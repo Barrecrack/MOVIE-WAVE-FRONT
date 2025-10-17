@@ -1,0 +1,189 @@
+// Fondo general
+.register-page
+  display: flex
+  justify-content: center
+  align-items: center
+  height: 100vh
+  width: 100vw
+  background: radial-gradient(circle at top left, #1e3a8a, #0f172a 60%)
+  font-family: 'Poppins', sans-serif
+  padding: 1rem
+
+// Caja de registro
+.register-box
+  background: rgba(255, 255, 255, 0.08)
+  padding: 2.8rem 3rem
+  border-radius: 1.2rem
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.35)
+  width: 100%
+  max-width: 420px
+  text-align: center
+  color: #fff
+  backdrop-filter: blur(16px)
+  display: flex
+  flex-direction: column
+  align-items: center
+  transition: all 0.3s ease
+
+  &:hover
+    transform: translateY(-3px)
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.3)
+
+// Título principal
+.title
+  font-size: 2.2rem
+  margin-bottom: 0.5rem
+  font-weight: 700
+  letter-spacing: 0.5px
+  span
+    color: #60a5fa
+
+.subtitle
+  font-size: 1rem
+  color: #c7d2fe
+  margin-bottom: 2rem
+
+// Grupo de entrada
+.input-group
+  display: flex
+  align-items: center
+  background: rgba(255, 255, 255, 0.95)
+  border-radius: 0.8rem
+  margin-bottom: 1rem
+  padding: 0.6rem 0.9rem
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1)
+  transition: all 0.25s ease
+
+  &:focus-within
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.4)
+
+  .icon
+    width: 22px
+    height: 22px
+    margin-right: 0.6rem
+    opacity: 0.7
+
+  .input
+    flex: 1
+    border: none
+    outline: none
+    background: transparent
+    font-size: 1rem
+    color: #111
+    padding: 0.4rem 0
+
+// Términos y condiciones
+.terms
+  display: flex
+  align-items: center
+  justify-content: flex-start
+  gap: 0.5rem
+  margin: 1rem 0
+  font-size: 0.9rem
+  color: #e0e7ff
+  line-height: 1.4
+
+  input[type="checkbox"]
+    accent-color: #3b82f6
+    transform: scale(1.1)
+
+  a
+    color: #93c5fd
+    text-decoration: none
+    font-weight: 500
+    &:hover
+      text-decoration: underline
+
+// Botón principal
+.register-btn
+  background: linear-gradient(90deg, #3b82f6, #2563eb)
+  color: white
+  border: none
+  padding: 0.9rem
+  width: 100%
+  border-radius: 10px
+  font-size: 1.05rem
+  font-weight: 600
+  cursor: pointer
+  margin-top: 0.8rem
+  letter-spacing: 0.5px
+  transition: all 0.3s ease
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4)
+
+  &:hover
+    background: linear-gradient(90deg, #2563eb, #1d4ed8)
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6)
+    transform: translateY(-2px)
+
+// Botón Google
+.google-btn
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: 0.6rem
+  background: #fff
+  border: none
+  color: #333
+  padding: 0.9rem
+  width: 100%
+  border-radius: 10px
+  margin-top: 1rem
+  cursor: pointer
+  font-weight: 500
+  transition: all 0.3s ease
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15)
+
+  img
+    width: 22px
+    height: 22px
+
+  &:hover
+    background: #f5f8ff
+    transform: translateY(-2px)
+
+// Enlace para iniciar sesión
+.login-link
+  margin-top: 1.5rem
+  font-size: 0.95rem
+  color: #cbd5e1
+
+  a
+    color: #60a5fa
+    font-weight: 600
+    text-decoration: none
+    margin-left: 0.3rem
+    position: relative
+    transition: all 0.25s ease
+
+    &::after
+      content: ""
+      position: absolute
+      left: 0
+      bottom: -3px
+      width: 100%
+      height: 2px
+      background-color: #60a5fa
+      transform: scaleX(0)
+      transform-origin: left
+      transition: transform 0.25s ease
+
+    &:hover
+      color: #93c5fd
+      &::after
+        transform: scaleX(1)
+
+// Responsividad
+@media (max-width: 480px)
+  .register-box
+    padding: 2rem 1.5rem
+    max-width: 95%
+
+  .title
+    font-size: 1.8rem
+
+  .input-group
+    padding: 0.5rem 0.8rem
+
+  .register-btn, .google-btn
+    padding: 0.8rem
+    font-size: 0.95rem
