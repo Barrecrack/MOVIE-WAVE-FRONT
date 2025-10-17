@@ -1,0 +1,225 @@
+// =============================
+// 🔹 Variables base
+// =============================
+$control-height: 48px
+$border-radius: 10px
+$primary: #3b82f6
+$primary-dark: #2563eb
+$background-gradient: radial-gradient(circle at top left, #1e3a8a, #0f172a 60%)
+$text-light: #e0e7ff
+$text-muted: #cbd5e1
+
+// =============================
+// 🌌 Fondo general
+// =============================
+.login-page
+  height: 100vh
+  width: 100vw
+  display: flex
+  align-items: center
+  justify-content: center
+  background: $background-gradient
+  font-family: 'Poppins', sans-serif
+  padding: 1rem
+
+// =============================
+// 🧊 Caja de login
+// =============================
+.login-box
+  background: rgba(255, 255, 255, 0.08)
+  padding: 2.8rem 3rem
+  border-radius: 1.2rem
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.35)
+  display: flex
+  flex-direction: column
+  align-items: center
+  color: #fff
+  width: 100%
+  max-width: 420px
+  text-align: center
+  backdrop-filter: blur(16px)
+  transition: all 0.3s ease
+
+  &:hover
+    transform: translateY(-3px)
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.3)
+
+// =============================
+// 🩵 Títulos
+// =============================
+.title
+  font-size: 2.2rem
+  font-weight: 700
+  margin-bottom: 0.4rem
+  letter-spacing: 0.5px
+  span
+    color: lighten($primary, 10%)
+
+.subtitle
+  font-size: 1rem
+  margin-bottom: 0.5rem
+  color: $text-light
+  opacity: 0.9
+
+.text
+  font-size: 0.9rem
+  margin-bottom: 1.5rem
+  color: $text-muted
+
+// =============================
+// 🧱 Elementos base
+// =============================
+.control-base
+  width: 100%
+  height: $control-height
+  border-radius: $border-radius
+  box-sizing: border-box
+  display: flex
+  align-items: center
+  justify-content: center
+  font-size: 1rem
+  transition: all 0.25s ease
+
+// =============================
+// 💬 Inputs
+// =============================
+.input
+  @extend .control-base
+  background: rgba(255, 255, 255, 0.95)
+  color: #000
+  border: none
+  outline: none
+  padding: 0 14px
+  font-size: 1rem
+  margin-bottom: 1rem
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1)
+  transition: box-shadow 0.25s ease
+
+  &:focus
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.4)
+
+// =============================
+// 👁️ Contenedor del input contraseña
+// =============================
+.password-container
+  position: relative
+  width: 100%
+  margin-bottom: 1rem
+  height: $control-height
+
+  .input
+    padding-right: 44px
+    height: 100%
+
+  .eye-icon
+    position: absolute
+    right: 12px
+    top: 50%
+    transform: translateY(-50%)
+    width: 22px
+    height: 22px
+    cursor: pointer
+    opacity: 0.8
+    transition: opacity 0.3s ease, transform 0.2s ease
+
+    &:hover
+      opacity: 1
+      transform: translateY(-50%) scale(1.1)
+
+// Botón principal
+.login-btn
+  background: linear-gradient(90deg, #3b82f6, #2563eb)
+  color: white
+  border: none
+  padding: 0.9rem
+  width: 100%
+  border-radius: 10px
+  font-size: 1.05rem
+  font-weight: 600
+  cursor: pointer
+  margin-top: 0.8rem
+  letter-spacing: 0.5px
+  transition: all 0.3s ease
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4)
+
+  &:hover
+    background: linear-gradient(90deg, #2563eb, #1d4ed8)
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6)
+    transform: translateY(-2px)
+
+// Botón Google
+.google-btn
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: 0.6rem
+  background: #fff
+  border: none
+  color: #333
+  padding: 0.9rem
+  width: 100%
+  border-radius: 10px
+  margin-top: 1rem
+  cursor: pointer
+  font-weight: 500
+  transition: all 0.3s ease
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15)
+
+  img
+    width: 22px
+    height: 22px
+
+  &:hover
+    background: #f5f8ff
+    transform: translateY(-2px)
+// =============================
+// 🔗 Enlaces
+// =============================
+.forgot, .register a
+  color: $text-light
+  font-size: 0.9rem
+  text-decoration: none
+  position: relative
+  transition: color 0.25s ease, text-shadow 0.25s ease
+
+  &::after
+    content: ""
+    position: absolute
+    left: 0
+    bottom: -3px
+    width: 100%
+    height: 2px
+    background-color: rgba(255,255,255,0.85)
+    transform: scaleX(0)
+    transform-origin: left
+    transition: transform 0.25s ease
+
+  &:hover
+    color: #fff
+    text-shadow: 0 1px 0 rgba(0,0,0,0.2)
+    &::after
+      transform: scaleX(1)
+
+// =============================
+// 📱 Responsividad
+// =============================
+@media (max-width: 480px)
+  $mobile-height: 44px
+
+  .login-box
+    padding: 2rem 1.5rem
+    max-width: 95%
+
+  .title
+    font-size: 1.8rem
+
+  .control-base
+    height: $mobile-height
+    font-size: 0.95rem
+
+  .password-container
+    height: $mobile-height
+
+  .input, .login-btn, .google-btn
+    height: $mobile-height
+    font-size: 0.95rem
