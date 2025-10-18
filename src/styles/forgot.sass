@@ -1,27 +1,35 @@
-// ============================
-// forgot.sass
-// ============================
-
-$control-height: 52px
+// =============================
+// 🔹 Variables base
+// =============================
+$control-height: 48px
 $border-radius: 10px
+$primary: #3b82f6
+$primary-dark: #2563eb
+$background-gradient: radial-gradient(circle at top left, #1e3a8a, #0f172a 60%)
+$text-light: #e0e7ff
+$text-muted: #cbd5e1
 
-// Fondo general
+// =============================
+// 🌌 Fondo general
+// =============================
 .forgot-container
   height: 100vh
   width: 100vw
   display: flex
   align-items: center
   justify-content: center
-  background: linear-gradient(135deg, #1e3a8a, #3b82f6)
+  background: $background-gradient
   font-family: 'Poppins', sans-serif
   padding: 1rem
 
-// Caja del formulario
+// =============================
+// 🧊 Caja principal
+// =============================
 .forgot-form
-  background: rgba(255, 255, 255, 0.12)
-  padding: 3rem 2.5rem
+  background: rgba(255, 255, 255, 0.08)
+  padding: 2.8rem 3rem
   border-radius: 1.2rem
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25)
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.35)
   display: flex
   flex-direction: column
   align-items: center
@@ -29,56 +37,31 @@ $border-radius: 10px
   width: 100%
   max-width: 420px
   text-align: center
-  backdrop-filter: blur(12px)
+  backdrop-filter: blur(16px)
+  transition: all 0.3s ease
+
+  &:hover
+    transform: translateY(-3px)
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.3)
 
   h2
     font-size: 2rem
     font-weight: 700
-    margin-bottom: 1rem
-    color: #fff
-
-  input
-    width: 100%
-    height: $control-height
-    border-radius: $border-radius
-    border: none
-    outline: none
-    padding: 0 14px
-    margin-bottom: 1.2rem
-    font-size: 1rem
-    background: #fff
-    color: #000
-    transition: box-shadow 0.3s ease, transform 0.1s ease
-    &:focus
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3)
-      transform: scale(1.01)
-
-  button
-    width: 100%
-    height: $control-height
-    background: linear-gradient(90deg, #3b82f6, #2563eb)
-    border: none
-    color: #fff
-    border-radius: $border-radius
-    font-weight: 600
-    font-size: 1rem
-    cursor: pointer
-    transition: background 0.3s ease, transform 0.2s ease
-    &:hover
-      background: linear-gradient(90deg, #2563eb, #1d4ed8)
-      transform: scale(1.02)
+    margin-bottom: 0.5rem
+    letter-spacing: 0.5px
+    color: lighten($primary, 10%)
 
   p
-    margin-top: 1rem
-    font-size: 0.95rem
-    color: #dbeafe
+    font-size: 0.9rem
+    color: $text-muted
+    margin-top: 1.2rem
 
     a
-      color: #ffffff
-      font-weight: 500
+      color: $text-light
       text-decoration: none
       position: relative
-      transition: color 0.25s ease
+      transition: color 0.25s ease, text-shadow 0.25s ease
+
       &::after
         content: ""
         position: absolute
@@ -90,35 +73,83 @@ $border-radius: 10px
         transform: scaleX(0)
         transform-origin: left
         transition: transform 0.25s ease
+
       &:hover
-        color: #ffffff
+        color: #fff
+        text-shadow: 0 1px 0 rgba(0,0,0,0.2)
         &::after
           transform: scaleX(1)
 
-// Mensajes de error y éxito
-.error
-  color: #f87171
-  background: rgba(239, 68, 68, 0.15)
-  border: 1px solid rgba(239, 68, 68, 0.4)
-  padding: 10px
-  border-radius: 8px
-  margin-bottom: 1rem
+// =============================
+// 💬 Inputs
+// =============================
+input
   width: 100%
+  height: $control-height
+  border-radius: $border-radius
+  box-sizing: border-box
+  background: rgba(255, 255, 255, 0.95)
+  color: #000
+  border: none
+  outline: none
+  padding: 0 14px
+  font-size: 1rem
+  margin: 1rem 0
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1)
+  transition: box-shadow 0.25s ease
+
+  &:focus
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.4)
+
+// =============================
+// 🔘 Botón principal
+// =============================
+button
+  background: linear-gradient(90deg, #3b82f6, #2563eb)
+  color: white
+  border: none
+  padding: 0.9rem
+  width: 100%
+  border-radius: 10px
+  font-size: 1.05rem
+  font-weight: 600
+  cursor: pointer
+  margin-top: 0.8rem
+  letter-spacing: 0.5px
+  transition: all 0.3s ease
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4)
+
+  &:hover
+    background: linear-gradient(90deg, #2563eb, #1d4ed8)
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6)
+    transform: translateY(-2px)
+
+// =============================
+// ⚠️ Mensajes de error y éxito
+// =============================
+.error, .success
+  width: 100%
+  padding: 0.8rem
+  border-radius: 8px
   font-size: 0.9rem
+  text-align: center
+  margin-bottom: 1rem
+
+.error
+  color: #ff4d4d
+  background: rgba(255, 77, 77, 0.1)
+  border: 1px solid rgba(255, 77, 77, 0.2)
 
 .success
-  color: #4ade80
-  background: rgba(34, 197, 94, 0.15)
-  border: 1px solid rgba(34, 197, 94, 0.4)
-  padding: 10px
-  border-radius: 8px
-  margin-bottom: 1rem
-  width: 100%
-  font-size: 0.9rem
+  color: #4dff88
+  background: rgba(77, 255, 136, 0.1)
+  border: 1px solid rgba(77, 255, 136, 0.2)
 
-// Responsividad
+// =============================
+// 📱 Responsividad
+// =============================
 @media (max-width: 480px)
-  $mobile-height: 46px
+  $mobile-height: 44px
 
   .forgot-form
     padding: 2rem 1.5rem
@@ -127,6 +158,6 @@ $border-radius: 10px
     h2
       font-size: 1.7rem
 
-    input, button
-      height: $mobile-height
-      font-size: 0.95rem
+  input, button
+    height: $mobile-height
+    font-size: 0.95rem
