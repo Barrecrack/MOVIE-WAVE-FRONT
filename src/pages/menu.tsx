@@ -21,28 +21,34 @@ const Menu: React.FC = () => {
       </header>
 
       <div className="menu-content">
-        <h2 className="menu-subtitle">Welcome to MovieWave</h2>
+        <h2 className="menu-subtitle">Bienvenido a MovieWave</h2>
         <p className="menu-description">
-          Enjoy the best streaming experience. Explore movies, manage your profile,
-          or discover new releases.
+          Disfruta de la mejor experiencia de streaming. Explora películas, gestiona tu perfil o descubre nuevos estrenos.
         </p>
 
         <div className="menu-buttons">
           <button className="menu-btn" onClick={() => navigate("/movies")}>
-            🎬 Explore Movies
-          </button>
-          <button className="menu-btn" onClick={() => navigate("/favorites")}>
-            ❤️ My Favorites
+            Explora peliculas
           </button>
           <button className="menu-btn" onClick={() => navigate("/profile")}>
-            👤 Profile
+            Perfil
+          </button>
+          <button className="menu-btn" onClick={() => navigate("/about-us")}>
+             Sobre nosotros
           </button>
           <button className="menu-btn logout" onClick={() => navigate("/login")}>
-            🚪 Log Out
+             Cerra sesion 
           </button>
         </div>
       </div>
+      <footer className="menu-page__footer">
+        <p>© 2025 MovieWave. Todos los derechos son reservados.</p>
+        <div className="footer-links">
+          <a href="/mapa-del-sitio">Mapa del sitio </a>
+        </div>
+      </footer>
     </div>
+    
   );
 };
 

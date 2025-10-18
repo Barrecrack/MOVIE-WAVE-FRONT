@@ -1,5 +1,5 @@
 .menu-page
-  background: linear-gradient(180deg, #0d0d0d, #141414)
+  background: radial-gradient(circle at top, #0a1a2f 0%, #020b16 100%)
   color: #fff
   min-height: 100vh
   display: flex
@@ -9,20 +9,29 @@
   text-align: center
   padding: 2rem
   font-family: 'Poppins', sans-serif
+  position: relative
+  overflow: hidden
 
 .menu-header
   position: absolute
-  top: 20px
-  left: 40px
+  top: 25px
+  left: 50px
 
 .menu-title
-  font-size: 2.5rem
+  font-size: 2.8rem
   font-weight: 700
   letter-spacing: 2px
-  color: #e50914
+  color: #1e90ff
+  text-shadow: 0 0 10px rgba(30, 144, 255, 0.7)
   span
-    color: #fff
-  text-shadow: 0 0 10px rgba(229, 9, 20, 0.7)
+    color: #ffffff
+  animation: glowTitle 3s ease-in-out infinite alternate
+
+@keyframes glowTitle
+  from
+    text-shadow: 0 0 10px rgba(30, 144, 255, 0.7)
+  to
+    text-shadow: 0 0 25px rgba(0, 174, 255, 0.9)
 
 .menu-content
   max-width: 700px
@@ -32,13 +41,13 @@
 .menu-subtitle
   font-size: 2rem
   margin-bottom: 1rem
-  color: #ffffff
+  color: #cfe8ff
   font-weight: 600
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.2)
+  text-shadow: 0 0 8px rgba(0, 153, 255, 0.4)
 
 .menu-description
   font-size: 1.1rem
-  color: #cccccc
+  color: #b0c4de
   margin-bottom: 2rem
   line-height: 1.6
 
@@ -49,7 +58,7 @@
   align-items: center
 
 .menu-btn
-  background: linear-gradient(90deg, #e50914, #b0060f)
+  background: linear-gradient(90deg, #0072ff, #00c6ff)
   color: #fff
   border: none
   padding: 0.9rem 2rem
@@ -59,22 +68,22 @@
   cursor: pointer
   transition: all 0.3s ease
   width: 230px
-  box-shadow: 0 0 10px rgba(229, 9, 20, 0.4)
+  box-shadow: 0 0 10px rgba(0, 174, 255, 0.4)
 
   &:hover
     transform: scale(1.05)
-    background: linear-gradient(90deg, #ff0a16, #e50914)
-    box-shadow: 0 0 20px rgba(229, 9, 20, 0.7)
+    background: linear-gradient(90deg, #00c6ff, #0072ff)
+    box-shadow: 0 0 20px rgba(0, 174, 255, 0.7)
 
 .logout
   background: transparent
-  border: 1px solid #e50914
-  color: #e50914
+  border: 1px solid #00aaff
+  color: #00aaff
   box-shadow: none
   &:hover
-    background: #e50914
+    background: #00aaff
     color: #fff
-    box-shadow: 0 0 15px rgba(229, 9, 20, 0.7)
+    box-shadow: 0 0 15px rgba(0, 174, 255, 0.7)
 
 @keyframes fadeIn
   from

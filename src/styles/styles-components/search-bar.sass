@@ -1,0 +1,60 @@
+
+.search-bar
+  display: flex
+  align-items: center
+  justify-content: center
+  background: linear-gradient(135deg, #0b1b3f, #0d47a1)
+  padding: 0.8rem 1.2rem
+  border-radius: 2rem
+  width: 100%
+  max-width: 600px
+  margin: 1rem auto
+  box-shadow: 0 0 15px rgba(0, 102, 255, 0.25)
+  transition: all 0.3s ease
+
+  &:hover
+    box-shadow: 0 0 25px rgba(41, 121, 255, 0.4)
+    transform: translateY(-1px)
+
+  input
+    flex: 1
+    background: transparent
+    border: none
+    outline: none
+    color: #e3f2fd
+    font-size: 1rem
+    padding: 0.6rem 1rem
+    font-weight: 400
+    letter-spacing: 0.5px
+
+    &::placeholder
+      color: rgba(255, 255, 255, 0.6)
+
+  button
+    background: linear-gradient(90deg, #1565c0, #42a5f5)
+    border: none
+    color: #fff
+    font-weight: 600
+    border-radius: 50%
+    width: 2.5rem
+    height: 2.5rem
+    cursor: pointer
+    display: flex
+    align-items: center
+    justify-content: center
+    transition: all 0.3s ease
+    box-shadow: 0 0 10px rgba(33, 150, 243, 0.3)
+
+    &:hover
+      background: linear-gradient(90deg, #1e88e5, #64b5f6)
+      transform: scale(1.05)
+      box-shadow: 0 0 20px rgba(66, 165, 245, 0.4)
+
+  @media (max-width: 768px)
+    flex-direction: row
+    max-width: 90%
+    input
+      font-size: 0.95rem
+    button
+      width: 2.2rem
+      height: 2.2rem
