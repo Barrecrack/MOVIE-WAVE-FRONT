@@ -51,7 +51,7 @@ function ForgotPassword() {
         <button type="submit">Send Reset Link</button>
 
         <p>
-          Remember your password? <a href="/login">Sign in</a>
+          Remember your password? <Link to="/">Inicie sesión</Link>
         </p>
       </form>
     </div>
