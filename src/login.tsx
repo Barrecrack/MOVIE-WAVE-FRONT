@@ -37,7 +37,9 @@ const Login = () => {
       }
 
       alert("Inicio de sesión exitoso.");
+
       navigate("/menu"); // redirige al home o dashboard
+      
     } catch (error) {
       console.error(error);
       alert("Error al conectar con el servidor.");

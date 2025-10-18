@@ -4,48 +4,40 @@
   left: 0
   width: 100%
   height: 100%
-  background: rgba(0, 0, 0, 0.85)
+  background: rgba(0,0,0,0.8)
   display: flex
-  justify-content: center
   align-items: center
+  justify-content: center
   z-index: 1000
-  backdrop-filter: blur(5px)
 
   &__content
-    position: relative
-    background: linear-gradient(145deg, #0d1b4b, #0b0f2e)
-    border-radius: 1rem
-    padding: 1rem
+    background: #1a1a1a
+    padding: 1.5rem
+    border-radius: 12px
+    max-width: 700px
     width: 90%
-    max-width: 900px
-    box-shadow: 0 0 25px rgba(66, 165, 245, 0.4)
-    animation: fadeIn 0.4s ease
+    color: #fff
+    position: relative
+
+  &__title
+    color: #ffcc00
+    margin-bottom: 1rem
+
+  &__description
+    font-size: 0.9rem
+    margin-bottom: 1rem
+
+  &__video
+    width: 100%
+    border-radius: 8px
+    margin-bottom: 1rem
 
   &__close
     position: absolute
     top: 10px
     right: 10px
-    background: transparent
+    background: none
     border: none
-    color: #bbdefb
-    font-size: 1.5rem
+    color: #fff
+    font-size: 1.2rem
     cursor: pointer
-    transition: color 0.2s ease
-
-    &:hover
-      color: #42a5f5
-
-  iframe
-    width: 100%
-    height: 500px
-    border: none
-    border-radius: 0.5rem
-    background: #000
-
-@keyframes fadeIn
-  0%
-    opacity: 0
-    transform: scale(0.9)
-  100%
-    opacity: 1
-    transform: scale(1)

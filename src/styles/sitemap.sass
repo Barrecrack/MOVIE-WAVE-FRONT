@@ -1,0 +1,74 @@
+$primary: #3b82f6
+$primary-dark: #2563eb
+$background-gradient: radial-gradient(circle at top left, #1e3a8a, #0f172a 60%)
+$text-light: #e0e7ff
+$text-muted: #cbd5e1
+
+.sitemap-page
+  height: 100vh
+  width: 100vw
+  display: flex
+  align-items: center
+  justify-content: center
+  background: $background-gradient
+  font-family: 'Poppins', sans-serif
+  color: #fff
+  padding: 1rem
+
+.sitemap-box
+  background: rgba(255, 255, 255, 0.08)
+  padding: 3rem
+  border-radius: 1.2rem
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.35)
+  text-align: center
+  width: 100%
+  max-width: 420px
+  backdrop-filter: blur(16px)
+  transition: all 0.3s ease
+
+  &:hover
+    transform: translateY(-3px)
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.3)
+
+.title
+  font-size: 2.1rem
+  font-weight: 700
+  margin-bottom: 0.5rem
+  color: lighten($primary, 10%)
+
+.subtitle
+  font-size: 1rem
+  margin-bottom: 1.5rem
+  color: $text-muted
+
+.sitemap-list
+  list-style: none
+  padding: 0
+  display: flex
+  flex-direction: column
+  gap: 0.8rem
+
+.sitemap-item
+  background: rgba(255, 255, 255, 0.1)
+  padding: 0.9rem
+  border-radius: 10px
+  cursor: pointer
+  font-size: 1rem
+  transition: all 0.3s ease
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15)
+
+  &:hover
+    background: linear-gradient(90deg, #3b82f6, #2563eb)
+    transform: translateY(-2px)
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6)
+
+@media (max-width: 480px)
+  .sitemap-box
+    padding: 2rem 1.5rem
+    max-width: 95%
+
+  .title
+    font-size: 1.8rem
+
+  .sitemap-item
+    font-size: 0.95rem

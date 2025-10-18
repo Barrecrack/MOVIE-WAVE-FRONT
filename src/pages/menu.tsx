@@ -12,6 +12,13 @@ import "../styles/menu.sass";
 const Menu: React.FC = () => {
   const navigate = useNavigate();
 
+  // --- Función para cerrar sesión ---
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Elimina el token del almacenamiento
+    alert("Sesión cerrada exitosamente.");
+    navigate("/login"); // Redirige al login
+  };
+
   return (
     <div className="menu-page">
       <header className="menu-header">
@@ -28,27 +35,30 @@ const Menu: React.FC = () => {
 
         <div className="menu-buttons">
           <button className="menu-btn" onClick={() => navigate("/movies")}>
-            Explora peliculas
+            Explorar películas
           </button>
+
           <button className="menu-btn" onClick={() => navigate("/profile")}>
             Perfil
           </button>
-          <button className="menu-btn" onClick={() => navigate("/about-us")}>
-             Sobre nosotros
+
+          <button className="menu-btn" onClick={() => navigate("/about")}>
+            Sobre nosotros
           </button>
-          <button className="menu-btn logout" onClick={() => navigate("/login")}>
-             Cerra sesion 
+
+          <button className="menu-btn logout" onClick={() => navigate("/")}>
+            Cerrar sesión
           </button>
         </div>
       </div>
+
       <footer className="menu-page__footer">
-        <p>© 2025 MovieWave. Todos los derechos son reservados.</p>
+        <p>© 2025 MovieWave. Todos los derechos reservados.</p>
         <div className="footer-links">
-          <a href="/mapa-del-sitio">Mapa del sitio </a>
+          <a href="/sitemap">Mapa del sitio</a>
         </div>
       </footer>
     </div>
-    
   );
 };
 
