@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../styles/forgot.sass";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
