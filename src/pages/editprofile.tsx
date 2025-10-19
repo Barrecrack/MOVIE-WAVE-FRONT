@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "../styles/editprofile.sass"; // reutilizamos el mismo estilo base
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
+
 
 const EditProfile = () => {
   const [name, setName] = useState("");
@@ -11,51 +13,63 @@ const EditProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Cargar datos del usuario desde localStorage
-    const storedUser = localStorage.getItem("userData");
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      setName(user.name || "");
-      setLastname(user.lastname || "");
-      setAge(user.age || "");
+  const fetchUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setName(user.user_metadata?.name || "");
+      setLastname(user.user_metadata?.lastname || "");
       setEmail(user.email || "");
     } else {
-      navigate("/"); // si no hay sesión activa, redirige al login
+      navigate("/");
     }
-  }, [navigate]);
+  };
+  fetchUser();
+}, [navigate]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !lastname || !age || !email) {
+    if (!name || !lastname || !email) {
       alert("Por favor complete todos los campos obligatorios.");
       return;
     }
 
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
-      const response = await fetch(`${API_URL}/api/update-profile`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          lastname,
-          age,
-          email,
-          password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
+     try {
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      alert("Sesión expirada. Inicia sesión de nuevo.");
+      navigate("/");
+      return;
+    }
+    const response = await fetch(`${API_URL}/api/update-user`, { // Corrige URL
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.access_token}`, // Agrega token
+      },
+      body: JSON.stringify({
+        name,
+        lastname,
+        email,
+        password, // Opcional
+        // age, // Agrega si el backend lo soporta
+      }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      if (response.status === 401) {
+        alert("Sesión expirada. Inicia sesión de nuevo.");
+        await supabase.auth.signOut();
+        navigate("/");
+      } else {
         alert(data.message || "Error al actualizar el perfil.");
-        return;
       }
-
+      return;
+    }
+    
       // Actualizamos los datos en localStorage
-      const updatedUser = { name, lastname, age, email };
+      const updatedUser = { name, lastname, email };
       localStorage.setItem("userData", JSON.stringify(updatedUser));
 
       alert("Perfil actualizado exitosamente.");

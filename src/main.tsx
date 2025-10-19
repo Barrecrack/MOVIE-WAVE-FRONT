@@ -1,3 +1,4 @@
+import React from "react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -19,12 +20,12 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot" element={<Forgot />} />
+        <Route path="/resetpassword" element={<ResetPassword />} />
         <Route path="/menu" element={<Menu />} />
         <Route path="/movies" element={<Movies />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/about" element={<About />} />
         <Route path="/editprofile" element={<EditProfile />} />
-        <Route path="/resetpassword" element={<ResetPassword />} />
+        <Route path="/about" element={<About />} />
         <Route path="/sitemap" element={<Sitemap />} />
       </Routes>
     </BrowserRouter>
