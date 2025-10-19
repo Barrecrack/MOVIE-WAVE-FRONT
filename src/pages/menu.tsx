@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 import "../styles/menu.sass";
 
 /**
@@ -13,10 +14,12 @@ const Menu: React.FC = () => {
   const navigate = useNavigate();
 
   // --- Función para cerrar sesión ---
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     localStorage.removeItem("token"); // Elimina el token del almacenamiento
+    localStorage.removeItem("userData");
     alert("Sesión cerrada exitosamente.");
-    navigate("/login"); // Redirige al login
+    navigate("/"); // Redirige al login
   };
 
   return (
@@ -46,7 +49,7 @@ const Menu: React.FC = () => {
             Sobre nosotros
           </button>
 
-          <button className="menu-btn logout" onClick={() => navigate("/")}>
+          <button className="menu-btn logout" onClick={handleLogout}>
             Cerrar sesión
           </button>
         </div>
