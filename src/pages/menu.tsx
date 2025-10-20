@@ -4,22 +4,22 @@ import { supabase } from "../supabaseClient";
 import "../styles/menu.sass";
 
 /**
- * Menu principal de la aplicación MovieWave.
- * Sirve como punto de acceso a las diferentes secciones de la plataforma.
+ * Main menu of the MovieWave app.
+ * Serves as an access point to the different sections of the platform.
  * 
  * @component
- * @returns {JSX.Element} Vista del menú principal
+ * @returns {JSX.Element} Main menu view
  */
 const Menu: React.FC = () => {
   const navigate = useNavigate();
 
-  // --- Función para cerrar sesión ---
+  // --- Logout function ---
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    localStorage.removeItem("token"); // Elimina el token del almacenamiento
+    localStorage.removeItem("token"); // Delete the token from storage
     localStorage.removeItem("userData");
     alert("Sesión cerrada exitosamente.");
-    navigate("/"); // Redirige al login
+    navigate("/"); // Redirects to login
   };
 
   return (

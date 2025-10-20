@@ -17,7 +17,7 @@ const Login = () => {
     }
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';  // Dinámico
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';  // Dynamic
       const response = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -31,14 +31,14 @@ const Login = () => {
         return;
       }
 
-      // Guarda el token si existe
+      // Save the token if it exists
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
 
       alert("Inicio de sesión exitoso.");
 
-      navigate("/menu"); // redirige al home o dashboard
+      navigate("/menu"); // redirects to the home or dashboard
       
     } catch (error) {
       console.error(error);

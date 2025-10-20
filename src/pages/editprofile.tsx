@@ -53,7 +53,7 @@ const EditProfile = () => {
           name,
           lastname,
           email,
-          password, // opcional
+          password, // optional
         }),
       });
 
@@ -64,10 +64,10 @@ const EditProfile = () => {
         return;
       }
 
-      // ✅ Refrescar sesión local para mantener el token activo
+      // ✅ Refresh local session to keep the token active
       await supabase.auth.refreshSession();
 
-      // ✅ Actualizamos los datos localmente
+      // ✅ We update the data locally
       const updatedUser = { name, lastname, email };
       localStorage.setItem("userData", JSON.stringify(updatedUser));
 

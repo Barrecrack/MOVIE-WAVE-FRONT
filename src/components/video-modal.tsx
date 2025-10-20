@@ -7,11 +7,11 @@ interface VideoModalProps {
 }
 
 /**
- * Modal que muestra el detalle de una película seleccionada.
+ * Modal that shows the details of a selected movie.
  * 
  * @component
- * @param {number} videoId - ID del video seleccionado.
- * @param {Function} alCerrar - Cierra el modal.
+ * @param {number} videoId - ID of the selected video.
+ * @param {Function} alCerrar - Close the modal.
  */
 const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   const [videoData, setVideoData] = useState<any>(null);
