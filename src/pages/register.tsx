@@ -50,7 +50,7 @@ const Register = () => {
       }
 
       alert("Registro exitoso. Ahora puede iniciar sesión.");
-      navigate("/"); // Redirige al login
+      navigate("/"); // Redirects to login
     } catch (error) {
       console.error(error);
       alert("Error al conectar con el servidor.");

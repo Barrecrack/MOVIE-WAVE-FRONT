@@ -5,7 +5,7 @@ import VideoModal from "../components/video-modal.tsx";
 import type { Categoria, ResultadoBusquedaVideo } from "../types/vide.types.ts";
 
 /**
- * Categorías disponibles para filtrar películas.
+ * Categories available to filter movies.
  */
 const MOVIE_CATEGORIES: Categoria[] = [
   { id: "1", nombre: "Acción", consulta: "action" },
@@ -17,8 +17,8 @@ const MOVIE_CATEGORIES: Categoria[] = [
 ];
 
 /**
- * Página de listado de películas.
- * Contiene búsqueda, filtrado por categoría y modal de detalle.
+ * Movie listing page.
+ * Contains search, category filtering, and a detail mode.
  */
 const MoviesPage: React.FC = () => {
   const [movies, setMovies] = useState<ResultadoBusquedaVideo[]>([]);
@@ -28,8 +28,8 @@ const MoviesPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * Obtiene las películas desde el backend según la categoría o búsqueda.
-   * @param query Término de búsqueda o categoría
+   * Gets movies from the backend based on category or search.
+   * @param query Search term or category
    */
   const loadMovies = async (query: string) => {
     try {
@@ -49,7 +49,7 @@ const MoviesPage: React.FC = () => {
   };
 
   /**
-   * Cambia la categoría activa y recarga las películas.
+   * Change the active category and reload the movies.
    */
   const handleCategoryChange = (categoryQuery: string) => {
     setActiveCategory(categoryQuery);
@@ -57,7 +57,7 @@ const MoviesPage: React.FC = () => {
   };
 
   /**
-   * Maneja la búsqueda por término.
+   * Handles search by term.
    */
   const handleSearch = (term: string) => {
     setActiveCategory("");
@@ -65,17 +65,17 @@ const MoviesPage: React.FC = () => {
   };
 
   /**
-   * Abre el modal con el detalle de la película seleccionada.
+   * Opens the modal with the details of the selected movie.
    */
   const openModal = (id: number) => setSelectedMovieId(id);
 
   /**
-   * Cierra el modal.
+   * Close the modal.
    */
   const closeModal = () => setSelectedMovieId(null);
 
   /**
-   * Cargar películas populares al montar.
+   * Load popular movies when mounting.
    */
   useEffect(() => {
     loadMovies("popular");

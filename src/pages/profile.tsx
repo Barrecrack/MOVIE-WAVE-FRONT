@@ -16,12 +16,12 @@ const Profile: React.FC = () => {
     if (storedUser) {
       setUserData(JSON.parse(storedUser));
     } else {
-      window.location.href = "/"; // redirige al login si no hay sesión
+      window.location.href = "/"; // Redirects to login if there is no session
     }
   }, []);
 
   const handleEditProfile = () => {
-    // Aquí podrías abrir un modal o navegar a una página de edición
+    // Here you could open a modal or navigate to an edit page.
     alert("Funcionalidad de edición de perfil próximamente 🔧");
   };
 

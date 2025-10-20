@@ -6,10 +6,10 @@ interface SearchBarProps {
 }
 
 /**
- * Barra de búsqueda para buscar películas o videos.
+ * Search bar to search for movies or videos.
  * 
  * @component
- * @param {Function} alBuscar - Función que recibe el término de búsqueda.
+ * @param {Function} alBuscar - Function that receives the search term.
  */
 const SearchBar: React.FC<SearchBarProps> = ({ alBuscar }) => {
   const [searchTerm, setSearchTerm] = useState("");
