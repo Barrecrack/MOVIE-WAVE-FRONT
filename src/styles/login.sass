@@ -172,33 +172,38 @@ $text-muted: #cbd5e1
   &:hover
     background: #f5f8ff
     transform: translateY(-2px)
+
 // =============================
 // 🔗 Enlaces
 // =============================
-.forgot, .register a
+.forgot
   color: $text-light
   font-size: 0.9rem
-  text-decoration: none
-  position: relative
-  transition: color 0.25s ease, text-shadow 0.25s ease
 
-  &::after
-    content: ""
-    position: absolute
-    left: 0
-    bottom: -3px
-    width: 100%
-    height: 2px
-    background-color: rgba(255,255,255,0.85)
-    transform: scaleX(0)
-    transform-origin: left
-    transition: transform 0.25s ease
+  a
+    color: #ffd700 // 🌟 Dorado para “Recupérela”
+    font-weight: 500
+    text-decoration: none
+    transition: color 0.25s ease
 
-  &:hover
-    color: #fff
-    text-shadow: 0 1px 0 rgba(0,0,0,0.2)
-    &::after
-      transform: scaleX(1)
+    &:hover
+      color: #fff
+      text-shadow: 0 1px 0 rgba(0,0,0,0.2)
+
+.register
+  font-size: 0.9rem
+  color: $text-light
+
+  a
+    color: #ffd700 // 🌟 Dorado para “Regístrese”
+    font-weight: 500
+    text-decoration: none
+    transition: color 0.25s ease
+
+    &:hover
+      color: #fff
+      text-shadow: 0 1px 0 rgba(0,0,0,0.2)
+
 
 // =============================
 // 📱 Responsividad

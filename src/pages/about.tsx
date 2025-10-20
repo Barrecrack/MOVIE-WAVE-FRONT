@@ -12,27 +12,27 @@ const About: React.FC = () => {
     {
       name: "Joshua Arciniegas",
       role: "Desarrollador Frontend",
-      image: "../public/images/joshuafoto.jpeg",
+      image: "/images/joshuafoto.jpeg",
     },
     {
       name: "Alejandra Giraldo",
       role: "Tester & QA",
-      image: "../public/images/alejandrafoto.jpeg",
+      image: "/images/alejandrafoto.jpeg",
     },
     {
       name: "Daniela Chanchi",
       role: "Desarrollador BD",
-      image: "../public/images/danielafoto.jpeg",
+      image: "/images/danielafoto.jpeg",
     },
     {
       name: "Gean Franco Muñoz",
-      role: "Desarrollador backend",
-      image: "../public/images/geanfoto.jpg",
+      role: "Desarrollador Backend",
+      image: "/images/geanfoto.jpeg",
     },
     {
-      name: "Diego Alejandro Chinome ",
+      name: "Diego Alejandro Chinome",
       role: "Gestor de proyecto",
-      image: "/images/team/laura.jpg",
+      image: "/images/diego.jpeg",
     },
   ];
 

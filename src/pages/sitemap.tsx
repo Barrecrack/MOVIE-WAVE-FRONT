@@ -11,7 +11,7 @@ const SiteMap: React.FC = () => {
     { name: "Perfil", path: "/profile" },
     { name: "Editar Perfil", path: "/editprofile" },
     { name: "Registro", path: "/register" },
-    { name: "Iniciar Sesión", path: "/login" },
+    { name: "Iniciar Sesión", path: "/" },
     { name: "Olvidé mi contraseña", path: "/forgot" },
     { name: "Restablecer contraseña", path: "/resetpassword" },
     { name: "Sobre nosotros", path: "/about" },
@@ -28,7 +28,7 @@ const SiteMap: React.FC = () => {
             <li
               key={index}
               className="sitemap-item"
-              onClick={() => navigate(page.path)}
+              onClick={() => navigate(page.path, { replace: true })}
             >
               {page.name}
             </li>
