@@ -13,7 +13,7 @@ function ForgotPassword() {
     setMessage("");
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const API_URL = import.meta.env.VITE_API_URL || 'VITE_API_URL=https://movie-wave-ocyd.onrender.com';
       const response = await fetch(`${API_URL}/api/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -23,10 +23,10 @@ function ForgotPassword() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Something went wrong");
+        throw new Error(data.message || "algo salió mal");
       }
 
-      setMessage("We have sent a password reset link to your email 📩");
+      setMessage("Hemos enviado un enlace de restablecimiento de contraseña a su correo electrónico. 📩");
     } catch (err: any) {
       setErrorMessage(err.message);
     }
@@ -35,23 +35,26 @@ function ForgotPassword() {
   return (
     <div className="forgot-container">
       <form onSubmit={handleForgotPassword} className="forgot-form">
-        <h2>Forgot Password</h2>
+        <img src="../public/images/moviewave-logo.png" className="img-log" alt="Logo del sitio" height="auto" width="auto">
+        </img>
+        <h2>Ingrese su correo de recuperación</h2>
 
         {errorMessage && <p className="error">{errorMessage}</p>}
         {message && <p className="success">{message}</p>}
 
         <input
-          type="email"
-          placeholder="Enter your email"
+          type="correo electrónico"
+          className="input"
+          placeholder="Introduce tu correo electrónico"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
 
-        <button type="submit">Send Reset Link</button>
+        <button type="submit">Confirmar</button>
 
-        <p>
-          Remember your password? <a href="/login">Sign in</a>
+        <p className="login-link">
+          Recuerdas tu contraseña? <Link to="/">Iniciar sesión</Link>
         </p>
       </form>
     </div>

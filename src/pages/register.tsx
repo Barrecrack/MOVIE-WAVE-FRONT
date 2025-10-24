@@ -30,7 +30,7 @@ const Register = () => {
     }
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const API_URL = import.meta.env.VITE_API_URL || 'VITE_API_URL=https://movie-wave-ocyd.onrender.com';
       const response = await fetch(`${API_URL}/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,8 +59,10 @@ const Register = () => {
 
   return (
     <div className="register-page">
+      <img src="../public/images/moviewave-logo.png" className="img-logo" alt="Logo del sitio" height="auto" width="auto">
+        </img>
       <div className="register-box">
-        <h1 className="title">Crea tu cuenta</h1>
+        <h1 className="titulo">Crea tu cuenta</h1>
 
         <form onSubmit={handleRegister}>
           <input
@@ -103,32 +105,12 @@ const Register = () => {
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
 
-          <div className="terms">
-            <input
-              type="checkbox"
-              id="terms"
-              checked={agreeTerms}
-              onChange={(e) => setAgreeTerms(e.target.checked)}
-            />
-            <label htmlFor="terms">
-              Estoy de acuerdo con los{" "}
-              <a href="#" onClick={(e) => e.preventDefault()}>
-                términos y condiciones
-              </a>
-            </label>
-          </div>
-
           <button type="submit" className="register-btn">
             Registrarse
           </button>
         </form>
 
-        <button className="google-btn">
-          <img src="/images/google.svg" alt="Google" />
-          Continuar con Google
-        </button>
-
-        <p className="register">
+        <p className="login-link">
           ¿Ya tiene cuenta? <Link to="/">Inicie sesión</Link>
         </p>
       </div>

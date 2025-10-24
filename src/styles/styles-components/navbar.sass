@@ -1,0 +1,69 @@
+.navbar
+  position: relative
+  background-color: #0a0f1c // azul muy oscuro, fondo tipo Disney+
+  padding: 1rem 1.5rem
+  display: flex
+  justify-content: flex-end
+  align-items: center
+  z-index: 1000
+
+// Botón hamburguesa
+.hamburger
+  cursor: pointer
+  width: 30px
+  height: 22px
+  display: flex
+  flex-direction: column
+  justify-content: space-between
+  span
+    display: block
+    height: 3px
+    width: 100%
+    background: #00b7ff // azul brillante tipo neón
+    border-radius: 2px
+    transition: all 0.3s ease
+
+  &.open span:nth-child(1)
+    transform: rotate(45deg) translateY(8px)
+
+  &.open span:nth-child(2)
+    opacity: 0
+
+  &.open span:nth-child(3)
+    transform: rotate(-45deg) translateY(-8px)
+
+// Menú desplegable
+.nav-menu
+  position: absolute
+  top: 60px
+  right: 15px
+  background: rgba(10, 15, 25, 0.95)
+  border: 1px solid #00b7ff
+  border-radius: 10px
+  padding: 1rem
+  list-style: none
+  display: none
+  flex-direction: column
+  gap: 0.75rem
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5)
+  animation: fadeIn 0.3s ease-in-out
+
+  li a
+    color: #e0f7ff
+    text-decoration: none
+    font-weight: 500
+    transition: color 0.3s
+    font-size: 1rem
+    &:hover
+      color: #00b7ff
+
+  &.active
+    display: flex
+
+@keyframes fadeIn
+  from
+    opacity: 0
+    transform: translateY(-10px)
+  to
+    opacity: 1
+    transform: translateY(0)

@@ -4,7 +4,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./login.tsx";
 import Register from "./pages/register.tsx";
 import Forgot from "./pages/forgot.tsx"; 
-import Menu from "./pages/menu";
+import Movies from "./pages/movies.tsx";
+import Profile from "./pages/profile.tsx";
+import About from "./pages/about.tsx";
+import EditProfile from "./pages/editprofile.tsx";
+import ResetPassword from "./pages/resetpassword.tsx";
+
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -13,7 +18,11 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot" element={<Forgot />} />
-        <Route path="/menu" element={<Menu />} />
+        <Route path="/movies" element={<Movies />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/editprofile" element={<EditProfile />} />
+        <Route path="/resetpassword" element={<ResetPassword />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>
