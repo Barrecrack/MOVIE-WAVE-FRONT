@@ -1,9 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/resetpassword.sass";
 
 const ResetPassword: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [token, setToken] = useState<string | null>(null); // Agregado para extraer token
+
+  useEffect(() => {
+    // Extraer token de la URL (agregado)
+    const urlParams = new URLSearchParams(window.location.search);
+    const extractedToken = urlParams.get('token');
+    if (extractedToken) {
+      setToken(extractedToken);
+    } else {
+      alert("Token no encontrado en la URL. Solicita un nuevo enlace de recuperación.");
+    }
+  }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,13 +30,18 @@ const ResetPassword: React.FC = () => {
       return;
     }
 
+    if (!token) {
+      alert("Token inválido. Solicita un nuevo enlace.");
+      return;
+    }
+
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
       const response = await fetch(`${API_URL}/api/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ jwt: token, newPassword: password }), // Cambiado: enviar token y newPassword
       });
 
       const data = await response.json();
