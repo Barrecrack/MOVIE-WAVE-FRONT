@@ -59,6 +59,8 @@ const Register = () => {
 
   return (
     <div className="register-page">
+      <img src="../public/images/moviewave-logo.png" className="img-logo" alt="Logo del sitio" height="auto" width="auto"></img>
+     
       <div className="register-box">
         <h1 className="title">Crea tu cuenta</h1>
 
@@ -122,11 +124,7 @@ const Register = () => {
             Registrarse
           </button>
         </form>
-
-        <button className="google-btn">
-          <img src="/images/google.svg" alt="Google" />
-          Continuar con Google
-        </button>
+        
 
         <p className="register">
           ¿Ya tiene cuenta? <Link to="/">Inicie sesión</Link>
