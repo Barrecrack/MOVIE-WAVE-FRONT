@@ -49,9 +49,9 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="login-box">
-        <h1 className="title">
-          Movie<span>Wave</span>
-        </h1>
+        <img src="../public/images/moviewave-logo.png" className="img-logo" alt="Logo del sitio" height="auto" width="auto">
+        </img>
+
 
         <p className="subtitle">¡Bienvenido a la mejor plataforma de streaming!</p>
         <p className="text">Ingrese su correo y contraseña para acceder</p>
@@ -91,16 +91,11 @@ const Login = () => {
         </form>
 
         <a className="forgot">
-          ¿Olvidó su contraseña? <Link to="/forgot">Recupérela</Link>
+          ¿Olvidó su contraseña? <Link to="/forgot">Recuperar</Link>
         </a>
 
-        <button className="google-btn">
-          <img src="/images/google.svg" alt="Google" />
-          Continuar con Google
-        </button>
-
         <p className="register">
-          ¿No tiene cuenta? <Link to="/register">Regístrese</Link>
+          ¿No tiene cuenta? <Link to="/register">Regístrarse</Link>
         </p>
       </div>
     </div>
