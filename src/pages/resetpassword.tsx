@@ -10,6 +10,7 @@ const ResetPassword: React.FC = () => {
     // Extraer token de la URL (agregado)
     const urlParams = new URLSearchParams(window.location.search);
     const extractedToken = urlParams.get('token');
+    console.log("🔍 Token obtenido desde URL:", extractedToken);
     if (extractedToken) {
       setToken(extractedToken);
     } else {
