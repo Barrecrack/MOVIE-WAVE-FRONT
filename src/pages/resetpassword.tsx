@@ -9,7 +9,7 @@ const ResetPassword: React.FC = () => {
   useEffect(() => {
     // Extraer token de la URL (agregado)
     const urlParams = new URLSearchParams(window.location.search);
-    const extractedToken = urlParams.get('token');
+    const extractedToken = urlParams.get("token");
     console.log("🔍 Token obtenido desde URL:", extractedToken);
     if (extractedToken) {
       setToken(extractedToken);
@@ -21,41 +21,52 @@ const ResetPassword: React.FC = () => {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log("📤 Enviando solicitud de restablecimiento...");
+    console.log("🧩 Estado actual:", { password, confirmPassword, token });
+
     if (!password || !confirmPassword) {
+      console.warn("⚠️ Faltan campos obligatorios");
       alert("Por favor complete todos los campos.");
       return;
     }
 
     if (password !== confirmPassword) {
+      console.warn("⚠️ Las contraseñas no coinciden");
       alert("Las contraseñas no coinciden.");
       return;
     }
 
     if (!token) {
+      console.error("❌ Token inválido o no presente");
       alert("Token inválido. Solicita un nuevo enlace.");
       return;
     }
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+      console.log("🌐 Enviando petición a:", `${API_URL}/api/reset-password`);
 
       const response = await fetch(`${API_URL}/api/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jwt: token, newPassword: password }), // Cambiado: enviar token y newPassword
+        body: JSON.stringify({ token, newPassword: password }), // ✅ token corregido
       });
 
+      console.log("📨 Respuesta HTTP:", response.status);
       const data = await response.json();
+      console.log("📦 Respuesta JSON del servidor:", data);
 
       if (!response.ok) {
+        console.error("❌ Error desde el backend:", data.message || data.error);
         alert(data.message || "Error al restablecer la contraseña.");
         return;
       }
 
+      console.log("✅ Contraseña restablecida correctamente.");
       alert("Contraseña restablecida exitosamente. Ahora puede iniciar sesión.");
       window.location.href = "/";
     } catch (error) {
-      console.error(error);
+      console.error("🚨 Error en la conexión o proceso:", error);
       alert("Error al conectar con el servidor.");
     }
   };
@@ -64,9 +75,7 @@ const ResetPassword: React.FC = () => {
     <div className="reset-password-page">
       <div className="reset-password-box">
         <h1 className="title">Restablecer Contraseña</h1>
-        <p className="subtitle">
-          Introduzca su nueva contraseña para continuar.
-        </p>
+        <p className="subtitle">Introduzca su nueva contraseña para continuar.</p>
 
         <form onSubmit={handleResetPassword}>
           <input
