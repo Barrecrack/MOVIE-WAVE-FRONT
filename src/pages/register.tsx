@@ -59,7 +59,7 @@ const Register = () => {
 
   return (
     <div className="register-page">
-      <img src="../public/images/moviewave-logo.png" className="img-logo" alt="Logo del sitio" height="auto" width="auto"></img>
+      <img src="/images/moviewave-logo.png" className="img-logo" alt="Logo del sitio" />
      
       <div className="register-box">
         <h1 className="title">Crea tu cuenta</h1>
