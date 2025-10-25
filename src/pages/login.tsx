@@ -49,9 +49,7 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="login-box">
-        <img src="../public/images/moviewave-logo.png" className="img-logo" alt="Logo del sitio" height="auto" width="auto">
-        </img>
-
+        <img src="/images/moviewave-logo.png" className="img-logo" alt="Logo del sitio" />
 
         <p className="subtitle">¡Bienvenido a la mejor plataforma de streaming!</p>
         <p className="text">Ingrese su correo y contraseña para acceder</p>
