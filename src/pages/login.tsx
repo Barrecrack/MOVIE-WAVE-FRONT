@@ -38,7 +38,7 @@ const Login = () => {
 
       alert("Inicio de sesión exitoso.");
 
-      navigate("/menu"); // redirects to the home or dashboard
+      navigate("/movies"); // redirects to the home or dashboard-redirige a la vista principal de películas
       
     } catch (error) {
       console.error(error);
