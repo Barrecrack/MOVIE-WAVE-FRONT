@@ -8,6 +8,7 @@ import Menu from "./pages/menu";
 import Movies from "./pages/movies.tsx";
 import Profile from "./pages/profile.tsx";
 import About from "./pages/about.tsx";
+import EditProfile from "./pages/editprofile.tsx";
 import ResetPassword from "./pages/resetpassword.tsx";
 import Sitemap from "./pages/sitemap.tsx";
 import Favorite from "./pages/favorite.tsx";
@@ -23,6 +24,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/menu" element={<Menu />} />
         <Route path="/movies" element={<Movies />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/editprofile" element={<EditProfile />} />
         <Route path="/about" element={<About />} />
         <Route path="/sitemap" element={<Sitemap />} />
         <Route path="/favorite" element={<Favorite />} />
