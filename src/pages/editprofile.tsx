@@ -163,7 +163,7 @@ const EditProfile = () => {
             <button 
               type="button" 
               className="google-btn" 
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate("/movies")}
             >
               Cancelar
             </button>
