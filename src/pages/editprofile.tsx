@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../styles/editprofile.sass";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient";
 
 const EditProfile = () => {
   const [name, setName] = useState("");
@@ -12,17 +11,26 @@ const EditProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setName(user.user_metadata?.name || "");
-        setLastname(user.user_metadata?.lastname || "");
-        setEmail(user.email || "");
-      } else {
-        navigate("/");
+    // Cargar datos del usuario desde localStorage
+    const userData = localStorage.getItem("userData");
+    const token = localStorage.getItem("token");
+    
+    if (!token) {
+      alert("Sesión expirada. Inicia sesión de nuevo.");
+      navigate("/");
+      return;
+    }
+
+    if (userData) {
+      try {
+        const parsedData = JSON.parse(userData);
+        setName(parsedData.name || "");
+        setLastname(parsedData.lastname || "");
+        setEmail(parsedData.email || "");
+      } catch (error) {
+        console.error("Error parsing user data:", error);
       }
-    };
-    fetchUser();
+    }
   }, [navigate]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -34,10 +42,10 @@ const EditProfile = () => {
     }
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-      const { data: { session } } = await supabase.auth.getSession();
+      const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+      const token = localStorage.getItem("token");
 
-      if (!session?.access_token) {
+      if (!token) {
         alert("Sesión expirada. Inicia sesión de nuevo.");
         navigate("/");
         return;
@@ -47,13 +55,13 @@ const EditProfile = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           name,
           lastname,
           email,
-          password, // optional
+          password: password || undefined, // optional
         }),
       });
 
@@ -64,10 +72,7 @@ const EditProfile = () => {
         return;
       }
 
-      // ✅ Refresh local session to keep the token active
-      await supabase.auth.refreshSession();
-
-      // ✅ We update the data locally
+      // ✅ Actualizar datos localmente
       const updatedUser = { name, lastname, email };
       localStorage.setItem("userData", JSON.stringify(updatedUser));
 
@@ -91,6 +96,7 @@ const EditProfile = () => {
             className="input"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
           />
 
           <input
@@ -99,11 +105,12 @@ const EditProfile = () => {
             className="input"
             value={lastname}
             onChange={(e) => setLastname(e.target.value)}
+            required
           />
 
           <input
             type="number"
-            placeholder="Edad"
+            placeholder="Edad (opcional)"
             className="input"
             value={age}
             onChange={(e) => setAge(e.target.value)}
@@ -111,10 +118,11 @@ const EditProfile = () => {
 
           <input
             type="email"
-            placeholder="Correo"
+            placeholder="Correo electrónico"
             className="input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
 
           <input
