@@ -178,7 +178,7 @@ const MoviesPage: React.FC = () => {
         <nav className="sidebar-nav">
           <button onClick={() => navigate("/movies")}>🎬 Películas</button>
           <button onClick={() => navigate("/favorites")}>⭐ Favoritos</button>
-          <button onClick={() => navigate("/editprofile")}>👤 Perfil</button>
+          <button onClick={() => navigate("/profile")}>👤 Perfil</button>
           <button onClick={() => navigate("/about")}>ℹ️ Sobre nosotros</button>
           <button onClick={() => navigate("/")} className="logout">🚪 Cerrar sesión</button>
         </nav>
