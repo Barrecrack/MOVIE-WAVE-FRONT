@@ -67,28 +67,6 @@
     &:hover
       transform: scale(1.1)
 
-  /* ----- FILTROS ----- */
-  &__filters
-    display: flex
-    justify-content: center
-    flex-wrap: wrap
-    gap: 12px
-    margin: 1.8rem 0
-
-  &__filter
-    background: transparent
-    border: 1px solid #00bfff
-    color: #00bfff
-    padding: 0.55rem 1.2rem
-    border-radius: 25px
-    font-weight: 500
-    cursor: pointer
-    transition: all 0.3s ease
-    &:hover, &.active
-      background: #00bfff
-      color: #001b3a
-      box-shadow: 0 0 12px #00bfff
-
   /* ----- ESTADO DE CARGA ----- */
   &__loading
     display: flex
@@ -114,14 +92,86 @@
     to
       transform: rotate(360deg)
 
-  /* ----- GRID DE PELÍCULAS ----- */
-  &__grid
-    display: grid
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))
-    gap: 1.5rem
-    padding: 1.5rem 2rem
-    transition: all 0.3s ease-in-out
+  /* ===== FILAS TIPO NETFLIX ===== */
+  &__main
+    flex: 1
+    padding: 2rem 0
 
+  &__content
+    display: flex
+    flex-direction: column
+    gap: 3rem
+
+  &__row
+    padding: 0 2rem
+
+  &__row-title
+    font-size: 1.5rem
+    font-weight: 600
+    color: #ffffff
+    margin-bottom: 1rem
+    padding-left: 0.5rem
+    border-left: 4px solid #00bfff
+    text-transform: capitalize
+
+  &__row-container
+    position: relative
+    overflow: hidden
+    &:hover
+      .movies__row-nav
+        opacity: 1
+
+  &__row-scroll
+    display: flex
+    gap: 1rem
+    overflow-x: auto
+    overflow-y: hidden
+    padding: 0.5rem 0.2rem 1.5rem
+    scroll-behavior: smooth
+    -webkit-overflow-scrolling: touch
+    
+    /* Ocultar scrollbar pero mantener funcionalidad */
+    scrollbar-width: none
+    -ms-overflow-style: none
+    &::-webkit-scrollbar
+      display: none
+
+    /* Asegurar que las tarjetas mantengan tamaño consistente */
+    .movies__card
+      flex: 0 0 auto
+      width: 180px
+      min-width: 180px
+
+  /* Navegación del carrusel */
+  &__row-nav
+    position: absolute
+    top: 50%
+    transform: translateY(-50%)
+    background: rgba(0, 0, 0, 0.7)
+    border: none
+    color: #00bfff
+    font-size: 1.5rem
+    width: 40px
+    height: 40px
+    border-radius: 50%
+    display: flex
+    align-items: center
+    justify-content: center
+    cursor: pointer
+    transition: all 0.3s ease
+    opacity: 0
+    z-index: 5
+    &:hover
+      background: rgba(0, 191, 255, 0.8)
+      color: #001b3a
+
+    &--prev
+      left: 10px
+
+    &--next
+      right: 10px
+
+  /* ----- TARJETAS DE PELÍCULAS ----- */
   &__card
     background: rgba(255, 255, 255, 0.08)
     border-radius: 12px
@@ -150,11 +200,15 @@
     font-size: 1.05rem
     margin-bottom: 0.3rem
     color: #ffffff
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
 
   &__genre
     color: #7fc9ff
     font-size: 0.9rem
     margin-bottom: 0.2rem
+    text-transform: capitalize
 
   &__year
     color: #b8d9ff
@@ -184,6 +238,18 @@
     text-align: center
     color: #ff4c4c
     margin: 2rem 0
+
+  /* ----- BÚSQUEDA ----- */
+  &__search-results
+    padding: 0 2rem
+
+  &__search-title
+    font-size: 1.5rem
+    font-weight: 600
+    color: #ffffff
+    margin-bottom: 1.5rem
+    padding-left: 0.5rem
+    border-left: 4px solid #00bfff
 
 /* ==================== PIE DE PÁGINA ==================== */
 .movies__footer
@@ -329,14 +395,67 @@
 @media (max-width: 768px)
   .movies__logo
     height: 45px
+  
   .movies__nav-center
     width: 100%
+  
   .movies__search
     width: 100%
+  
   .menu-toggle
     font-size: 1.6rem
 
-  .movies__grid
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr))
-    gap: 1rem
-    padding: 1rem
+  .movies__row
+    padding: 0 1rem
+  
+  .movies__row-title
+    font-size: 1.3rem
+  
+  .movies__row-scroll .movies__card
+    width: 150px
+    min-width: 150px
+
+  .movies__row-nav
+    display: none // Ocultar navegación en móviles
+
+  .movies__search-results
+    padding: 0 1rem
+
+@media (max-width: 480px)
+  .movies__row-scroll .movies__card
+    width: 140px
+    min-width: 140px
+
+  .movies__row-title
+    font-size: 1.2rem
+
+  .movies__image
+    height: 200px
+
+  .movies__info
+    padding: 0.7rem
+
+  .movies__name
+    font-size: 0.95rem
+
+  .movies__favorite-btn
+    font-size: 0.8rem
+    padding: 0.3rem 0.8rem
+
+/* Estilos para cuando no hay resultados */
+.movies__no-results
+  text-align: center
+  padding: 3rem 2rem
+  color: #7fc9ff
+
+  &-icon
+    font-size: 3rem
+    margin-bottom: 1rem
+
+  &-title
+    font-size: 1.5rem
+    margin-bottom: 0.5rem
+
+  &-message
+    font-size: 1rem
+    opacity: 0.8
