@@ -96,3 +96,80 @@ $fuente-principal: 'Arial'
 .loading
   color: #90caf9
   font-size: 1.2rem
+
+
+.profile-actions
+  display: flex
+  flex-direction: column
+  gap: 0.8rem
+  margin-top: 1.5rem
+
+.password-button
+  background: rgba(255, 193, 7, 0.2)
+  border: 1px solid #ffc107
+  color: #ffc107
+  padding: 0.8rem 1.5rem
+  border-radius: 8px
+  cursor: pointer
+  font-size: 1rem
+  transition: all 0.3s ease
+
+  &:hover
+    background: #ffc107
+    color: #000
+
+.form-group
+  margin-bottom: 1.2rem
+
+  label
+    display: block
+    margin-bottom: 0.5rem
+    color: #7fc9ff
+
+.edit-input
+  width: 100%
+  padding: 0.8rem
+  border: 1px solid #00bfff
+  border-radius: 6px
+  background: rgba(255, 255, 255, 0.1)
+  color: white
+  font-size: 1rem
+
+  &.disabled
+    background: rgba(255, 255, 255, 0.05)
+    border-color: #666
+    color: #999
+    cursor: not-allowed
+
+.edit-actions
+  display: flex
+  gap: 1rem
+  margin-top: 1.5rem
+
+.save-button
+  background: #28a745
+  color: white
+  border: none
+  padding: 0.8rem 1.5rem
+  border-radius: 6px
+  cursor: pointer
+  flex: 1
+
+  &:hover:not(:disabled)
+    background: #218838
+
+  &:disabled
+    background: #6c757d
+    cursor: not-allowed
+
+.cancel-button
+  background: #dc3545
+  color: white
+  border: none
+  padding: 0.8rem 1.5rem
+  border-radius: 6px
+  cursor: pointer
+  flex: 1
+
+  &:hover
+    background: #c82333

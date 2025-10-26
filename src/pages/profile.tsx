@@ -16,43 +16,55 @@ const Profile: React.FC = () => {
     name: '',
     lastname: '',
     email: '',
-    password: '',
   });
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) {
-        //window.location.href = "/";
-        return;
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) {
+          console.error("Error obteniendo usuario:", error);
+          navigate("/");
+          return;
+        }
+        
+        const userData = {
+          name: user.user_metadata?.name || '',
+          lastname: user.user_metadata?.lastname || '',
+          email: user.email || '',
+        };
+        
+        setUserData(userData);
+        setFormData(userData);
+      } catch (error) {
+        console.error("Error cargando perfil:", error);
+      } finally {
+        setPageLoading(false);
       }
-      setUserData({
-        name: user.user_metadata?.name || '',
-        lastname: user.user_metadata?.lastname || '',
-        email: user.email || '',
-      });
-      setFormData({
-        name: user.user_metadata?.name || '',
-        lastname: user.user_metadata?.lastname || '',
-        email: user.email || '',
-        password: '',
-      });
     };
+    
     getUser();
-  }, []);
+  }, [navigate]);
 
   const handleEditProfile = () => {
     setIsEditing(true);
   };
 
   const handleSave = async () => {
+    if (!formData.name.trim() || !formData.lastname.trim()) {
+      alert("Por favor complete nombre y apellido.");
+      return;
+    }
+
     setLoading(true);
     try {
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) {
         alert('Sesión expirada. Inicia sesión de nuevo.');
+        navigate("/");
         return;
       }
 
@@ -66,7 +78,7 @@ const Profile: React.FC = () => {
         body: JSON.stringify({
           name: formData.name,
           lastname: formData.lastname,
-          password: formData.password || undefined,
+          // No enviamos email ni password
         }),
       });
 
@@ -78,12 +90,13 @@ const Profile: React.FC = () => {
       alert('Perfil actualizado correctamente');
       setIsEditing(false);
 
-      const { data: { user } } = await supabase.auth.getUser();
+      // Actualizar datos locales
       setUserData({
-        name: user?.user_metadata?.name || '',
-        lastname: user?.user_metadata?.lastname || '',
-        email: user?.email || '',
+        name: formData.name,
+        lastname: formData.lastname,
+        email: formData.email,
       });
+
     } catch (error: any) {
       console.error('Error actualizando perfil:', error);
       alert(`Error: ${error.message}`);
@@ -94,12 +107,12 @@ const Profile: React.FC = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
+    // Restaurar datos originales
     if (userData) {
       setFormData({
         name: userData.name,
         lastname: userData.lastname,
         email: userData.email,
-        password: '',
       });
     }
   };
@@ -108,8 +121,28 @@ const Profile: React.FC = () => {
     navigate("/movies");
   };
 
+  const handleForgotPassword = () => {
+    navigate("/forgot");
+  };
+
+  if (pageLoading) {
+    return (
+      <div className="profile-page">
+        <div className="profile-container">
+          <div className="loading">Cargando perfil...</div>
+        </div>
+      </div>
+    );
+  }
+
   if (!userData) {
-    return <div className="loading">Cargando perfil...</div>;
+    return (
+      <div className="profile-page">
+        <div className="profile-container">
+          <p>Error al cargar el perfil. <a href="/">Iniciar sesión</a></p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -125,6 +158,7 @@ const Profile: React.FC = () => {
         <div className="profile-card">
           <div className="profile-info">
             {!isEditing ? (
+              // MODO LECTURA
               <>
                 <p className="letter">
                   <strong>Nombre:</strong> {userData.name}
@@ -135,55 +169,71 @@ const Profile: React.FC = () => {
                 <p className="letter">
                   <strong>Correo:</strong> {userData.email}
                 </p>
+                
+                <div className="profile-actions">
+                  <button className="edit-button" onClick={handleEditProfile}>
+                    ✏️ Editar perfil
+                  </button>
+                  <button 
+                    className="password-button" 
+                    onClick={handleForgotPassword}
+                  >
+                    🔒 Cambiar contraseña
+                  </button>
+                </div>
               </>
             ) : (
+              // MODO EDICIÓN
               <>
-                <label>
-                  <strong>Nombre:</strong>
+                <div className="form-group">
+                  <label><strong>Nombre:</strong></label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="edit-input"
                   />
-                </label>
-                <label>
-                  <strong>Apellido:</strong>
+                </div>
+                
+                <div className="form-group">
+                  <label><strong>Apellido:</strong></label>
                   <input
                     type="text"
                     value={formData.lastname}
                     onChange={(e) => setFormData({ ...formData, lastname: e.target.value })}
+                    className="edit-input"
                   />
-                </label>
-                <label>
-                  <strong>Correo:</strong>
-                  <input type="email" value={formData.email} readOnly />
-                </label>
-                <label>
-                  <strong>Nueva Contraseña (opcional):</strong>
-                  <input
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                </div>
+                
+                <div className="form-group">
+                  <label><strong>Correo:</strong></label>
+                  <input 
+                    type="email" 
+                    value={formData.email} 
+                    readOnly 
+                    className="edit-input disabled"
+                    title="El correo no se puede modificar"
                   />
-                </label>
+                </div>
+
+                <div className="edit-actions">
+                  <button 
+                    className="save-button" 
+                    onClick={handleSave} 
+                    disabled={loading}
+                  >
+                    {loading ? 'Guardando...' : '💾 Guardar'}
+                  </button>
+                  <button 
+                    className="cancel-button" 
+                    onClick={handleCancel}
+                  >
+                    ❌ Cancelar
+                  </button>
+                </div>
               </>
             )}
           </div>
-
-          {!isEditing ? (
-            <button className="edit-button" onClick={handleEditProfile}>
-              Editar perfil
-            </button>
-          ) : (
-            <>
-              <button className="edit-button" onClick={handleSave} disabled={loading}>
-                {loading ? 'Guardando...' : 'Guardar'}
-              </button>
-              <button className="edit-button" onClick={handleCancel}>
-                Cancelar
-              </button>
-            </>
-          )}
         </div>
       </div>
     </div>
