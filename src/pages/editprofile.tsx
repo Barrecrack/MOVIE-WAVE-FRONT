@@ -5,9 +5,7 @@ import { useNavigate } from "react-router-dom";
 const EditProfile = () => {
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
-  const [age, setAge] = useState<number | string>("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -92,8 +90,7 @@ const EditProfile = () => {
         body: JSON.stringify({
           name,
           lastname,
-          // NO enviar email - no se puede cambiar
-          password: password || undefined,
+          // No enviamos email ya que no es editable
         }),
       });
 
@@ -151,29 +148,12 @@ const EditProfile = () => {
           />
 
           <input
-            type="number"
-            placeholder="Edad (opcional)"
-            className="input"
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-          />
-
-          <input
             type="email"
             placeholder="Correo electrónico"
-            className="input"
+            className="input disabled"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled // 🔒 Email no editable
+            disabled
             title="El correo electrónico no se puede modificar"
-          />
-
-          <input
-            type="password"
-            placeholder="Nueva contraseña (opcional)"
-            className="input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
           />
 
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
