@@ -62,7 +62,7 @@ const Register = () => {
       <img src="/images/moviewave-logo.png" className="img-logo" alt="Logo del sitio" />
      
       <div className="register-box">
-        <h1 className="title">Crea tu cuenta</h1>
+        <h1 className="titulo">Crea tu cuenta</h1>
 
         <form onSubmit={handleRegister}>
           <input
@@ -112,9 +112,9 @@ const Register = () => {
               checked={agreeTerms}
               onChange={(e) => setAgreeTerms(e.target.checked)}
             />
-            <label htmlFor="terms">
+            <label htmlFor="terms" className="terms-label">
               Estoy de acuerdo con los{" "}
-              <a href="#" onClick={(e) => e.preventDefault()}>
+              <a className="terms-link" href="#" onClick={(e) => e.preventDefault()}>
                 términos y condiciones
               </a>
             </label>
@@ -126,7 +126,7 @@ const Register = () => {
         </form>
         
 
-        <p className="register">
+        <p className="login-link">
           ¿Ya tiene cuenta? <Link to="/">Inicie sesión</Link>
         </p>
       </div>

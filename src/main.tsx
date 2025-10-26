@@ -11,6 +11,7 @@ import About from "./pages/about.tsx";
 import EditProfile from "./pages/editprofile.tsx";
 import ResetPassword from "./pages/resetpassword.tsx";
 import Sitemap from "./pages/sitemap.tsx";
+import Favorite from "./pages/favorite.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -26,6 +27,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/editprofile" element={<EditProfile />} />
         <Route path="/about" element={<About />} />
         <Route path="/sitemap" element={<Sitemap />} />
+        <Route path="/favorite" element={<Favorite />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>

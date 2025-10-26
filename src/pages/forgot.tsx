@@ -26,7 +26,7 @@ function ForgotPassword() {
         throw new Error(data.message || "Something went wrong");
       }
 
-      setMessage("We have sent a password reset link to your email 📩");
+      setMessage("Hemos enviado un enlace de restablecimiento de contraseña a su correo electrónico. 📩");
     } catch (err: any) {
       setErrorMessage(err.message);
     }
@@ -35,23 +35,26 @@ function ForgotPassword() {
   return (
     <div className="forgot-container">
       <form onSubmit={handleForgotPassword} className="forgot-form">
-        <h2>Forgot Password</h2>
+        <img src="../public/images/moviewave-logo.png" className="img-log" alt="Logo del sitio" height="auto" width="auto">
+        </img>
+        <h2>Ingrese su correo de recuperación</h2>
 
         {errorMessage && <p className="error">{errorMessage}</p>}
         {message && <p className="success">{message}</p>}
 
         <input
-          type="email"
-          placeholder="Enter your email"
+          type="correo electrónico"
+          className="input"
+          placeholder="Introduce tu correo electrónico"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
 
-        <button type="submit">Send Reset Link</button>
+        <button type="submit">Confirmar</button>
 
-        <p>
-          Remember your password? <Link to="/">Inicie sesión</Link>
+        <p className="login-link">
+          Recuerdas tu contraseña? <Link to="/">Iniciar sesión</Link>
         </p>
       </form>
     </div>
