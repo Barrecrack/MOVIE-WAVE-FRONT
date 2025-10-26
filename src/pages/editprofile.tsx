@@ -8,36 +8,68 @@ const EditProfile = () => {
   const [age, setAge] = useState<number | string>("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Cargar datos del usuario desde localStorage
-    const userData = localStorage.getItem("userData");
-    const token = localStorage.getItem("token");
-    
-    if (!token) {
-      alert("Sesión expirada. Inicia sesión de nuevo.");
-      navigate("/");
-      return;
-    }
-
-    if (userData) {
+    const fetchUserData = async () => {
       try {
-        const parsedData = JSON.parse(userData);
-        setName(parsedData.name || "");
-        setLastname(parsedData.lastname || "");
-        setEmail(parsedData.email || "");
+        const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          alert("Sesión expirada. Inicia sesión de nuevo.");
+          navigate("/");
+          return;
+        }
+
+        // Obtener datos del usuario actual
+        const response = await fetch(`${API_URL}/api/user-profile`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setName(userData.name || "");
+          setLastname(userData.lastname || "");
+          setEmail(userData.email || "");
+        } else {
+          // Si falla, cargar desde localStorage
+          const storedData = localStorage.getItem("userData");
+          if (storedData) {
+            const parsedData = JSON.parse(storedData);
+            setName(parsedData.name || "");
+            setLastname(parsedData.lastname || "");
+            setEmail(parsedData.email || "");
+          }
+        }
       } catch (error) {
-        console.error("Error parsing user data:", error);
+        console.error("Error cargando datos:", error);
+        // Cargar desde localStorage como fallback
+        const storedData = localStorage.getItem("userData");
+        if (storedData) {
+          const parsedData = JSON.parse(storedData);
+          setName(parsedData.name || "");
+          setLastname(parsedData.lastname || "");
+          setEmail(parsedData.email || "");
+        }
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    fetchUserData();
   }, [navigate]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !lastname || !email) {
-      alert("Por favor complete todos los campos obligatorios.");
+    if (!name || !lastname) {
+      alert("Por favor complete nombre y apellido.");
       return;
     }
 
@@ -60,8 +92,8 @@ const EditProfile = () => {
         body: JSON.stringify({
           name,
           lastname,
-          email,
-          password: password || undefined, // optional
+          // NO enviar email - no se puede cambiar
+          password: password || undefined,
         }),
       });
 
@@ -72,7 +104,7 @@ const EditProfile = () => {
         return;
       }
 
-      // ✅ Actualizar datos localmente
+      // Actualizar datos localmente
       const updatedUser = { name, lastname, email };
       localStorage.setItem("userData", JSON.stringify(updatedUser));
 
@@ -83,6 +115,16 @@ const EditProfile = () => {
       alert("Error al conectar con el servidor.");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="edit-profile-page">
+        <div className="edit-profile-box">
+          <p>Cargando datos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="edit-profile-page">
@@ -122,7 +164,8 @@ const EditProfile = () => {
             className="input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
+            disabled // 🔒 Email no editable
+            title="El correo electrónico no se puede modificar"
           />
 
           <input
@@ -133,14 +176,19 @@ const EditProfile = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <button type="submit" className="register-btn">
-            Guardar cambios
-          </button>
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+            <button type="submit" className="register-btn">
+              Guardar cambios
+            </button>
+            <button 
+              type="button" 
+              className="google-btn" 
+              onClick={() => navigate("/profile")}
+            >
+              Cancelar
+            </button>
+          </div>
         </form>
-
-        <button className="google-btn" onClick={() => navigate("/profile")}>
-          Cancelar
-        </button>
       </div>
     </div>
   );
