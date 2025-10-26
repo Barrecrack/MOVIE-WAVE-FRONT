@@ -1,32 +1,57 @@
-
+@use 'login' as *
+$fuente-principal: 'Arial'
 
 .profile-page
   min-height: 100vh
-  background: linear-gradient(to bottom, #364F68, #A5AFED)
+  background: $background-gradient-1
   display: flex
   justify-content: center
   align-items: center
   color: #e3f2fd
   
-  
-
 .profile-container
-  background: rgba(10, 25, 50, 0.9)
+  background: $background-gradient-2
   border-radius: 1rem
   padding: 2rem 3rem
-  box-shadow: 0 0 20px rgba(66, 165, 245, 0.4)
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4)
   text-align: center
   width: 90%
   max-width: 500px
 
-.title
-  font-size: 2rem
+  &:hover
+    transform: translateY(-3px)
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.3)
+
+.back-menu-btn
+  position: absolute
+  top: 15px
+  left: 15px
+  background-color: rgba(255, 255, 255, 0.15)
+  border: none
+  border-radius: 50%
+  width: 65px
+  height: 65px
+  font-size: 16px
+  color: white
+  cursor: pointer
+  display: flex
+  align-items: center
+  justify-content: center
+  transition: all 0.3s ease
+  z-index: 20
+
+  &:hover
+    background-color: rgba(255, 255, 255, 0.3)
+    transform: scale(1.1)
+
+
+.titulo
+  font-size: 2.5rem
+  margin-bottom: 0.5rem
   font-weight: 700
-  background: linear-gradient(90deg, #42a5f5, #1e88e5)
-  -webkit-background-clip: text
-  -webkit-text-fill-color: transparent
-  margin-bottom: 1.5rem
-  text-transform: uppercase
+  letter-spacing: 1.5px
+  color: #ffffffff
+  font-family: $fuente-principal;
 
 .profile-card
   display: flex
@@ -41,20 +66,32 @@
   line-height: 1.8
   font-size: 1rem
 
+.letter
+  color: #ffffffff
+  font-weight: 600
+  text-decoration: none
+  transition: color 0.25s ease
+  font-family: $fuente-principal; 
+
 .edit-button
-  margin-top: 1.5rem
-  padding: 0.8rem 1.2rem
-  background: linear-gradient(90deg, #42a5f5, #1e88e5)
+  background: linear-gradient(90deg, #3b82f6, #2563eb)
+  color: white
   border: none
-  border-radius: 0.5rem
-  color: #fff
+  padding: 0.9rem
+  width: 100%
+  border-radius: 10px
+  font-size: 1.05rem
   font-weight: 600
   cursor: pointer
+  margin-top: 0.8rem
+  letter-spacing: 0.5px
   transition: all 0.3s ease
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4)
 
   &:hover
-    transform: scale(1.05)
-    background: linear-gradient(90deg, #64b5f6, #2196f3)
+    background: linear-gradient(90deg, #2563eb, #1d4ed8)
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6)
+    transform: translateY(-2px)
 
 .loading
   color: #90caf9

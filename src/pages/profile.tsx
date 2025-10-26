@@ -23,7 +23,7 @@ const Profile: React.FC = () => {
     const getUser = async () => {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
-        window.location.href = "/";
+        //window.location.href = "/";
         return;
       }
       setUserData({
@@ -108,20 +108,25 @@ const Profile: React.FC = () => {
 
   return (
     <div className="profile-page">
+      <button className="back-menu-btn" onClick={() => (window.location.href = "/movies")}  >
+        menú ←
+      </button>
       <div className="profile-container">
-        <h1 className="title">Perfil</h1>
+        <h1 className="titulo">Perfil</h1>
+        <img src="../public/images/user.png" className="img-user" alt="foto de perfil" height="auto" width="220">
+        </img>
 
         <div className="profile-card">
           <div className="profile-info">
             {!isEditing ? (
               <>
-                <p>
+                <p className="letter">
                   <strong>Nombre:</strong> {userData.name}
                 </p>
-                <p>
+                <p className="letter">
                   <strong>Apellido:</strong> {userData.lastname}
                 </p>
-                <p>
+                <p className="letter">
                   <strong>Correo:</strong> {userData.email}
                 </p>
               </>

@@ -74,8 +74,9 @@ const ResetPassword: React.FC = () => {
   return (
     <div className="reset-password-page">
       <div className="reset-password-box">
-        <h1 className="title">Restablecer Contraseña</h1>
-        <p className="subtitle">Introduzca su nueva contraseña para continuar.</p>
+        <img src="../public/images/moviewave-logo.png" className="img-log" alt="Logo del sitio" height="auto" width="auto">
+        </img>
+        <h1 className="titulo">Ingrese una nueva contraseña</h1>       
 
         <form onSubmit={handleResetPassword}>
           <input
@@ -95,7 +96,7 @@ const ResetPassword: React.FC = () => {
           />
 
           <button type="submit" className="reset-btn">
-            Restablecer
+            Confirmar
           </button>
         </form>
       </div>
