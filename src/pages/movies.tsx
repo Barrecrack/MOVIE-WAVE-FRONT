@@ -10,6 +10,14 @@ interface MovieRow {
 }
 
 const MoviesPage: React.FC = () => {
+  // 🔧 CORREGIR: Usar VITE_API_URL en lugar de VITE_API_LOCAL_URL
+  const API_BASE = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
+  
+  console.log('🔧 Variables de entorno:', {
+    VITE_API_URL: import.meta.env.VITE_API_URL,
+    API_BASE_USADA: API_BASE
+  });
+
   const [movieRows, setMovieRows] = useState<MovieRow[]>([]);
   const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -20,20 +28,21 @@ const MoviesPage: React.FC = () => {
   const genres = ["popular", "action", "comedy", "romance", "horror", "sci-fi", "adventure", "animation"];
 
   const loadMoviesByGenre = async (genre: string): Promise<ResultadoBusquedaVideo[]> => {
-  try {
-    const url = `${import.meta.env.VITE_API_LOCAL_URL}/videos/search?query=${encodeURIComponent(genre)}`;
-    console.log('🔍 URL de petición:', url); // ← Agrega esta línea
-    const res = await fetch(url);
-    console.log('📡 Respuesta status:', res.status); // ← Y esta
-    if (!res.ok) throw new Error(`Error al obtener películas de ${genre}`);
-    const data = await res.json();
-    console.log('🎬 Datos recibidos:', data); // ← Y esta
-    return data;
-  } catch (err) {
-    console.error(`Error cargando ${genre}:`, err);
-    return [];
-  }
-};
+    try {
+      // 🔧 USAR API_BASE CORRECTA
+      const url = `${API_BASE}/videos/search?query=${encodeURIComponent(genre)}`;
+      console.log('🔍 URL de petición:', url);
+      const res = await fetch(url);
+      console.log('📡 Respuesta status:', res.status);
+      if (!res.ok) throw new Error(`Error al obtener películas de ${genre}`);
+      const data = await res.json();
+      console.log('🎬 Datos recibidos:', data);
+      return data;
+    } catch (err) {
+      console.error(`Error cargando ${genre}:`, err);
+      return [];
+    }
+  };
 
   const loadAllMovies = async () => {
     try {
@@ -76,7 +85,8 @@ const MoviesPage: React.FC = () => {
 
     try {
       setLoading(true);
-      const url = `${import.meta.env.VITE_API_LOCAL_URL}/videos/search?query=${encodeURIComponent(term)}`;
+      // 🔧 USAR API_BASE CORRECTA
+      const url = `${API_BASE}/videos/search?query=${encodeURIComponent(term)}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Error en la búsqueda");
       const data = await res.json();

@@ -22,7 +22,8 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const url = `${import.meta.env.VITE_API_LOCAL_URL}/videos/get?id=${videoId}`;
+        const API_BASE = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
+        const url = `${API_BASE}/videos/get?id=${videoId}`;
         const res = await fetch(url);
         const data = await res.json();
         setVideoData(data);
