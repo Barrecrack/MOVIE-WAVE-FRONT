@@ -35,7 +35,7 @@ function ForgotPassword() {
   return (
     <div className="forgot-container">
       <form onSubmit={handleForgotPassword} className="forgot-form">
-        <img src="../public/images/moviewave-logo.png" className="img-log" alt="Logo del sitio" height="auto" width="auto">
+        <img src="/images/moviewave-logo.png" className="img-log" alt="Logo del sitio" height="auto" width="auto">
         </img>
         <h2>Ingrese su correo de recuperación</h2>
 

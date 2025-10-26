@@ -9,6 +9,7 @@ const MoviesPage: React.FC = () => {
   const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const loadMovies = async (query: string) => {
     try {
@@ -43,16 +44,60 @@ const MoviesPage: React.FC = () => {
       {/* ENCABEZADO */}
       <header className="movies__header">
         <div className="movies__nav">
-          <img src="/images/moviewave-logo.png" alt="MovieWave Logo" className="movies__logo" />
+          <img
+            src="/images/moviewave-logo.png"
+            alt="MovieWave Logo"
+            className="movies__logo"
+          />
 
-          {/* Contenedor centrado para buscador + menú */}
+          {/* Buscador centrado */}
           <div className="movies__nav-center">
             <div className="movies__search">
               <SearchBar alBuscar={handleSearch} />
             </div>
           </div>
+
+          {/* Botón menú lateral */}
+          <button
+            className="menu-toggle"
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="Abrir menú"
+          >
+            ☰
+          </button>
         </div>
       </header>
+
+      {/* SIDEBAR */}
+      <aside className={`sidebar sidebar-right ${isSidebarOpen ? "open" : ""}`}>
+        <button
+          className="close-btn"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-label="Cerrar menú"
+        >
+          ✖
+        </button>
+
+        <h2 className="sidebar-title">
+          Movie<span>Wave</span>
+        </h2>
+
+        <nav className="sidebar-nav">
+          <a href="/movies">🎬 Películas</a>
+          <a href="/profile">👤 Perfil</a>
+          <a href="/editprofile">✏️ Editar perfil</a>
+          <a href="/about">ℹ️ Sobre nosotros</a>
+          <a href="/" className="logout">🚪 Cerrar sesión</a>
+        </nav>
+      </aside>
+
+      {/* FONDO OSCURO */}
+      {isSidebarOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
 
       {/* CONTENIDO PRINCIPAL */}
       {loading && (
@@ -70,7 +115,11 @@ const MoviesPage: React.FC = () => {
             <p className="movies__empty">No se encontraron resultados.</p>
           ) : (
             movies.map((movie) => (
-              <div key={movie.id} className="movies__card" onClick={() => openModal(movie.id)}>
+              <div
+                key={movie.id}
+                className="movies__card"
+                onClick={() => openModal(movie.id)}
+              >
                 <img
                   src={movie.poster || "/images/default-movie.jpg"}
                   alt={movie.title}
@@ -87,7 +136,9 @@ const MoviesPage: React.FC = () => {
         </div>
       )}
 
-      {selectedMovieId && <VideoModal videoId={selectedMovieId} alCerrar={closeModal} />}
+      {selectedMovieId && (
+        <VideoModal videoId={selectedMovieId} alCerrar={closeModal} />
+      )}
 
       {/* FOOTER */}
       <footer className="movies__footer">
@@ -104,7 +155,7 @@ const MoviesPage: React.FC = () => {
 
             <div className="footer-column">
               <h4>Cuenta y soporte</h4>
-              <a href="/ressetpassword">Restablecer contraseña</a>
+              <a href="/resetpassword">Restablecer contraseña</a>
               <a href="/forgot">Olvidé mi contraseña</a>
             </div>
 
