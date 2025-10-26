@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import "../styles/profile.sass";
+import { useNavigate } from "react-router-dom";
 
 interface UserData {
   name: string;
@@ -18,6 +19,7 @@ const Profile: React.FC = () => {
     password: '',
   });
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getUser = async () => {
@@ -54,7 +56,7 @@ const Profile: React.FC = () => {
         return;
       }
 
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+      const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
       const response = await fetch(`${API_URL}/api/update-user`, {
         method: 'PUT',
         headers: {
@@ -102,19 +104,23 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleBackToMenu = () => {
+    navigate("/movies");
+  };
+
   if (!userData) {
     return <div className="loading">Cargando perfil...</div>;
   }
 
   return (
     <div className="profile-page">
-      <button className="back-menu-btn" onClick={() => (window.location.href = "/movies")}  >
+      <button className="back-menu-btn" onClick={handleBackToMenu}>
         menú ←
       </button>
       <div className="profile-container">
         <h1 className="titulo">Perfil</h1>
-        <img src="../public/images/user.png" className="img-user" alt="foto de perfil" height="auto" width="220">
-        </img>
+  
+        <img src="/images/user.png" className="img-user" alt="foto de perfil" />
 
         <div className="profile-card">
           <div className="profile-info">
