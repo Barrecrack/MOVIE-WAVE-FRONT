@@ -4,36 +4,59 @@ import SearchBar from "../components/search-bar.tsx";
 import VideoModal from "../components/video-modal.tsx";
 import type { ResultadoBusquedaVideo } from "../types/vide.types.ts";
 
+interface MovieRow {
+  genre: string;
+  movies: ResultadoBusquedaVideo[];
+}
+
 const MoviesPage: React.FC = () => {
-  const [movies, setMovies] = useState<ResultadoBusquedaVideo[]>([]);
+  const [movieRows, setMovieRows] = useState<MovieRow[]>([]);
   const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState("popular");
+  const [searchResults, setSearchResults] = useState<ResultadoBusquedaVideo[] | null>(null);
 
-  const genres = [
-    "popular",
-    "action",
-    "comedy",
-    "romance",
-    "horror",
-    "sci-fi",
-    "adventure",
-    "animation",
-  ];
+  const genres = ["popular", "action", "comedy", "romance", "horror", "sci-fi", "adventure", "animation"];
 
-  const loadMovies = async (query: string) => {
+  const loadMoviesByGenre = async (genre: string): Promise<ResultadoBusquedaVideo[]> => {
+    try {
+      const url = `${import.meta.env.VITE_API_LOCAL_URL}/videos/search?query=${encodeURIComponent(genre)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Error al obtener películas de ${genre}`);
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.error(`Error cargando ${genre}:`, err);
+      return [];
+    }
+  };
+
+  const loadAllMovies = async () => {
     try {
       setLoading(true);
       setError(null);
-      const url = `${import.meta.env.VITE_API_LOCAL_URL}/videos/search?query=${encodeURIComponent(
-        query
-      )}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Error al obtener películas");
-      const data = await res.json();
-      setMovies(data);
+      
+      // Para "popular", cargamos una mezcla de todos los géneros
+      const popularMovies = await loadMoviesByGenre("popular");
+      
+      // Para otros géneros, cargamos cada uno individualmente
+      const genrePromises = genres
+        .filter(genre => genre !== "popular")
+        .map(async (genre) => {
+          const movies = await loadMoviesByGenre(genre);
+          return { genre, movies };
+        });
+
+      const genreResults = await Promise.all(genrePromises);
+      
+      // Combinamos todo en rows
+      const allRows: MovieRow[] = [
+        { genre: "popular", movies: popularMovies },
+        ...genreResults.filter(row => row.movies.length > 0)
+      ];
+
+      setMovieRows(allRows);
     } catch (err: any) {
       console.error(err);
       setError("Hubo un problema al cargar las películas. Intenta más tarde.");
@@ -42,9 +65,25 @@ const MoviesPage: React.FC = () => {
     }
   };
 
-  const handleSearch = (term: string) => {
-    setActiveFilter(term);
-    loadMovies(term);
+  const handleSearch = async (term: string) => {
+    if (!term.trim()) {
+      setSearchResults(null);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const url = `${import.meta.env.VITE_API_LOCAL_URL}/videos/search?query=${encodeURIComponent(term)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Error en la búsqueda");
+      const data = await res.json();
+      setSearchResults(data);
+    } catch (err: any) {
+      console.error(err);
+      setError("Error en la búsqueda");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const openModal = (id: number) => setSelectedMovieId(id);
@@ -62,8 +101,23 @@ const MoviesPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadMovies("popular");
+    loadAllMovies();
   }, []);
+
+  // Función para obtener el nombre display del género
+  const getGenreDisplayName = (genre: string): string => {
+    const genreMap: { [key: string]: string } = {
+      "popular": "Populares",
+      "action": "Acción",
+      "comedy": "Comedia", 
+      "romance": "Romance",
+      "horror": "Terror",
+      "sci-fi": "Ciencia Ficción",
+      "adventure": "Aventura",
+      "animation": "Animación"
+    };
+    return genreMap[genre] || genre.charAt(0).toUpperCase() + genre.slice(1);
+  };
 
   return (
     <div className="movies">
@@ -91,22 +145,6 @@ const MoviesPage: React.FC = () => {
           </button>
         </div>
       </header>
-
-      {/* FILTROS */}
-      <div className="movies__filters">
-        {genres.map((genre) => (
-          <button
-            key={genre}
-            className={`movies__filter ${activeFilter === genre ? "active" : ""}`}
-            onClick={() => {
-              setActiveFilter(genre);
-              loadMovies(genre);
-            }}
-          >
-            {genre.toUpperCase()}
-          </button>
-        ))}
-      </div>
 
       {/* SIDEBAR */}
       <aside className={`sidebar sidebar-right ${isSidebarOpen ? "open" : ""}`}>
@@ -140,44 +178,94 @@ const MoviesPage: React.FC = () => {
       )}
 
       {/* CONTENIDO PRINCIPAL */}
-      {loading && (
-        <div className="movies__loading">
-          <div className="movies__spinner"></div>
-          <p>Cargando películas...</p>
-        </div>
-      )}
+      <main className="movies__main">
+        {loading && (
+          <div className="movies__loading">
+            <div className="movies__spinner"></div>
+            <p>Cargando películas...</p>
+          </div>
+        )}
 
-      {error && <p className="movies__error">{error}</p>}
+        {error && <p className="movies__error">{error}</p>}
 
-      {!loading && !error && (
-        <div className="movies__grid">
-          {movies.length === 0 ? (
-            <p className="movies__empty">No se encontraron resultados.</p>
-          ) : (
-            movies.map((movie) => (
-              <div key={movie.id} className="movies__card">
-                <img
-                  src={movie.poster || "/images/default-movie.jpg"}
-                  alt={movie.title}
-                  className="movies__image"
-                  onClick={() => openModal(movie.id)}
-                />
-                <div className="movies__info">
-                  <h3 className="movies__name">{movie.title}</h3>
-                  <p className="movies__genre">{movie.genre}</p>
-                  <p className="movies__year">{movie.year}</p>
-                  <button
-                    className="movies__favorite-btn"
-                    onClick={() => addToFavorites(movie)}
-                  >
-                    ⭐ Favorito
-                  </button>
+        {!loading && !error && (
+          <div className="movies__content">
+            {/* RESULTADOS DE BÚSQUEDA */}
+            {searchResults && (
+              <section className="movies__row">
+                <h2 className="movies__row-title">
+                  Resultados de búsqueda ({searchResults.length})
+                </h2>
+                <div className="movies__row-container">
+                  <div className="movies__row-scroll">
+                    {searchResults.length === 0 ? (
+                      <p className="movies__empty">No se encontraron resultados.</p>
+                    ) : (
+                      searchResults.map((movie) => (
+                        <div key={movie.id} className="movies__card">
+                          <img
+                            src={movie.poster || "/images/default-movie.jpg"}
+                            alt={movie.title}
+                            className="movies__image"
+                            onClick={() => openModal(movie.id)}
+                          />
+                          <div className="movies__info">
+                            <h3 className="movies__name">{movie.title}</h3>
+                            <p className="movies__genre">{movie.genre}</p>
+                            <p className="movies__year">{movie.year}</p>
+                            <button
+                              className="movies__favorite-btn"
+                              onClick={() => addToFavorites(movie)}
+                            >
+                              ⭐ Favorito
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
+              </section>
+            )}
+
+            {/* FILAS POR GÉNERO (solo si no hay búsqueda activa) */}
+            {!searchResults && movieRows.map((row) => (
+              row.movies.length > 0 && (
+                <section key={row.genre} className="movies__row">
+                  <h2 className="movies__row-title">
+                    {getGenreDisplayName(row.genre)}
+                  </h2>
+                  <div className="movies__row-container">
+                    <div className="movies__row-scroll">
+                      {row.movies.map((movie) => (
+                        <div key={movie.id} className="movies__card">
+                          <img
+                            src={movie.poster || "/images/default-movie.jpg"}
+                            alt={movie.title}
+                            className="movies__image"
+                            onClick={() => openModal(movie.id)}
+                          />
+                          <div className="movies__info">
+                            <h3 className="movies__name">{movie.title}</h3>
+                            <p className="movies__genre">{movie.genre}</p>
+                            <p className="movies__year">{movie.year}</p>
+                            <button
+                              className="movies__favorite-btn"
+                              onClick={() => addToFavorites(movie)}
+                            >
+                              ⭐ Favorito
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              )
+            ))}
+          </div>
+        )}
+      </main>
 
       {selectedMovieId && (
         <VideoModal videoId={selectedMovieId} alCerrar={closeModal} />
