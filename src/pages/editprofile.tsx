@@ -9,12 +9,12 @@ const EditProfile = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Obtener usuario de Supabase (igual que Profile.tsx)
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error || !user) {
           console.error("Error obteniendo usuario:", error);
@@ -22,7 +22,6 @@ const EditProfile = () => {
           return;
         }
         
-        // Cargar datos del usuario desde metadata de Supabase
         const userData = {
           name: user.user_metadata?.name || '',
           lastname: user.user_metadata?.lastname || '',
@@ -35,7 +34,6 @@ const EditProfile = () => {
         
       } catch (error) {
         console.error("Error cargando datos:", error);
-        // Fallback: cargar desde localStorage
         const storedData = localStorage.getItem("userData");
         if (storedData) {
           const parsedData = JSON.parse(storedData);
@@ -61,7 +59,6 @@ const EditProfile = () => {
 
     setSaving(true);
     try {
-      // Obtener token de Supabase
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) {
         alert('Sesión expirada. Inicia sesión de nuevo.');
@@ -97,7 +94,7 @@ const EditProfile = () => {
       localStorage.setItem("userData", JSON.stringify(updatedUser));
 
       alert("Perfil actualizado exitosamente.");
-      navigate("/profile");
+      setIsEditing(false); // Volver al modo vista
     } catch (error: any) {
       console.error(error);
       alert(error.message || "Error al conectar con el servidor.");
@@ -106,8 +103,36 @@ const EditProfile = () => {
     }
   };
 
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
   const handleCancel = () => {
-    navigate("/profile");
+    setIsEditing(false);
+    // Recargar datos originales
+    fetchUserData();
+  };
+
+  const handleBackToMovies = () => {
+    navigate("/movies");
+  };
+
+  const handleChangePassword = () => {
+    navigate("/forgot");
+  };
+
+  // Función para recargar datos
+  const fetchUserData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setName(user.user_metadata?.name || '');
+        setLastname(user.user_metadata?.lastname || '');
+        setEmail(user.email || '');
+      }
+    } catch (error) {
+      console.error("Error recargando datos:", error);
+    }
   };
 
   if (loading) {
@@ -122,55 +147,96 @@ const EditProfile = () => {
 
   return (
     <div className="edit-profile-page">
+      <button className="back-menu-btn" onClick={handleBackToMovies}>
+        menú ←
+      </button>
+      
       <div className="edit-profile-box">
-        <h1 className="title">Editar perfil</h1>
+        <h1 className="title">{isEditing ? "Editar perfil" : "Mi perfil"}</h1>
 
-        <form onSubmit={handleUpdateProfile}>
-          <input
-            type="text"
-            placeholder="Nombre"
-            className="input"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+        {!isEditing ? (
+          // MODO VISTA (solo lectura)
+          <div className="profile-view">
+            <img src="/images/user.png" className="img-user" alt="foto de perfil" />
+            
+            <div className="profile-info">
+              <p className="profile-field">
+                <strong>Nombre:</strong> {name}
+              </p>
+              <p className="profile-field">
+                <strong>Apellido:</strong> {lastname}
+              </p>
+              <p className="profile-field">
+                <strong>Correo:</strong> {email}
+              </p>
+            </div>
 
-          <input
-            type="text"
-            placeholder="Apellido"
-            className="input"
-            value={lastname}
-            onChange={(e) => setLastname(e.target.value)}
-            required
-          />
-
-          <input
-            type="email"
-            placeholder="Correo electrónico"
-            className="input disabled"
-            value={email}
-            disabled
-            title="El correo electrónico no se puede modificar"
-          />
-
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-            <button 
-              type="submit" 
-              className="register-btn"
-              disabled={saving}
-            >
-              {saving ? 'Guardando...' : 'Guardar cambios'}
-            </button>
-            <button 
-              type="button" 
-              className="google-btn" 
-              onClick={handleCancel}
-              disabled={saving}
-            >
-              Cancelar
-            </button>
+            <div className="profile-actions">
+              <button 
+                type="button" 
+                className="register-btn"
+                onClick={handleEdit}
+              >
+                ✏️ Editar perfil
+              </button>
+              <button 
+                type="button" 
+                className="google-btn" 
+                onClick={handleChangePassword}
+              >
+                🔒 Cambiar contraseña
+              </button>
+            </div>
           </div>
-        </form>
+        ) : (
+          // MODO EDICIÓN
+          <form onSubmit={handleUpdateProfile}>
+            <input
+              type="text"
+              placeholder="Nombre"
+              className="input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+
+            <input
+              type="text"
+              placeholder="Apellido"
+              className="input"
+              value={lastname}
+              onChange={(e) => setLastname(e.target.value)}
+              required
+            />
+
+            <input
+              type="email"
+              placeholder="Correo electrónico"
+              className="input disabled"
+              value={email}
+              disabled
+              title="El correo electrónico no se puede modificar"
+            />
+
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+              <button 
+                type="submit" 
+                className="register-btn"
+                disabled={saving}
+              >
+                {saving ? 'Guardando...' : '💾 Guardar'}
+              </button>
+              <button 
+                type="button" 
+                className="google-btn" 
+                onClick={handleCancel}
+                disabled={saving}
+              >
+                ❌ Cancelar
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

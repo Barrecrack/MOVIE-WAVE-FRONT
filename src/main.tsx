@@ -6,7 +6,6 @@ import Register from "./pages/register.tsx";
 import Forgot from "./pages/forgot.tsx"; 
 import Menu from "./pages/menu";
 import Movies from "./pages/movies.tsx";
-import Profile from "./pages/profile.tsx";
 import About from "./pages/about.tsx";
 import EditProfile from "./pages/editprofile.tsx";
 import ResetPassword from "./pages/resetpassword.tsx";
@@ -23,7 +22,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/resetpassword" element={<ResetPassword />} />
         <Route path="/menu" element={<Menu />} />
         <Route path="/movies" element={<Movies />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<EditProfile />} />
         <Route path="/editprofile" element={<EditProfile />} />
         <Route path="/about" element={<About />} />
         <Route path="/sitemap" element={<Sitemap />} />
