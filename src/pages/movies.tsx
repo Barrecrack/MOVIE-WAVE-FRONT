@@ -3,6 +3,7 @@ import "../styles/movies.sass";
 import SearchBar from "../components/search-bar.tsx";
 import VideoModal from "../components/video-modal.tsx";
 import type { ResultadoBusquedaVideo } from "../types/vide.types.ts";
+import { useNavigate } from "react-router-dom";
 
 interface MovieRow {
   genre: string;
@@ -24,6 +25,7 @@ const MoviesPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<ResultadoBusquedaVideo[] | null>(null);
+  const navigate = useNavigate();
 
   const genres = ["popular", "action", "comedy", "romance", "horror", "sci-fi", "adventure", "animation"];
 
@@ -174,12 +176,11 @@ const MoviesPage: React.FC = () => {
         </h2>
 
         <nav className="sidebar-nav">
-          <a href="/movies">🎬 Películas</a>
-          <a href="/favorites">⭐ Favoritos</a>
-          <a href="/profile">👤 Perfil</a>
-          <a href="/editprofile">✏️ Editar perfil</a>
-          <a href="/about">ℹ️ Sobre nosotros</a>
-          <a href="/" className="logout">🚪 Cerrar sesión</a>
+          <button onClick={() => navigate("/movies")}>🎬 Películas</button>
+          <button onClick={() => navigate("/favorites")}>⭐ Favoritos</button>
+          <button onClick={() => navigate("/editprofile")}>👤 Perfil</button>
+          <button onClick={() => navigate("/about")}>ℹ️ Sobre nosotros</button>
+          <button onClick={() => navigate("/")} className="logout">🚪 Cerrar sesión</button>
         </nav>
       </aside>
 
