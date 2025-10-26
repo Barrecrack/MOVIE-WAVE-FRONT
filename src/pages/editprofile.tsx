@@ -1,53 +1,41 @@
 import React, { useState, useEffect } from "react";
 import "../styles/editprofile.sass";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 
 const EditProfile = () => {
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          alert("Sesión expirada. Inicia sesión de nuevo.");
+        // Obtener usuario de Supabase (igual que Profile.tsx)
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) {
+          console.error("Error obteniendo usuario:", error);
           navigate("/");
           return;
         }
-
-        // Obtener datos del usuario actual
-        const response = await fetch(`${API_URL}/api/user-profile`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
-          setName(userData.name || "");
-          setLastname(userData.lastname || "");
-          setEmail(userData.email || "");
-        } else {
-          // Si falla, cargar desde localStorage
-          const storedData = localStorage.getItem("userData");
-          if (storedData) {
-            const parsedData = JSON.parse(storedData);
-            setName(parsedData.name || "");
-            setLastname(parsedData.lastname || "");
-            setEmail(parsedData.email || "");
-          }
-        }
+        
+        // Cargar datos del usuario desde metadata de Supabase
+        const userData = {
+          name: user.user_metadata?.name || '',
+          lastname: user.user_metadata?.lastname || '',
+          email: user.email || '',
+        };
+        
+        setName(userData.name);
+        setLastname(userData.lastname);
+        setEmail(userData.email);
+        
       } catch (error) {
         console.error("Error cargando datos:", error);
-        // Cargar desde localStorage como fallback
+        // Fallback: cargar desde localStorage
         const storedData = localStorage.getItem("userData");
         if (storedData) {
           const parsedData = JSON.parse(storedData);
@@ -66,21 +54,22 @@ const EditProfile = () => {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !lastname) {
+    if (!name.trim() || !lastname.trim()) {
       alert("Por favor complete nombre y apellido.");
       return;
     }
 
+    setSaving(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-      const token = localStorage.getItem("token");
-
+      // Obtener token de Supabase
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) {
-        alert("Sesión expirada. Inicia sesión de nuevo.");
+        alert('Sesión expirada. Inicia sesión de nuevo.');
         navigate("/");
         return;
       }
 
+      const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
       const response = await fetch(`${API_URL}/api/update-user`, {
         method: "PUT",
         headers: {
@@ -88,29 +77,37 @@ const EditProfile = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          name,
-          lastname,
-          // No enviamos email ya que no es editable
+          name: name.trim(),
+          lastname: lastname.trim(),
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || "Error al actualizar el perfil.");
-        return;
+        throw new Error(data.error || "Error al actualizar el perfil.");
       }
 
-      // Actualizar datos localmente
-      const updatedUser = { name, lastname, email };
+      // Actualizar datos en localStorage
+      const updatedUser = { 
+        name: name.trim(), 
+        lastname: lastname.trim(), 
+        email 
+      };
       localStorage.setItem("userData", JSON.stringify(updatedUser));
 
       alert("Perfil actualizado exitosamente.");
       navigate("/profile");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Error al conectar con el servidor.");
+      alert(error.message || "Error al conectar con el servidor.");
+    } finally {
+      setSaving(false);
     }
+  };
+
+  const handleCancel = () => {
+    navigate("/profile");
   };
 
   if (loading) {
@@ -157,13 +154,18 @@ const EditProfile = () => {
           />
 
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-            <button type="submit" className="register-btn">
-              Guardar cambios
+            <button 
+              type="submit" 
+              className="register-btn"
+              disabled={saving}
+            >
+              {saving ? 'Guardando...' : 'Guardar cambios'}
             </button>
             <button 
               type="button" 
               className="google-btn" 
-              onClick={() => navigate("/movies")}
+              onClick={handleCancel}
+              disabled={saving}
             >
               Cancelar
             </button>
