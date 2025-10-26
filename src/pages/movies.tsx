@@ -20,17 +20,20 @@ const MoviesPage: React.FC = () => {
   const genres = ["popular", "action", "comedy", "romance", "horror", "sci-fi", "adventure", "animation"];
 
   const loadMoviesByGenre = async (genre: string): Promise<ResultadoBusquedaVideo[]> => {
-    try {
-      const url = `${import.meta.env.VITE_API_LOCAL_URL}/videos/search?query=${encodeURIComponent(genre)}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`Error al obtener películas de ${genre}`);
-      const data = await res.json();
-      return data;
-    } catch (err) {
-      console.error(`Error cargando ${genre}:`, err);
-      return [];
-    }
-  };
+  try {
+    const url = `${import.meta.env.VITE_API_LOCAL_URL}/videos/search?query=${encodeURIComponent(genre)}`;
+    console.log('🔍 URL de petición:', url); // ← Agrega esta línea
+    const res = await fetch(url);
+    console.log('📡 Respuesta status:', res.status); // ← Y esta
+    if (!res.ok) throw new Error(`Error al obtener películas de ${genre}`);
+    const data = await res.json();
+    console.log('🎬 Datos recibidos:', data); // ← Y esta
+    return data;
+  } catch (err) {
+    console.error(`Error cargando ${genre}:`, err);
+    return [];
+  }
+};
 
   const loadAllMovies = async () => {
     try {
