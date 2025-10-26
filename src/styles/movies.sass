@@ -18,7 +18,7 @@
     position: sticky
     top: 0
     z-index: 10
-    overflow: hidden      // ✅ elimina sombras/residuos visuales
+    overflow: hidden
 
   &__nav
     width: 100%
@@ -27,13 +27,13 @@
     justify-content: space-between
     align-items: center
     margin: 0 auto
-    padding: 0 0.5rem   // ✅ añade un pequeño padding lateral
+    padding: 0 0.5rem
 
   &__logo
     height: 55px
     width: auto
     cursor: pointer
-    margin-left: 0.3rem   // ✅ fuerza un pequeño margen a la izquierda
+    margin-left: 0.3rem
     filter: drop-shadow(0 0 8px rgba(0, 128, 255, 0.6))
     transition: transform 0.3s ease
     &:hover
@@ -52,14 +52,14 @@
     width: 100%
     max-width: 450px
 
-  /* Botón del menú */
+  /* Botón del menú (sidebar) */
   .menu-toggle
     background: none
     border: none
     color: #00bfff
-    font-size: 1.6rem  // 🔹 más pequeño
+    font-size: 1.8rem
     cursor: pointer
-    padding: 0.1rem 0.3rem  // 🔹 menos área de clic
+    padding: 0.3rem 0.6rem
     display: flex
     align-items: center
     justify-content: center
@@ -120,6 +120,7 @@
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))
     gap: 1.5rem
     padding: 1.5rem 2rem
+    transition: all 0.3s ease-in-out
 
   &__card
     background: rgba(255, 255, 255, 0.08)
@@ -158,6 +159,20 @@
   &__year
     color: #b8d9ff
     font-size: 0.85rem
+
+  &__favorite-btn
+    background: none
+    border: 1px solid #00bfff
+    color: #00bfff
+    padding: 0.4rem 1rem
+    border-radius: 25px
+    font-size: 0.85rem
+    margin-top: 0.5rem
+    cursor: pointer
+    transition: all 0.3s ease
+    &:hover
+      background: #00bfff
+      color: #001b3a
 
   &__empty
     text-align: center
@@ -283,8 +298,15 @@
   font-size: 1.3rem
   cursor: pointer
   transition: transform 0.2s ease
+  opacity: 0
+  pointer-events: none
   &:hover
     transform: scale(1.1)
+
+/* 🔹 Solo mostrar botón de cierre cuando el sidebar esté abierto */
+.sidebar.open .close-btn
+  opacity: 1
+  pointer-events: auto
 
 .sidebar-overlay
   position: fixed
@@ -294,6 +316,14 @@
   height: 100%
   background: rgba(0,0,0,0.5)
   z-index: 999
+  opacity: 0
+  pointer-events: none
+  transition: opacity 0.3s ease
+
+/* 🔹 Mostrar overlay solo cuando el sidebar está abierto */
+.sidebar.open + .sidebar-overlay
+  opacity: 1
+  pointer-events: auto
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px)
@@ -305,3 +335,8 @@
     width: 100%
   .menu-toggle
     font-size: 1.6rem
+
+  .movies__grid
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr))
+    gap: 1rem
+    padding: 1rem
