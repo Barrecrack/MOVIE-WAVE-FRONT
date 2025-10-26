@@ -13,41 +13,46 @@ const EditProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) {
-          console.error("Error obteniendo usuario:", error);
-          navigate("/");
-          return;
-        }
-        
-        const userData = {
-          name: user.user_metadata?.name || '',
-          lastname: user.user_metadata?.lastname || '',
-          email: user.email || '',
-        };
-        
-        setName(userData.name);
-        setLastname(userData.lastname);
-        setEmail(userData.email);
-        
-      } catch (error) {
-        console.error("Error cargando datos:", error);
-        const storedData = localStorage.getItem("userData");
-        if (storedData) {
-          const parsedData = JSON.parse(storedData);
-          setName(parsedData.name || "");
-          setLastname(parsedData.lastname || "");
-          setEmail(parsedData.email || "");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUserData();
-  }, [navigate]);
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      console.log("🔹 Obteniendo datos del usuario...");
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error) {
+        console.error("❌ Error obteniendo usuario:", error);
+        throw error;
+      }
+      
+      if (!user) {
+        console.error("❌ No hay usuario autenticado");
+        navigate("/");
+        return;
+      }
+
+      console.log("✅ Usuario obtenido:", user.email);
+      
+      // Usar datos de user_metadata de Supabase
+      const userData = {
+        name: user.user_metadata?.name || '',
+        lastname: user.user_metadata?.lastname || '',
+        email: user.email || '',
+      };
+      
+      setName(userData.name);
+      setLastname(userData.lastname);
+      setEmail(userData.email);
+      
+    } catch (error: any) {
+      console.error("❌ Error cargando datos:", error);
+      alert("Error cargando perfil: " + error.message);
+      navigate("/");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,14 +64,23 @@ const EditProfile = () => {
 
     setSaving(true);
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      if (!token) {
+      console.log("🔹 Actualizando perfil...");
+      
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error("❌ Error de sesión:", sessionError);
         alert('Sesión expirada. Inicia sesión de nuevo.');
         navigate("/");
         return;
       }
 
+      const token = session.access_token;
+      console.log("✅ Token obtenido");
+
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+      console.log("🔹 Enviando solicitud a:", `${API_URL}/api/update-user`);
+      
       const response = await fetch(`${API_URL}/api/update-user`, {
         method: "PUT",
         headers: {
@@ -80,23 +94,20 @@ const EditProfile = () => {
       });
 
       const data = await response.json();
+      console.log("📨 Respuesta del servidor:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Error al actualizar el perfil.");
       }
 
-      // Actualizar datos en localStorage
-      const updatedUser = { 
-        name: name.trim(), 
-        lastname: lastname.trim(), 
-        email 
-      };
-      localStorage.setItem("userData", JSON.stringify(updatedUser));
-
       alert("Perfil actualizado exitosamente.");
-      setIsEditing(false); // Volver al modo vista
+      setIsEditing(false);
+      
+      // Recargar datos actualizados
+      await fetchUserData();
+      
     } catch (error: any) {
-      console.error(error);
+      console.error("❌ Error actualizando perfil:", error);
       alert(error.message || "Error al conectar con el servidor.");
     } finally {
       setSaving(false);
@@ -121,25 +132,11 @@ const EditProfile = () => {
     navigate("/forgot");
   };
 
-  // Función para recargar datos
-  const fetchUserData = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setName(user.user_metadata?.name || '');
-        setLastname(user.user_metadata?.lastname || '');
-        setEmail(user.email || '');
-      }
-    } catch (error) {
-      console.error("Error recargando datos:", error);
-    }
-  };
-
   if (loading) {
     return (
       <div className="edit-profile-page">
         <div className="edit-profile-box">
-          <p>Cargando datos...</p>
+          <p>Cargando datos del perfil...</p>
         </div>
       </div>
     );
