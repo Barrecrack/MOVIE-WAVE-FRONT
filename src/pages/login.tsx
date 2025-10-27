@@ -21,29 +21,47 @@ const Login = () => {
     setLoading(true);
     
     try {
-      console.log("🔹 Iniciando sesión con Supabase...");
+      console.log("🔹 Iniciando sesión con el backend...");
       
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const API_URL = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
+      const response = await fetch(`${API_URL}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) {
-        console.error("❌ Error en login:", error.message);
-        alert(error.message || "Error al iniciar sesión.");
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.error || "Error al iniciar sesión.");
         return;
       }
 
-      if (data.user && data.session) {
-        console.log("✅ Login exitoso:", data.user.email);
-        console.log("✅ Sesión creada:", data.session.access_token);
+      console.log("✅ Login exitoso via backend:", data.user?.email);
+
+      // 🔥 CLAVE: Sincronizar con Supabase en el frontend
+      if (data.token) {
+        console.log("🔄 Sincronizando sesión con Supabase frontend...");
         
-        // La sesión se guarda automáticamente por Supabase
-        alert("Inicio de sesión exitoso.");
-        navigate("/movies");
-      } else {
-        throw new Error("No se pudo crear la sesión");
+        // Opción 1: Usar setSession para sincronizar
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: data.token,
+          refresh_token: data.token, // O usa el refresh token si lo tienes
+        });
+
+        if (sessionError) {
+          console.warn("⚠️ No se pudo sincronizar sesión:", sessionError.message);
+          // No es fatal, continuamos
+        } else {
+          console.log("✅ Sesión de Supabase sincronizada");
+        }
+
+        // También guardar en localStorage por compatibilidad
+        localStorage.setItem("token", data.token);
       }
+
+      alert("Inicio de sesión exitoso.");
+      navigate("/movies");
       
     } catch (error: any) {
       console.error("❌ Error en login:", error);
