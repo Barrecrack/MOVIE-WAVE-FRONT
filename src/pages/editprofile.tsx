@@ -20,66 +20,56 @@ const EditProfile = () => {
     try {
       console.log("🔹 Obteniendo datos del usuario...");
 
-      // Verificar sesión de manera más robusta
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // Primero intentar con Supabase directamente
+      const { data: { user }, error: supabaseError } = await supabase.auth.getUser();
 
-      if (sessionError) {
-        console.error("❌ Error de sesión:", sessionError);
-        // Intentar recuperar la sesión
-        await supabase.auth.refreshSession();
-        throw new Error('Error de sesión');
+      if (!supabaseError && user) {
+        console.log("✅ Usuario obtenido de Supabase:", user.email);
+
+        const userData = {
+          name: user.user_metadata?.name || '',
+          lastname: user.user_metadata?.lastname || '',
+          email: user.email || '',
+        };
+
+        setName(userData.name);
+        setLastname(userData.lastname);
+        setEmail(userData.email);
+        return;
       }
 
-      if (!session) {
-        console.error("❌ No hay sesión activa - intentando recuperar...");
+      console.log("🔄 Supabase no tiene sesión, intentando con backend...");
 
-        // Intentar recuperar la sesión
-        const { data: { session: newSession } } = await supabase.auth.refreshSession();
-
-        if (!newSession) {
-          console.error("❌ No se pudo recuperar la sesión");
-          alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
-          navigate("/");
-          return;
-        }
-
-        console.log("✅ Sesión recuperada:", newSession.user.email);
-        // Continuar con la nueva sesión
-      } else {
-        console.log("✅ Sesión activa encontrada:", session.user.email);
-      }
-
-      // Obtener usuario actual
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-      if (userError) {
-        console.error("❌ Error obteniendo usuario:", userError);
-        throw userError;
-      }
-
-      if (!user) {
-        console.error("❌ No hay usuario autenticado");
+      // Fallback: usar el backend con el token de localStorage
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("❌ No hay token disponible");
+        alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
         navigate("/");
         return;
       }
 
-      console.log("✅ Usuario obtenido:", user.email);
+      const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+      const response = await fetch(`${API_URL}/api/user-profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      // Usar datos de user_metadata de Supabase
-      const userData = {
-        name: user.user_metadata?.name || '',
-        lastname: user.user_metadata?.lastname || '',
-        email: user.email || '',
-      };
-
-      setName(userData.name);
-      setLastname(userData.lastname);
-      setEmail(userData.email);
+      if (response.ok) {
+        const userData = await response.json();
+        setName(userData.name || "");
+        setLastname(userData.lastname || "");
+        setEmail(userData.email || "");
+        console.log("✅ Datos obtenidos del backend");
+      } else {
+        throw new Error('Error obteniendo datos del usuario');
+      }
 
     } catch (error: any) {
       console.error("❌ Error cargando datos:", error);
 
-      // Intentar cargar desde localStorage como fallback
+      // Último fallback: localStorage
       try {
         const storedData = localStorage.getItem("userData");
         if (storedData) {
