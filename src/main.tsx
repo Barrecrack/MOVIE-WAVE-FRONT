@@ -11,6 +11,7 @@ import EditProfile from "./pages/editprofile.tsx";
 import ResetPassword from "./pages/resetpassword.tsx";
 import Sitemap from "./pages/sitemap.tsx";
 import Favorite from "./pages/favorite.tsx";
+import AuthGuard from "./components/AuthGuard.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -20,12 +21,14 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/register" element={<Register />} />
         <Route path="/forgot" element={<Forgot />} />
         <Route path="/resetpassword" element={<ResetPassword />} />
-        <Route path="/menu" element={<Menu />} />
-        <Route path="/movies" element={<Movies />} />
-        <Route path="/profile" element={<EditProfile />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/sitemap" element={<Sitemap />} />
-        <Route path="/favorite" element={<Favorite />} />
+        
+        {/* Rutas protegidas */}
+        <Route path="/menu" element={<AuthGuard><Menu /></AuthGuard>} />
+        <Route path="/movies" element={<AuthGuard><Movies /></AuthGuard>} />
+        <Route path="/profile" element={<AuthGuard><EditProfile /></AuthGuard>} />
+        <Route path="/about" element={<AuthGuard><About /></AuthGuard>} />
+        <Route path="/sitemap" element={<AuthGuard><Sitemap /></AuthGuard>} />
+        <Route path="/favorite" element={<AuthGuard><Favorite /></AuthGuard>} />
       </Routes>
     </BrowserRouter>
   </StrictMode>

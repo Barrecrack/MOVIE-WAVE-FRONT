@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import "../styles/login.sass";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -16,33 +18,38 @@ const Login = () => {
       return;
     }
 
+    setLoading(true);
+    
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';  // Dynamic
-      const response = await fetch(`${API_URL}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      console.log("🔹 Iniciando sesión con Supabase...");
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.message || "Error al iniciar sesión.");
+      if (error) {
+        console.error("❌ Error en login:", error.message);
+        alert(error.message || "Error al iniciar sesión.");
         return;
       }
 
-      // Save the token if it exists
-      if (data.token) {
-        localStorage.setItem("token", data.token);
+      if (data.user && data.session) {
+        console.log("✅ Login exitoso:", data.user.email);
+        console.log("✅ Sesión creada:", data.session.access_token);
+        
+        // La sesión se guarda automáticamente por Supabase
+        alert("Inicio de sesión exitoso.");
+        navigate("/movies");
+      } else {
+        throw new Error("No se pudo crear la sesión");
       }
-
-      alert("Inicio de sesión exitoso.");
-
-      navigate("/movies"); // redirects to the home or dashboard-redirige a la vista principal de películas
       
-    } catch (error) {
-      console.error(error);
-      alert("Error al conectar con el servidor.");
+    } catch (error: any) {
+      console.error("❌ Error en login:", error);
+      alert("Error al iniciar sesión: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,6 +68,7 @@ const Login = () => {
             className="input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
 
           <div className="password-container">
@@ -70,6 +78,7 @@ const Login = () => {
               className="input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
             <img
               src={
@@ -83,8 +92,12 @@ const Login = () => {
             />
           </div>
 
-          <button type="submit" className="login-btn">
-            Iniciar sesión
+          <button 
+            type="submit" 
+            className="login-btn"
+            disabled={loading}
+          >
+            {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </button>
         </form>
 
