@@ -10,7 +10,7 @@ import About from "./pages/about.tsx";
 import EditProfile from "./pages/editprofile.tsx";
 import ResetPassword from "./pages/resetpassword.tsx";
 import Sitemap from "./pages/sitemap.tsx";
-import Favorite from "./pages/favorite.tsx";
+import Favorite from "./pages/favorites.tsx";
 import AuthGuard from "./components/AuthGuard.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -28,7 +28,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/profile" element={<AuthGuard><EditProfile /></AuthGuard>} />
         <Route path="/about" element={<AuthGuard><About /></AuthGuard>} />
         <Route path="/sitemap" element={<AuthGuard><Sitemap /></AuthGuard>} />
-        <Route path="/favorite" element={<AuthGuard><Favorite /></AuthGuard>} />
+        <Route path="/favorites" element={<AuthGuard><Favorite /></AuthGuard>} />
       </Routes>
     </BrowserRouter>
   </StrictMode>

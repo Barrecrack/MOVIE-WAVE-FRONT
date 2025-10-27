@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "../styles/favorite.sass";
+import "../styles/favorites.sass";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 

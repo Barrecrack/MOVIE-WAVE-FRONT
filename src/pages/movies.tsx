@@ -218,7 +218,7 @@ const MoviesPage: React.FC = () => {
 
         <nav className="sidebar-nav">
           <button onClick={() => navigate("/movies")}>🎬 Películas</button>
-          <button onClick={() => navigate("/favorite")}>⭐ Favoritos</button>
+          <button onClick={() => navigate("/favorites")}>⭐ Favoritos</button>
           <button onClick={() => navigate("/profile")}>👤 Perfil</button>
           <button onClick={() => navigate("/about")}>ℹ️ Sobre nosotros</button>
           <button onClick={() => navigate("/")} className="logout">🚪 Cerrar sesión</button>
@@ -347,7 +347,7 @@ const MoviesPage: React.FC = () => {
             <div className="footer-column">
               <h4>Navegación</h4>
               <a href="/movies">Inicio</a>
-              <a href="/favorite">Favoritos</a>
+              <a href="/favorites">Favoritos</a>
               <a href="/profile">Perfil</a>
             </div>
 
