@@ -1,5 +1,14 @@
 import { supabase } from '../supabaseClient';
 
+/**
+ * Synchronizes the Supabase session with a given access and refresh token.
+ * 
+ * @async
+ * @function
+ * @param {string} token - The access token used to set the session.
+ * @param {string} [refreshToken] - Optional refresh token (defaults to the access token if not provided).
+ * @returns {Promise<boolean>} Returns `true` if the session was successfully synchronized, otherwise `false`.
+ */
 export const syncSupabaseSession = async (token: string, refreshToken?: string) => {
   try {
     console.log('🔄 Sincronizando sesión de Supabase...');
@@ -22,6 +31,13 @@ export const syncSupabaseSession = async (token: string, refreshToken?: string) 
   }
 };
 
+/**
+ * Checks if there is an active authenticated Supabase session.
+ * 
+ * @async
+ * @function
+ * @returns {Promise<boolean>} Returns `true` if a valid session exists, otherwise `false`.
+ */
 export const checkSupabaseAuth = async () => {
   try {
     const { data: { session }, error } = await supabase.auth.getSession();

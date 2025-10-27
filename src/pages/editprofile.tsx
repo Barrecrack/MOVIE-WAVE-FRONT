@@ -3,6 +3,13 @@ import "../styles/editprofile.sass";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 
+/**
+ * EditProfile component allows the user to view and update their profile information.
+ * It retrieves user data from Supabase or backend and provides edit functionality.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered EditProfile component.
+ */
 const EditProfile = () => {
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
@@ -16,11 +23,17 @@ const EditProfile = () => {
     fetchUserData();
   }, []);
 
+  /**
+   * Fetches user data from Supabase or backend if Supabase session is not found.
+   * Falls back to localStorage if no session is available.
+   * 
+   * @async
+   * @function
+   */
   const fetchUserData = async () => {
     try {
       console.log("🔹 Obteniendo datos del usuario...");
 
-      // Primero intentar con Supabase directamente
       const { data: { user }, error: supabaseError } = await supabase.auth.getUser();
 
       if (!supabaseError && user) {
@@ -40,7 +53,6 @@ const EditProfile = () => {
 
       console.log("🔄 Supabase no tiene sesión, intentando con backend...");
 
-      // Fallback: usar el backend con el token de localStorage
       const token = localStorage.getItem("token");
       if (!token) {
         console.error("❌ No hay token disponible");
@@ -69,7 +81,6 @@ const EditProfile = () => {
     } catch (error: any) {
       console.error("❌ Error cargando datos:", error);
 
-      // Último fallback: localStorage
       try {
         const storedData = localStorage.getItem("userData");
         if (storedData) {
@@ -92,6 +103,13 @@ const EditProfile = () => {
     }
   };
 
+  /**
+   * Handles the profile update process by sending updated data to the backend.
+   * Verifies the Supabase session before proceeding.
+   * 
+   * @async
+   * @param {React.FormEvent} e - The form submission event.
+   */
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -104,7 +122,6 @@ const EditProfile = () => {
     try {
       console.log("🔹 Actualizando perfil...");
 
-      // Verificar sesión antes de actualizar
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError || !session) {
@@ -141,8 +158,6 @@ const EditProfile = () => {
 
       alert("Perfil actualizado exitosamente.");
       setIsEditing(false);
-
-      // Recargar datos actualizados
       await fetchUserData();
 
     } catch (error: any) {
@@ -153,20 +168,23 @@ const EditProfile = () => {
     }
   };
 
+  /** Enables edit mode for the profile form. */
   const handleEdit = () => {
     setIsEditing(true);
   };
 
+  /** Cancels edit mode and reloads the original user data. */
   const handleCancel = () => {
     setIsEditing(false);
-    // Recargar datos originales
     fetchUserData();
   };
 
+  /** Navigates back to the movies page. */
   const handleBackToMovies = () => {
     navigate("/movies");
   };
 
+  /** Redirects user to password change page. */
   const handleChangePassword = () => {
     navigate("/forgot");
   };
@@ -192,7 +210,6 @@ const EditProfile = () => {
         <h1 className="title">{isEditing ? "Editar perfil" : "Mi perfil"}</h1>
 
         {!isEditing ? (
-          // MODO VISTA (solo lectura)
           <div className="profile-view">
             <img src="/images/user.png" className="img-user" alt="foto de perfil" />
 
@@ -226,7 +243,6 @@ const EditProfile = () => {
             </div>
           </div>
         ) : (
-          // MODO EDICIÓN
           <form onSubmit={handleUpdateProfile}>
             <input
               type="text"
