@@ -107,25 +107,37 @@ const MoviesPage: React.FC = () => {
 
   const addToFavorites = async (movie: ResultadoBusquedaVideo) => {
     try {
-      // Obtener usuario actual
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      console.log("🔹 Intentando agregar a favoritos...");
 
-      if (userError || !user) {
-        alert('Debes iniciar sesión para agregar favoritos');
+      // Verificar sesión primero
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        console.error("❌ Error de sesión:", sessionError);
+        alert('Error de autenticación. Por favor inicia sesión nuevamente.');
+        navigate("/");
         return;
       }
 
+      if (!session) {
+        console.error("❌ No hay sesión activa");
+        alert('Debes iniciar sesión para agregar favoritos');
+        navigate("/");
+        return;
+      }
+
+      console.log("✅ Usuario autenticado:", session.user.email);
+
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
 
       const response = await fetch(`${API_URL}/api/favorites`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          id_usuario: user.id,
+          id_usuario: session.user.id,
           id_contenido: movie.id
         }),
       });
