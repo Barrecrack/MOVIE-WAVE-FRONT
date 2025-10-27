@@ -21,6 +21,17 @@ interface FavoriteItem {
   Contenido: Contenido;
 }
 
+// Función helper para convertir UUID a número (solución temporal)
+const hashStringToNumber = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+};
+
 const FavoritesPage: React.FC = () => {
   const [favoritos, setFavoritos] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,8 +54,11 @@ const FavoritesPage: React.FC = () => {
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
       const token = (await supabase.auth.getSession()).data.session?.access_token;
 
-      console.log("🔹 Cargando favoritos...");
-      const response = await fetch(`${API_URL}/api/favorites/${user.id}`, {
+      // Convertir UUID a número para el backend
+      const userIdNumber = hashStringToNumber(user.id);
+      console.log("🔹 Cargando favoritos para usuario (convertido):", userIdNumber);
+
+      const response = await fetch(`${API_URL}/api/favorites/${userIdNumber}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -102,7 +116,11 @@ const FavoritesPage: React.FC = () => {
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
       const token = (await supabase.auth.getSession()).data.session?.access_token;
 
-      const response = await fetch(`${API_URL}/api/favorites/${user.id}/${idContenido}`, {
+      // Convertir UUID a número para el backend
+      const userIdNumber = hashStringToNumber(user.id);
+      console.log("🔹 Eliminando favorito para usuario (convertido):", userIdNumber);
+
+      const response = await fetch(`${API_URL}/api/favorites/${userIdNumber}/${idContenido}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -113,13 +131,41 @@ const FavoritesPage: React.FC = () => {
         // Actualizar estado local
         setFavoritos(prev => prev.filter(fav => fav.id_contenido !== idContenido));
         alert("Película eliminada de favoritos");
+        
+        // También eliminar de localStorage para mantener sincronización
+        try {
+          const stored = JSON.parse(localStorage.getItem("favoritos") || "[]");
+          const updatedFavorites = stored.filter((movie: any) => movie.id !== idContenido);
+          localStorage.setItem("favoritos", JSON.stringify(updatedFavorites));
+        } catch (localError) {
+          console.error("Error actualizando localStorage:", localError);
+        }
       } else {
-        throw new Error('Error eliminando favorito');
+        const errorData = await response.json();
+        console.error('❌ Error del backend al eliminar:', errorData);
+        throw new Error(errorData.error || 'Error eliminando favorito');
       }
     } catch (error: any) {
       console.error("Error eliminando favorito:", error);
-      alert("Error al eliminar de favoritos");
+      
+      // Fallback: eliminar de localStorage
+      try {
+        const stored = JSON.parse(localStorage.getItem("favoritos") || "[]");
+        const updatedFavorites = stored.filter((movie: any) => movie.id !== idContenido);
+        localStorage.setItem("favoritos", JSON.stringify(updatedFavorites));
+        
+        // Actualizar estado local
+        setFavoritos(prev => prev.filter(fav => fav.id_contenido !== idContenido));
+        alert("Película eliminada de favoritos (local)");
+      } catch (localError) {
+        console.error("Error con localStorage:", localError);
+        alert("Error al eliminar de favoritos");
+      }
     }
+  };
+
+  const handleBackToMovies = () => {
+    navigate("/movies");
   };
 
   if (loading) {
@@ -133,7 +179,7 @@ const FavoritesPage: React.FC = () => {
   return (
     <div className="favorites-page">
       <header className="favorites-header">
-        <button className="back-btn" onClick={() => navigate("/movies")}>
+        <button className="back-btn" onClick={handleBackToMovies}>
           ← Volver a Películas
         </button>
         <h2 className="favorites-title">Mis Películas Favoritas</h2>
@@ -144,7 +190,7 @@ const FavoritesPage: React.FC = () => {
           <p>No tienes películas en favoritos.</p>
           <p>Agrega películas desde la página principal haciendo clic en "⭐ Favorito"</p>
           <button
-            onClick={() => navigate("/movies")}
+            onClick={handleBackToMovies}
             className="browse-movies-btn"
           >
             Explorar Películas
@@ -158,13 +204,21 @@ const FavoritesPage: React.FC = () => {
                 src={fav.Contenido.poster || "/images/default-movie.jpg"}
                 alt={fav.Contenido.titulo}
                 className="favorite-poster"
+                onError={(e) => {
+                  // Fallback si la imagen no carga
+                  (e.target as HTMLImageElement).src = "/images/default-movie.jpg";
+                }}
               />
               <div className="favorite-info">
                 <h3>{fav.Contenido.titulo}</h3>
                 <p className="favorite-genre">{fav.Contenido.genero}</p>
                 <p className="favorite-year">{fav.Contenido.año}</p>
                 <p className="favorite-date">
-                  Agregado: {new Date(fav.fecha_agregado).toLocaleDateString()}
+                  Agregado: {new Date(fav.fecha_agregado).toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
                 </p>
                 <div className="favorite-actions">
                   <button
