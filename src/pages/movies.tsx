@@ -130,10 +130,6 @@ const MoviesPage: React.FC = () => {
 
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
 
-      // Convertir el UUID del usuario a un número (temporal)
-      // Esto es una solución temporal - idealmente deberías cambiar el tipo en la BD
-      const userIdNumber = hashStringToNumber(session.user.id);
-
       const response = await fetch(`${API_URL}/api/favorites`, {
         method: 'POST',
         headers: {
@@ -141,7 +137,7 @@ const MoviesPage: React.FC = () => {
           Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          id_usuario: userIdNumber, // Enviar el número en lugar del UUID
+          id_usuario: session.user.id,
           id_contenido: movie.id
         }),
       });
@@ -163,18 +159,6 @@ const MoviesPage: React.FC = () => {
   useEffect(() => {
     loadAllMovies();
   }, []);
-
-  
-  // Función helper para convertir UUID a número (solución temporal)
-  const hashStringToNumber = (str: string): number => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    return Math.abs(hash);
-  };
 
   // Función para obtener el nombre display del género
   const getGenreDisplayName = (genre: string): string => {
