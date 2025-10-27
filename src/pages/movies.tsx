@@ -4,6 +4,7 @@ import SearchBar from "../components/search-bar.tsx";
 import VideoModal from "../components/video-modal.tsx";
 import type { ResultadoBusquedaVideo } from "../types/vide.types.ts";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 
 interface MovieRow {
   genre: string;
@@ -13,7 +14,7 @@ interface MovieRow {
 const MoviesPage: React.FC = () => {
   // 🔧 CORREGIR: Usar VITE_API_URL en lugar de VITE_API_LOCAL_URL
   const API_BASE = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
-  
+
   console.log('🔧 Variables de entorno:', {
     VITE_API_URL: import.meta.env.VITE_API_URL,
     API_BASE_USADA: API_BASE
@@ -50,10 +51,10 @@ const MoviesPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Para "popular", cargamos una mezcla de todos los géneros
       const popularMovies = await loadMoviesByGenre("popular");
-      
+
       // Para otros géneros, cargamos cada uno individualmente
       const genrePromises = genres
         .filter(genre => genre !== "popular")
@@ -63,7 +64,7 @@ const MoviesPage: React.FC = () => {
         });
 
       const genreResults = await Promise.all(genrePromises);
-      
+
       // Combinamos todo en rows
       const allRows: MovieRow[] = [
         { genre: "popular", movies: popularMovies },
@@ -104,14 +105,42 @@ const MoviesPage: React.FC = () => {
   const openModal = (id: number) => setSelectedMovieId(id);
   const closeModal = () => setSelectedMovieId(null);
 
-  const addToFavorites = (movie: ResultadoBusquedaVideo) => {
-    const stored = JSON.parse(localStorage.getItem("favoritos") || "[]");
-    if (!stored.find((fav: any) => fav.id === movie.id)) {
-      stored.push(movie);
-      localStorage.setItem("favoritos", JSON.stringify(stored));
-      alert("✅ Película agregada a favoritos");
-    } else {
-      alert("⭐ Esta película ya está en favoritos");
+  const addToFavorites = async (movie: ResultadoBusquedaVideo) => {
+    try {
+      // Obtener usuario actual
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        alert('Debes iniciar sesión para agregar favoritos');
+        return;
+      }
+
+      const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+
+      const response = await fetch(`${API_URL}/api/favorites`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          id_usuario: user.id,
+          id_contenido: movie.id
+        }),
+      });
+
+      if (response.ok) {
+        alert("✅ Película agregada a favoritos");
+      } else if (response.status === 400) {
+        alert("⭐ Esta película ya está en favoritos");
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al agregar favorito');
+      }
+    } catch (error: any) {
+      console.error('Error agregando favorito:', error);
+      alert("Error al agregar a favoritos: " + error.message);
     }
   };
 
@@ -124,7 +153,7 @@ const MoviesPage: React.FC = () => {
     const genreMap: { [key: string]: string } = {
       "popular": "Populares",
       "action": "Acción",
-      "comedy": "Comedia", 
+      "comedy": "Comedia",
       "romance": "Romance",
       "horror": "Terror",
       "sci-fi": "Ciencia Ficción",
