@@ -33,7 +33,7 @@ const FavoritesPage: React.FC = () => {
   const loadFavorites = async () => {
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
+
       if (userError || !user) {
         console.error("Usuario no autenticado");
         navigate("/");
@@ -43,6 +43,7 @@ const FavoritesPage: React.FC = () => {
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
       const token = (await supabase.auth.getSession()).data.session?.access_token;
 
+      console.log("🔹 Cargando favoritos...");
       const response = await fetch(`${API_URL}/api/favorites/${user.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -54,14 +55,19 @@ const FavoritesPage: React.FC = () => {
         console.log('📋 Favoritos cargados:', data);
         setFavoritos(data);
       } else {
-        throw new Error('Error cargando favoritos');
+        // Obtener el error específico del backend
+        const errorData = await response.json();
+        console.error('❌ Error del backend:', errorData);
+        throw new Error(errorData.error || 'Error cargando favoritos');
       }
     } catch (error) {
       console.error("Error cargando favoritos:", error);
-      // Fallback a localStorage si hay error
+
+      // Fallback a localStorage
       try {
         const stored = JSON.parse(localStorage.getItem("favoritos") || "[]");
-        // Convertir formato localStorage al nuevo formato
+        console.log('📋 Usando favoritos de localStorage:', stored.length);
+
         const convertedFavorites: FavoriteItem[] = stored.map((movie: any) => ({
           id_usuario: 'local',
           id_contenido: movie.id,
@@ -77,6 +83,7 @@ const FavoritesPage: React.FC = () => {
         setFavoritos(convertedFavorites);
       } catch (localError) {
         console.error("Error con localStorage:", localError);
+        setFavoritos([]); // Asegurar que no se quede en loading
       }
     } finally {
       setLoading(false);
@@ -86,7 +93,7 @@ const FavoritesPage: React.FC = () => {
   const eliminarFavorito = async (idContenido: number) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         alert('Usuario no autenticado');
         return;
@@ -136,7 +143,7 @@ const FavoritesPage: React.FC = () => {
         <div className="favorites-empty">
           <p>No tienes películas en favoritos.</p>
           <p>Agrega películas desde la página principal haciendo clic en "⭐ Favorito"</p>
-          <button 
+          <button
             onClick={() => navigate("/movies")}
             className="browse-movies-btn"
           >
