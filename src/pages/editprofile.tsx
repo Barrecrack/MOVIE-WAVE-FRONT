@@ -19,11 +19,30 @@ const EditProfile = () => {
   const fetchUserData = async () => {
     try {
       console.log("🔹 Obteniendo datos del usuario...");
-      const { data: { user }, error } = await supabase.auth.getUser();
       
-      if (error) {
-        console.error("❌ Error obteniendo usuario:", error);
-        throw error;
+      // Primero verificar si hay sesión activa
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error("❌ Error de sesión:", sessionError);
+        throw sessionError;
+      }
+      
+      if (!session) {
+        console.error("❌ No hay sesión activa");
+        alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
+        navigate("/");
+        return;
+      }
+
+      console.log("✅ Sesión activa encontrada");
+
+      // Ahora obtener el usuario
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error("❌ Error obteniendo usuario:", userError);
+        throw userError;
       }
       
       if (!user) {
@@ -47,8 +66,25 @@ const EditProfile = () => {
       
     } catch (error: any) {
       console.error("❌ Error cargando datos:", error);
-      alert("Error cargando perfil: " + error.message);
-      navigate("/");
+      
+      // Intentar cargar desde localStorage como fallback
+      try {
+        const storedData = localStorage.getItem("userData");
+        if (storedData) {
+          const parsedData = JSON.parse(storedData);
+          setName(parsedData.name || "");
+          setLastname(parsedData.lastname || "");
+          setEmail(parsedData.email || "");
+          console.log("✅ Datos cargados desde localStorage");
+        } else {
+          alert("Error cargando perfil. Por favor inicia sesión nuevamente.");
+          navigate("/");
+        }
+      } catch (localError) {
+        console.error("Error con localStorage:", localError);
+        alert("Error cargando perfil. Por favor inicia sesión nuevamente.");
+        navigate("/");
+      }
     } finally {
       setLoading(false);
     }
@@ -66,11 +102,12 @@ const EditProfile = () => {
     try {
       console.log("🔹 Actualizando perfil...");
       
+      // Verificar sesión antes de actualizar
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session) {
         console.error("❌ Error de sesión:", sessionError);
-        alert('Sesión expirada. Inicia sesión de nuevo.');
+        alert('Tu sesión ha expirado. Por favor inicia sesión de nuevo.');
         navigate("/");
         return;
       }
@@ -136,6 +173,7 @@ const EditProfile = () => {
     return (
       <div className="edit-profile-page">
         <div className="edit-profile-box">
+          <div className="loading-spinner"></div>
           <p>Cargando datos del perfil...</p>
         </div>
       </div>
@@ -158,13 +196,13 @@ const EditProfile = () => {
             
             <div className="profile-info">
               <p className="profile-field">
-                <strong>Nombre:</strong> {name}
+                <strong>Nombre:</strong> {name || "No disponible"}
               </p>
               <p className="profile-field">
-                <strong>Apellido:</strong> {lastname}
+                <strong>Apellido:</strong> {lastname || "No disponible"}
               </p>
               <p className="profile-field">
-                <strong>Correo:</strong> {email}
+                <strong>Correo:</strong> {email || "No disponible"}
               </p>
             </div>
 
