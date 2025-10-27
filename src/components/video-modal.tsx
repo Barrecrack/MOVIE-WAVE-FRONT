@@ -1,57 +1,64 @@
 import React, { useEffect, useState } from "react";
 import "../styles/styles-components/video-modal.sass";
 
+/**
+ * Props for the VideoModal component.
+ * @interface
+ * @property {number} videoId - ID of the selected video.
+ * @property {() => void} alCerrar - Function executed when the modal is closed.
+ */
 interface VideoModalProps {
   videoId: number;
   alCerrar: () => void;
 }
 
 /**
- * Modal que muestra el detalle de una película seleccionada.
- * Permite añadir, ver y eliminar favoritos.
+ * VideoModal component that displays detailed information about a selected movie.
+ * Allows users to view, add, or remove the movie from favorites.
+ * 
+ * @component
+ * @param {VideoModalProps} props - The properties for the VideoModal component.
+ * @returns {JSX.Element} The video modal with movie details and favorite controls.
  */
 const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   const [videoData, setVideoData] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // --- Cargar datos del video ---
+  /** 
+   * Loads the video data by ID when the modal opens.
+   * Searches across genres if not found in the initial query.
+   */
   useEffect(() => {
     const fetchVideo = async () => {
       try {
         setLoading(true);
         const API_BASE = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
-        
-        console.log('🔍 Buscando video ID:', videoId);
-        
-        // SOLUCIÓN: Usar el endpoint existente /videos/search
+        console.log('🔍 Searching for video ID:', videoId);
+
         const url = `${API_BASE}/videos/search?query=popular`;
-        console.log('📡 URL de búsqueda:', url);
-        
+        console.log('📡 Search URL:', url);
         const res = await fetch(url);
-        
+
         if (res.ok) {
           const data = await res.json();
-          console.log('📦 Datos recibidos:', data);
+          console.log('📦 Data received:', data);
           
-          // Buscar el video específico por ID en los resultados
           const videoEncontrado = data.find((video: any) => video.id === videoId);
           
           if (videoEncontrado) {
-            console.log('✅ Video encontrado:', videoEncontrado);
+            console.log('✅ Video found:', videoEncontrado);
             setVideoData(videoEncontrado);
           } else {
-            console.warn('❌ Video no encontrado en resultados');
-            // Si no se encuentra, buscar en otros géneros
+            console.warn('❌ Video not found in results');
             await buscarEnOtrosGeneros(videoId);
           }
         } else {
-          console.error('❌ Error en respuesta:', res.status);
+          console.error('❌ Response error:', res.status);
           throw new Error(`Error ${res.status}: ${res.statusText}`);
         }
       } catch (err) {
-        console.error("Error al cargar video:", err);
-        // Crear objeto básico en caso de error
+        console.error("Error loading video:", err);
         setVideoData({
           id: videoId,
           title: "Película",
@@ -66,6 +73,10 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
       }
     };
 
+    /**
+     * Searches the movie across multiple genres if not found initially.
+     * @param {number} id - The ID of the movie to search for.
+     */
     const buscarEnOtrosGeneros = async (id: number) => {
       const generos = ["action", "comedy", "romance", "horror", "sci-fi", "adventure", "animation"];
       const API_BASE = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
@@ -73,7 +84,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
       for (const genero of generos) {
         try {
           const url = `${API_BASE}/videos/search?query=${genero}`;
-          console.log(`🔍 Buscando en género: ${genero}`);
+          console.log(`🔍 Searching in genre: ${genero}`);
           const res = await fetch(url);
           
           if (res.ok) {
@@ -81,18 +92,17 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
             const video = data.find((v: any) => v.id === id);
             
             if (video) {
-              console.log(`✅ Video encontrado en género: ${genero}`);
+              console.log(`✅ Video found in genre: ${genero}`);
               setVideoData(video);
               return;
             }
           }
         } catch (error) {
-          console.error(`Error buscando en ${genero}:`, error);
+          console.error(`Error searching in ${genero}:`, error);
         }
       }
-      
-      // Si no se encuentra en ningún género
-      console.warn('❌ Video no encontrado en ningún género');
+
+      console.warn('❌ Video not found in any genre');
       setVideoData({
         id: id,
         title: "Película no disponible",
@@ -107,20 +117,19 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     fetchVideo();
   }, [videoId]);
 
-  // --- Verificar si es favorito al cargar ---
+  /** Checks if the selected video is already in the favorites list. */
   useEffect(() => {
     const favoritos = JSON.parse(localStorage.getItem("favoritos") || "[]");
     const existe = favoritos.some((fav: any) => fav.id === videoId);
     setIsFavorite(existe);
   }, [videoId]);
 
-  // --- Añadir a favoritos ---
+  /** Adds the current video to the favorites list in localStorage. */
   const addToFavorites = () => {
     const favoritos = JSON.parse(localStorage.getItem("favoritos") || "[]");
 
     if (!videoData) return;
 
-    // Evita duplicados
     const existe = favoritos.some((fav: any) => fav.id === videoData.id);
     if (!existe) {
       favoritos.push(videoData);
@@ -132,7 +141,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  // --- Eliminar de favoritos ---
+  /** Removes the current video from the favorites list in localStorage. */
   const removeFromFavorites = () => {
     const favoritos = JSON.parse(localStorage.getItem("favoritos") || "[]");
     const nuevos = favoritos.filter((fav: any) => fav.id !== videoId);
@@ -173,7 +182,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
           {videoData.description || `Género: ${videoData.genre} • Año: ${videoData.year}`}
         </p>
 
-        {/* CORRECCIÓN: Usar videoUrl en lugar de url */}
         {videoData.videoUrl ? (
           <video 
             controls 

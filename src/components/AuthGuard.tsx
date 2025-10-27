@@ -6,6 +6,14 @@ interface AuthGuardProps {
   children: React.ReactNode;
 }
 
+/**
+ * AuthGuard component that protects routes from unauthorized access.
+ * Checks if a valid Supabase session exists; if not, redirects to login.
+ *
+ * @component
+ * @param {React.ReactNode} children - Components to render when the user is authenticated.
+ * @returns {JSX.Element} The protected content or a loading screen.
+ */
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -14,6 +22,14 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     checkAuth();
   }, []);
 
+  /**
+   * Verifies if there is an active user session in Supabase.
+   * Redirects to the login page if no session is found or if an error occurs.
+   *
+   * @async
+   * @function checkAuth
+   * @returns {Promise<void>}
+   */
   const checkAuth = async () => {
     try {
       const { data: { session }, error } = await supabase.auth.getSession();

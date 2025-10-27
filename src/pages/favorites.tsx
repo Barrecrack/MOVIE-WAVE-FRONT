@@ -21,6 +21,13 @@ interface FavoriteItem {
   Contenido: Contenido;
 }
 
+/**
+ * FavoritesPage component that displays and manages the user's favorite movies.
+ * Loads favorites from the API or falls back to localStorage if necessary.
+ *
+ * @component
+ * @returns {JSX.Element} The favorites management page.
+ */
 const FavoritesPage: React.FC = () => {
   const [favoritos, setFavoritos] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +37,13 @@ const FavoritesPage: React.FC = () => {
     loadFavorites();
   }, []);
 
+  /**
+   * Loads the user's favorite movies from the API or localStorage as a fallback.
+   *
+   * @async
+   * @function loadFavorites
+   * @returns {Promise<void>}
+   */
   const loadFavorites = async () => {
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -55,7 +69,6 @@ const FavoritesPage: React.FC = () => {
         console.log('📋 Favoritos cargados:', data);
         setFavoritos(data);
       } else {
-        // Obtener el error específico del backend
         const errorData = await response.json();
         console.error('❌ Error del backend:', errorData);
         throw new Error(errorData.error || 'Error cargando favoritos');
@@ -63,7 +76,6 @@ const FavoritesPage: React.FC = () => {
     } catch (error) {
       console.error("Error cargando favoritos:", error);
 
-      // Fallback a localStorage
       try {
         const stored = JSON.parse(localStorage.getItem("favoritos") || "[]");
         console.log('📋 Usando favoritos de localStorage:', stored.length);
@@ -83,42 +95,66 @@ const FavoritesPage: React.FC = () => {
         setFavoritos(convertedFavorites);
       } catch (localError) {
         console.error("Error con localStorage:", localError);
-        setFavoritos([]); // Asegurar que no se quede en loading
+        setFavoritos([]);
       }
     } finally {
       setLoading(false);
     }
   };
 
+  /**
+   * Removes a movie from the user's favorites list.
+   *
+   * @async
+   * @function eliminarFavorito
+   * @param {number} idContenido - The ID of the movie to remove from favorites.
+   * @returns {Promise<void>}
+   */
   const eliminarFavorito = async (idContenido: number) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (userError || !user) {
         alert('Usuario no autenticado');
         return;
       }
 
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      const session = (await supabase.auth.getSession()).data.session;
+      const token = session?.access_token;
+
+      if (!token) {
+        alert('Sesión inválida. Inicie sesión nuevamente.');
+        return;
+      }
 
       const response = await fetch(`${API_URL}/api/favorites/${user.id}/${idContenido}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
       });
 
+      const respBody = await response.json().catch(() => ({}));
+
       if (response.ok) {
-        // Actualizar estado local
+        // Only remove from state when server confirms deletion
         setFavoritos(prev => prev.filter(fav => fav.id_contenido !== idContenido));
-        alert("Película eliminada de favoritos");
+        alert(respBody.message || "Película eliminada de favoritos");
       } else {
-        throw new Error('Error eliminando favorito');
+        // handle specific codes
+        if (response.status === 404) {
+          alert("No se encontró el favorito en servidor.");
+          // sync local state with server (optional)
+        } else {
+          console.error('Delete failed:', respBody);
+          alert(respBody.error || 'Error al eliminar favorito');
+        }
       }
     } catch (error: any) {
       console.error("Error eliminando favorito:", error);
-      alert("Error al eliminar de favoritos");
+      alert("Error al eliminar de favoritos: " + (error.message || error));
     }
   };
 

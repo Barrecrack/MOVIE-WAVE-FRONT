@@ -11,8 +11,12 @@ interface MovieRow {
   movies: ResultadoBusquedaVideo[];
 }
 
+/**
+ * MoviesPage component - displays movie categories, search results, and allows adding favorites.
+ * Handles authentication, API requests, modals, and navigation.
+ */
 const MoviesPage: React.FC = () => {
-  // 🔧 CORREGIR: Usar VITE_API_URL en lugar de VITE_API_LOCAL_URL
+  /** API base URL (uses environment variable or Render fallback) */
   const API_BASE = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
 
   console.log('🔧 Variables de entorno:', {
@@ -30,9 +34,13 @@ const MoviesPage: React.FC = () => {
 
   const genres = ["popular", "action", "comedy", "romance", "horror", "sci-fi", "adventure", "animation"];
 
+  /**
+   * Loads movies by genre using the API.
+   * @param genre - The genre to search for.
+   * @returns A promise resolving with an array of movies.
+   */
   const loadMoviesByGenre = async (genre: string): Promise<ResultadoBusquedaVideo[]> => {
     try {
-      // 🔧 USAR API_BASE CORRECTA
       const url = `${API_BASE}/videos/search?query=${encodeURIComponent(genre)}`;
       console.log('🔍 URL de petición:', url);
       const res = await fetch(url);
@@ -47,15 +55,16 @@ const MoviesPage: React.FC = () => {
     }
   };
 
+  /**
+   * Loads all genres and combines them into rows for display.
+   */
   const loadAllMovies = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Para "popular", cargamos una mezcla de todos los géneros
       const popularMovies = await loadMoviesByGenre("popular");
 
-      // Para otros géneros, cargamos cada uno individualmente
       const genrePromises = genres
         .filter(genre => genre !== "popular")
         .map(async (genre) => {
@@ -65,7 +74,6 @@ const MoviesPage: React.FC = () => {
 
       const genreResults = await Promise.all(genrePromises);
 
-      // Combinamos todo en rows
       const allRows: MovieRow[] = [
         { genre: "popular", movies: popularMovies },
         ...genreResults.filter(row => row.movies.length > 0)
@@ -80,6 +88,10 @@ const MoviesPage: React.FC = () => {
     }
   };
 
+  /**
+   * Handles movie search by term using API.
+   * @param term - The search term entered by the user.
+   */
   const handleSearch = async (term: string) => {
     if (!term.trim()) {
       setSearchResults(null);
@@ -88,7 +100,6 @@ const MoviesPage: React.FC = () => {
 
     try {
       setLoading(true);
-      // 🔧 USAR API_BASE CORRECTA
       const url = `${API_BASE}/videos/search?query=${encodeURIComponent(term)}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Error en la búsqueda");
@@ -102,14 +113,23 @@ const MoviesPage: React.FC = () => {
     }
   };
 
+  /**
+   * Opens the movie modal.
+   * @param id - ID of the selected movie.
+   */
   const openModal = (id: number) => setSelectedMovieId(id);
+
+  /** Closes the movie modal. */
   const closeModal = () => setSelectedMovieId(null);
 
+  /**
+   * Adds a movie to user's favorites list.
+   * @param movie - Movie object to be added to favorites.
+   */
   const addToFavorites = async (movie: ResultadoBusquedaVideo) => {
     try {
       console.log("🔹 Intentando agregar a favoritos...");
 
-      // Verificar sesión primero
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError) {
@@ -156,11 +176,16 @@ const MoviesPage: React.FC = () => {
     }
   };
 
+  /** Loads movies on first render. */
   useEffect(() => {
     loadAllMovies();
   }, []);
 
-  // Función para obtener el nombre display del género
+  /**
+   * Returns display name for a given genre.
+   * @param genre - The genre key.
+   * @returns Display name in Spanish.
+   */
   const getGenreDisplayName = (genre: string): string => {
     const genreMap: { [key: string]: string } = {
       "popular": "Populares",
@@ -177,7 +202,7 @@ const MoviesPage: React.FC = () => {
 
   return (
     <div className="movies">
-      {/* ENCABEZADO */}
+      {/* HEADER */}
       <header className="movies__header">
         <div className="movies__nav">
           <img
@@ -232,7 +257,7 @@ const MoviesPage: React.FC = () => {
         ></div>
       )}
 
-      {/* CONTENIDO PRINCIPAL */}
+      {/* MAIN CONTENT */}
       <main className="movies__main">
         {loading && (
           <div className="movies__loading">
@@ -245,7 +270,7 @@ const MoviesPage: React.FC = () => {
 
         {!loading && !error && (
           <div className="movies__content">
-            {/* RESULTADOS DE BÚSQUEDA */}
+            {/* SEARCH RESULTS */}
             {searchResults && (
               <section className="movies__row">
                 <h2 className="movies__row-title">
@@ -283,7 +308,7 @@ const MoviesPage: React.FC = () => {
               </section>
             )}
 
-            {/* FILAS POR GÉNERO (solo si no hay búsqueda activa) */}
+            {/* GENRE ROWS */}
             {!searchResults && movieRows.map((row) => (
               row.movies.length > 0 && (
                 <section key={row.genre} className="movies__row">

@@ -2,6 +2,12 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/sitemap.sass";
 
+/**
+ * Renders the sitemap page, allowing users to navigate through all site sections.
+ * 
+ * @component
+ * @returns {JSX.Element} The sitemap component with navigation links.
+ */
 const SiteMap: React.FC = () => {
   const navigate = useNavigate();
 

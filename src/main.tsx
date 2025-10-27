@@ -13,6 +13,14 @@ import Sitemap from "./pages/sitemap.tsx";
 import Favorite from "./pages/favorites.tsx";
 import AuthGuard from "./components/AuthGuard.tsx";
 
+/**
+ * Application entry point.
+ * 
+ * - Uses React 18's createRoot API.
+ * - Configures routes with React Router.
+ * - Protects private routes with AuthGuard.
+ */
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
@@ -22,7 +30,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/forgot" element={<Forgot />} />
         <Route path="/resetpassword" element={<ResetPassword />} />
         
-        {/* Rutas protegidas */}
+        {/* Protected routes */}
         <Route path="/menu" element={<AuthGuard><Menu /></AuthGuard>} />
         <Route path="/movies" element={<AuthGuard><Movies /></AuthGuard>} />
         <Route path="/profile" element={<AuthGuard><EditProfile /></AuthGuard>} />

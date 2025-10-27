@@ -3,6 +3,12 @@ import "../styles/login.sass";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 
+/**
+ * Login component for user authentication.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered login form component.
+ */
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -10,6 +16,12 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  /**
+   * Handles the user login process by validating credentials,
+   * sending a request to the backend, and synchronizing with Supabase.
+   * 
+   * @param {React.FormEvent} e - The form submission event.
+   */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -43,20 +55,20 @@ const Login = () => {
       if (data.token) {
         console.log("🔄 Sincronizando sesión con Supabase frontend...");
         
-        // Opción 1: Usar setSession para sincronizar
+        // Option 1: Use setSession to synchronize
         const { error: sessionError } = await supabase.auth.setSession({
           access_token: data.token,
-          refresh_token: data.token, // O usa el refresh token si lo tienes
+          refresh_token: data.token, // Or use a real refresh token if available
         });
 
         if (sessionError) {
-          console.warn("⚠️ No se pudo sincronizar sesión:", sessionError.message);
-          // No es fatal, continuamos
+          console.warn("⚠️ Failed to sync session:", sessionError.message);
+          // Not fatal, continue
         } else {
-          console.log("✅ Sesión de Supabase sincronizada");
+          console.log("✅ Supabase session synchronized");
         }
 
-        // También guardar en localStorage por compatibilidad
+        // Also store token in localStorage for compatibility
         localStorage.setItem("token", data.token);
       }
 

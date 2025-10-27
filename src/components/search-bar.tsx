@@ -6,14 +6,20 @@ interface SearchBarProps {
 }
 
 /**
- * Barra de búsqueda para buscar películas o videos.
- * 
+ * Search bar component for finding movies or videos.
+ *
  * @component
- * @param {Function} alBuscar - Función que recibe el término de búsqueda.
+ * @param {Function} alBuscar - Function that receives the search term and triggers the search logic.
  */
 const SearchBar: React.FC<SearchBarProps> = ({ alBuscar }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
+  /**
+   * Handles the form submission event.
+   * Prevents default refresh behavior and calls the search callback if the term is not empty.
+   *
+   * @param {React.FormEvent} e - The form submission event.
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim() !== "") {

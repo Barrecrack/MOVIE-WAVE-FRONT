@@ -1,12 +1,22 @@
 import React from "react";
 import "../styles/about.sass";
 
+/**
+ * Represents a team member with name, role, and image.
+ * @interface
+ */
 interface TeamMember {
   name: string;
   role: string;
   image: string;
 }
 
+/**
+ * About component that displays information about MovieWave and its team.
+ * 
+ * @component
+ * @returns {JSX.Element} About page content with team details and mission
+ */
 const About: React.FC = () => {
   const team: TeamMember[] = [
     {

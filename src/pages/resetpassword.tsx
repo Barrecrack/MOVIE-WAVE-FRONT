@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from "react";
 import "../styles/resetpassword.sass";
 
+/**
+ * Component that handles password reset functionality.
+ * Extracts a reset token from the URL and allows the user to set a new password.
+ * 
+ * @component
+ * @returns {JSX.Element} The reset password page component.
+ */
 const ResetPassword: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [token, setToken] = useState<string | null>(null); // Agregado para extraer token
+  const [token, setToken] = useState<string | null>(null); // Added to extract token
 
   useEffect(() => {
-    // Extraer token de la URL (agregado)
+    /** Extract token from URL parameters. */
     const urlParams = new URLSearchParams(window.location.search);
     const extractedToken = urlParams.get("token");
     console.log("🔍 Token obtenido desde URL:", extractedToken);
@@ -18,6 +25,12 @@ const ResetPassword: React.FC = () => {
     }
   }, []);
 
+  /**
+   * Handles the password reset form submission.
+   * Validates input fields and sends the reset request to the API.
+   * 
+   * @param {React.FormEvent} e - The form event.
+   */
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 

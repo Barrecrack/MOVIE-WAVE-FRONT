@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import "../styles/register.sass";
 import { Link, useNavigate } from "react-router-dom";
 
+/**
+ * Register component handles user registration process.
+ * @component
+ * @returns {JSX.Element} The registration page with form and validation.
+ */
 const Register = () => {
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
@@ -11,6 +16,13 @@ const Register = () => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const navigate = useNavigate();
 
+  /**
+   * Handles the registration form submission.
+   * Validates inputs, sends data to the API, and redirects on success.
+   * @async
+   * @param {React.FormEvent} e - The form submission event.
+   * @returns {Promise<void>}
+   */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -125,7 +137,6 @@ const Register = () => {
           </button>
         </form>
         
-
         <p className="login-link">
           ¿Ya tiene cuenta? <Link to="/">Inicie sesión</Link>
         </p>

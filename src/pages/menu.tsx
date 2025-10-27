@@ -5,7 +5,7 @@ import "../styles/menu.sass";
 
 /**
  * Main menu of the MovieWave app.
- * Serves as an access point to the different sections of the platform.
+ * Acts as a central hub for navigation to different sections of the platform.
  * 
  * @component
  * @returns {JSX.Element} Main menu view
@@ -13,7 +13,14 @@ import "../styles/menu.sass";
 const Menu: React.FC = () => {
   const navigate = useNavigate();
 
-  // --- Logout function ---
+  /**
+   * Handles user logout process.
+   * Clears authentication data from local storage and redirects to login.
+   * 
+   * @async
+   * @function handleLogout
+   * @returns {Promise<void>}
+   */
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem("token"); // Delete the token from storage
