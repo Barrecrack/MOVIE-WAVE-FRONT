@@ -112,49 +112,32 @@ const FavoritesPage: React.FC = () => {
    */
   const eliminarFavorito = async (idContenido: number) => {
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
 
-      if (userError || !user) {
+      if (!user) {
         alert('Usuario no autenticado');
         return;
       }
 
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-      const session = (await supabase.auth.getSession()).data.session;
-      const token = session?.access_token;
-
-      if (!token) {
-        alert('Sesión inválida. Inicie sesión nuevamente.');
-        return;
-      }
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
 
       const response = await fetch(`${API_URL}/api/favorites/${user.id}/${idContenido}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
         },
       });
 
-      const respBody = await response.json().catch(() => ({}));
-
       if (response.ok) {
-        // Only remove from state when server confirms deletion
         setFavoritos(prev => prev.filter(fav => fav.id_contenido !== idContenido));
-        alert(respBody.message || "Película eliminada de favoritos");
+        alert("Película eliminada de favoritos");
       } else {
-        // handle specific codes
-        if (response.status === 404) {
-          alert("No se encontró el favorito en servidor.");
-          // sync local state with server (optional)
-        } else {
-          console.error('Delete failed:', respBody);
-          alert(respBody.error || 'Error al eliminar favorito');
-        }
+        throw new Error('Error eliminando favorito');
       }
     } catch (error: any) {
       console.error("Error eliminando favorito:", error);
-      alert("Error al eliminar de favoritos: " + (error.message || error));
+      alert("Error al eliminar de favoritos");
     }
   };
 
