@@ -28,7 +28,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/profile" element={<AuthGuard><EditProfile /></AuthGuard>} />
         <Route path="/about" element={<AuthGuard><About /></AuthGuard>} />
         <Route path="/sitemap" element={<AuthGuard><Sitemap /></AuthGuard>} />
-        <Route path="/favorite" element={<AuthGuard><Favorite /></AuthGuard>} />
+        <Route path="/favorites" element={<AuthGuard><Favorite /></AuthGuard>} />
       </Routes>
     </BrowserRouter>
   </StrictMode>
