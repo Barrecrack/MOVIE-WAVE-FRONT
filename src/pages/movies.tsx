@@ -229,6 +229,9 @@ const MoviesPage: React.FC = () => {
 
       {/* SIDEBAR */}
       <aside className={`sidebar sidebar-right ${isSidebarOpen ? "open" : ""}`}>
+          <h2 className="sidebar-title">
+            Movie<span>Wave</span>
+          </h2>
         <button
           className="close-btn"
           onClick={() => setIsSidebarOpen(false)}
@@ -237,15 +240,14 @@ const MoviesPage: React.FC = () => {
           ✖
         </button>
 
-        <h2 className="sidebar-title">
-          Movie<span>Wave</span>
-        </h2>
+          
 
         <nav className="sidebar-nav">
-          <button onClick={() => navigate("/movies")}>🎬 Películas</button>
-          <button onClick={() => navigate("/favorites")}>⭐ Favoritos</button>
+          
           <button onClick={() => navigate("/profile")}>👤 Perfil</button>
+          <button onClick={() => navigate("/favorites")}>⭐ Favoritos</button>
           <button onClick={() => navigate("/about")}>ℹ️ Sobre nosotros</button>
+          <button onClick={() => navigate("/deleteaccount")}>🗑️ Eliminar cuenta</button>
           <button onClick={() => navigate("/")} className="logout">🚪 Cerrar sesión</button>
         </nav>
       </aside>
@@ -374,6 +376,7 @@ const MoviesPage: React.FC = () => {
               <a href="/movies">Inicio</a>
               <a href="/favorites">Favoritos</a>
               <a href="/profile">Perfil</a>
+              <a href="/deleteaccount">Eliminar cuenta</a>
             </div>
 
             <div className="footer-column">

@@ -7,8 +7,10 @@ import { supabase } from "../supabaseClient";
  * EditProfile component allows the user to view and update their profile information.
  * It retrieves user data from Supabase or backend and provides edit functionality.
  * 
- * @component
- * @returns {JSX.Element} The rendered EditProfile component.
+ * 💡 NOTA:
+ * Si deseas visualizar el frontend sin iniciar sesión,
+ * puedes comentar temporalmente las líneas marcadas con:
+ * // 👉 (Desactivar para visualizar frontend)
  */
 const EditProfile = () => {
   const [name, setName] = useState("");
@@ -20,6 +22,7 @@ const EditProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // 👉 (Desactivar para visualizar frontend sin login)
     fetchUserData();
   }, []);
 
@@ -56,6 +59,7 @@ const EditProfile = () => {
       const token = localStorage.getItem("token");
       if (!token) {
         console.error("❌ No hay token disponible");
+        // 👉 (Desactivar para visualizar frontend sin login)
         alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
         navigate("/");
         return;
@@ -90,11 +94,13 @@ const EditProfile = () => {
           setEmail(parsedData.email || "");
           console.log("✅ Datos cargados desde localStorage");
         } else {
+          // 👉 (Desactivar para visualizar frontend sin login)
           alert("Error cargando perfil. Por favor inicia sesión nuevamente.");
           navigate("/");
         }
       } catch (localError) {
         console.error("Error con localStorage:", localError);
+        // 👉 (Desactivar para visualizar frontend sin login)
         alert("Error cargando perfil. Por favor inicia sesión nuevamente.");
         navigate("/");
       }
@@ -126,6 +132,7 @@ const EditProfile = () => {
 
       if (sessionError || !session) {
         console.error("❌ Error de sesión:", sessionError);
+        // 👉 (Desactivar para visualizar frontend sin login)
         alert('Tu sesión ha expirado. Por favor inicia sesión de nuevo.');
         navigate("/");
         return;
@@ -181,11 +188,13 @@ const EditProfile = () => {
 
   /** Navigates back to the movies page. */
   const handleBackToMovies = () => {
+    // 👉 (Desactivar para visualizar frontend sin redirección)
     navigate("/movies");
   };
 
   /** Redirects user to password change page. */
   const handleChangePassword = () => {
+    // 👉 (Desactivar para visualizar frontend sin redirección)
     navigate("/forgot");
   };
 
@@ -223,6 +232,11 @@ const EditProfile = () => {
               <p className="profile-field">
                 <strong>Correo:</strong> {email || "No disponible"}
               </p>
+              {/* 
+              <p className="profile-field">
+                <strong>Edad:</strong> {age || "No disponible"}
+              </p>
+              */}
             </div>
 
             <div className="profile-actions">
@@ -271,6 +285,17 @@ const EditProfile = () => {
               title="El correo electrónico no se puede modificar"
             />
 
+            {/*
+            <input
+              type="number"
+              placeholder="Edad"
+              className="input disabled"
+              value={age}
+              disabled
+              title="edad aun no se puede modificar"
+            />
+            */}
+
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
               <button
                 type="submit"
@@ -285,7 +310,7 @@ const EditProfile = () => {
                 onClick={handleCancel}
                 disabled={saving}
               >
-                ❌ Cancelar
+               ❌ Cancelar
               </button>
             </div>
           </form>

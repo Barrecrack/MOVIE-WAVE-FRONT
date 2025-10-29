@@ -94,6 +94,14 @@ const Register = () => {
           />
 
           <input
+            type="number"
+            placeholder="Edad"
+            className="input"
+            //value={age}
+            //onChange={(e) => setAge(e.target.value)}
+          />
+
+          <input
             type="email"
             placeholder="Correo"
             className="input"
@@ -103,11 +111,13 @@ const Register = () => {
 
           <input
             type="password"
-            placeholder="Contraseña"
+            placeholder="Confirme su contraseña"
             className="input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+
+          
 
           <input
             type="password"

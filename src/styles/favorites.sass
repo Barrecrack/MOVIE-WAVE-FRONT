@@ -12,17 +12,28 @@
   margin-bottom: 2rem
 
 .back-btn
-  background: rgba(255, 255, 255, 0.1)
-  border: 1px solid #00bfff
-  color: #00bfff
-  padding: 0.5rem 1rem
-  border-radius: 8px
-  cursor: pointer
-  transition: all 0.3s ease
-  &:hover
-    background: #00bfff
-    color: #001b3a
+    position: right
+    top: 20px
+    left: 20px
+    background-color: rgba(255, 255, 255, 0.15)
+    border: none
+    border-radius: 50%
+    width: 65px
+    height: 65px
+    font-size: 16px
+    color: white
+    cursor: pointer
+    display: flex
+    align-items: center
+    justify-content: center
+    transition: all 0.3s ease
+    z-index: 20
 
+    &:hover
+      background-color: rgba(255, 255, 255, 0.3)
+      transform: scale(1.1)
+
+      
 .favorites-title
   font-size: 1.8rem
   color: #00bfff

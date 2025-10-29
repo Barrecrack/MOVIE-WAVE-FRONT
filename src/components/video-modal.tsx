@@ -1,98 +1,68 @@
 import React, { useEffect, useState } from "react";
 import "../styles/styles-components/video-modal.sass";
 
-/**
- * Props for the VideoModal component.
- * @interface
- * @property {number} videoId - ID of the selected video.
- * @property {() => void} alCerrar - Function executed when the modal is closed.
- */
 interface VideoModalProps {
   videoId: number;
   alCerrar: () => void;
 }
 
-/**
- * VideoModal component that displays detailed information about a selected movie.
- * Allows users to view, add, or remove the movie from favorites.
- * 
- * @component
- * @param {VideoModalProps} props - The properties for the VideoModal component.
- * @returns {JSX.Element} The video modal with movie details and favorite controls.
- */
 const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   const [videoData, setVideoData] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  /** 
-   * Loads the video data by ID when the modal opens.
-   * Searches across genres if not found in the initial query.
-   */
+  // ⭐ NUEVOS ESTADOS para comentarios y calificación
+  const [rating, setRating] = useState<number | null>(null);
+  const [comment, setComment] = useState("");
+  const [commentsList, setCommentsList] = useState<string[]>([]);
+
+  // 🎬 NUEVOS ESTADOS PARA SUBTÍTULOS
+  const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
+
+  // ===============================
+  // CÓDIGO ORIGINAL (sin cambios)
+  // ===============================
   useEffect(() => {
     const fetchVideo = async () => {
       try {
         setLoading(true);
-        const API_BASE = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
-        console.log('🔍 Searching for video ID:', videoId);
-
+        const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
         const url = `${API_BASE}/videos/search?query=popular`;
-        console.log('📡 Search URL:', url);
         const res = await fetch(url);
 
         if (res.ok) {
           const data = await res.json();
-          console.log('📦 Data received:', data);
-          
           const videoEncontrado = data.find((video: any) => video.id === videoId);
-          
-          if (videoEncontrado) {
-            console.log('✅ Video found:', videoEncontrado);
-            setVideoData(videoEncontrado);
-          } else {
-            console.warn('❌ Video not found in results');
-            await buscarEnOtrosGeneros(videoId);
-          }
-        } else {
-          console.error('❌ Response error:', res.status);
-          throw new Error(`Error ${res.status}: ${res.statusText}`);
-        }
+          if (videoEncontrado) setVideoData(videoEncontrado);
+          else await buscarEnOtrosGeneros(videoId);
+        } else throw new Error(`Error ${res.status}: ${res.statusText}`);
       } catch (err) {
         console.error("Error loading video:", err);
         setVideoData({
           id: videoId,
           title: "Película",
-          genre: "Desconocido", 
+          genre: "Desconocido",
           year: new Date().getFullYear(),
           poster: "/images/default-movie.jpg",
           videoUrl: null,
-          description: "Información no disponible"
+          description: "Información no disponible",
         });
       } finally {
         setLoading(false);
       }
     };
 
-    /**
-     * Searches the movie across multiple genres if not found initially.
-     * @param {number} id - The ID of the movie to search for.
-     */
     const buscarEnOtrosGeneros = async (id: number) => {
       const generos = ["action", "comedy", "romance", "horror", "sci-fi", "adventure", "animation"];
-      const API_BASE = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
-      
+      const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
       for (const genero of generos) {
         try {
           const url = `${API_BASE}/videos/search?query=${genero}`;
-          console.log(`🔍 Searching in genre: ${genero}`);
           const res = await fetch(url);
-          
           if (res.ok) {
             const data = await res.json();
             const video = data.find((v: any) => v.id === id);
-            
             if (video) {
-              console.log(`✅ Video found in genre: ${genero}`);
               setVideoData(video);
               return;
             }
@@ -101,8 +71,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
           console.error(`Error searching in ${genero}:`, error);
         }
       }
-
-      console.warn('❌ Video not found in any genre');
       setVideoData({
         id: id,
         title: "Película no disponible",
@@ -110,26 +78,22 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
         year: new Date().getFullYear(),
         poster: "/images/default-movie.jpg",
         videoUrl: null,
-        description: "No se pudo encontrar la información de esta película"
+        description: "No se pudo encontrar la información de esta película",
       });
     };
 
     fetchVideo();
   }, [videoId]);
 
-  /** Checks if the selected video is already in the favorites list. */
   useEffect(() => {
     const favoritos = JSON.parse(localStorage.getItem("favoritos") || "[]");
     const existe = favoritos.some((fav: any) => fav.id === videoId);
     setIsFavorite(existe);
   }, [videoId]);
 
-  /** Adds the current video to the favorites list in localStorage. */
   const addToFavorites = () => {
     const favoritos = JSON.parse(localStorage.getItem("favoritos") || "[]");
-
     if (!videoData) return;
-
     const existe = favoritos.some((fav: any) => fav.id === videoData.id);
     if (!existe) {
       favoritos.push(videoData);
@@ -141,7 +105,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  /** Removes the current video from the favorites list in localStorage. */
   const removeFromFavorites = () => {
     const favoritos = JSON.parse(localStorage.getItem("favoritos") || "[]");
     const nuevos = favoritos.filter((fav: any) => fav.id !== videoId);
@@ -150,6 +113,33 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     alert(`🗑️ "${videoData?.title}" fue eliminada de favoritos.`);
   };
 
+  // ===============================
+  // 💫 NUEVAS FUNCIONES
+  // ===============================
+
+  /** Guarda la calificación del usuario (1-5 estrellas) */
+  const handleRating = (value: number) => {
+    setRating(value);
+    alert(`🌟 Calificaste la película con ${value} estrella${value > 1 ? "s" : ""}`);
+  };
+
+  /** Envía un comentario y lo almacena en la lista local */
+  const handleCommentSubmit = () => {
+    if (comment.trim() !== "") {
+      setCommentsList((prev) => [...prev, comment]);
+      setComment("");
+      alert("💬 Comentario enviado correctamente");
+    }
+  };
+
+  /** Activa o desactiva los subtítulos */
+  const toggleSubtitles = () => {
+    setSubtitlesEnabled(!subtitlesEnabled);
+  };
+
+  // ===============================
+  // RENDER ORIGINAL + NUEVAS SECCIONES
+  // ===============================
   if (loading) {
     return (
       <div className="video-modal" onClick={alCerrar}>
@@ -174,8 +164,8 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
 
   return (
     <div className="video-modal" onClick={alCerrar}>
+      <button className="video-modal__close" onClick={alCerrar}>✖</button>
       <div className="video-modal__content" onClick={(e) => e.stopPropagation()}>
-        <button className="video-modal__close" onClick={alCerrar}>✖</button>
 
         <h2 className="video-modal__title">{videoData.title}</h2>
         <p className="video-modal__description">
@@ -183,25 +173,53 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
         </p>
 
         {videoData.videoUrl ? (
-          <video 
-            controls 
-            src={videoData.videoUrl} 
-            className="video-modal__video"
-            poster={videoData.poster}
-          >
-            Tu navegador no soporta el elemento de video.
-          </video>
+          <div style={{ textAlign: "center" }}>
+            <video
+              controls
+              src={videoData.videoUrl}
+              className="video-modal__video"
+              poster={videoData.poster}
+            >
+              {subtitlesEnabled && (
+                <track
+                  label="Español"
+                  kind="subtitles"
+                  srcLang="es"
+                  src="/subtitles/default.vtt"
+                  default
+                />
+              )}
+              Tu navegador no soporta el elemento de video.
+            </video>
+
+            {/* 🔤 Botón de subtítulos */}
+            <button
+              onClick={toggleSubtitles}
+              style={{
+                marginTop: "0.5rem",
+                background: "#3b82f6",
+                color: "#fff",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "8px",
+                cursor: "pointer",
+              }}
+            >
+              {subtitlesEnabled ? "🔇 Desactivar subtítulos" : "💬 Activar subtítulos"}
+            </button>
+          </div>
         ) : (
-          <div style={{textAlign: 'center', padding: '2rem'}}>
-            <img 
-              src={videoData.poster || "/images/default-movie.jpg"} 
+          <div style={{ textAlign: "center", padding: "2rem" }}>
+            <img
+              src={videoData.poster || "/images/default-movie.jpg"}
               alt={videoData.title}
-              style={{maxWidth: '300px', width: '100%', borderRadius: '8px', marginBottom: '1rem'}}
+              style={{ maxWidth: "300px", width: "100%", borderRadius: "8px", marginBottom: "1rem" }}
             />
             <p>🎬 Video no disponible para reproducción</p>
           </div>
         )}
 
+        {/* FAVORITOS */}
         <div className="video-modal__actions">
           {isFavorite ? (
             <button className="fav-btn remove" onClick={removeFromFavorites}>
@@ -212,6 +230,55 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
               ❤️ Añadir a favoritos
             </button>
           )}
+        </div>
+
+        {/* ⭐ SECCIÓN DE CALIFICACIÓN */}
+        <div className="rating-section" style={{ marginTop: "1.5rem", textAlign: "center" }}>
+          <h3>Califica esta película:</h3>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <span
+              key={star}
+              onClick={() => handleRating(star)}
+              style={{
+                fontSize: "1.8rem",
+                cursor: "pointer",
+                color: star <= (rating || 0) ? "#ffd700" : "#ccc",
+              }}
+            >
+              ★
+            </span>
+          ))}
+        </div>
+
+        {/* 💬 SECCIÓN DE COMENTARIOS */}
+        <div className="comments-section" style={{ marginTop: "1.5rem" }}>
+          <h3>Deja tu comentario:</h3>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Escribe tu opinión sobre la película..."
+            style={{
+              width: "100%",
+              minHeight: "80px",
+              borderRadius: "8px",
+              padding: "10px",
+              border: "1px solid #ccc",
+              resize: "none",
+              marginBottom: "0.5rem",
+            }}
+          />
+          <button onClick={handleCommentSubmit} className="fav-btn add">
+            💬 Enviar comentario
+          </button>
+
+          {/* Lista de comentarios */}
+          <ul style={{ marginTop: "1rem", paddingLeft: "1rem" }}>
+            {commentsList.map((c, i) => (
+              <li key={i} style={{ marginBottom: "0.5rem" }}>
+                🗣️ {c}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

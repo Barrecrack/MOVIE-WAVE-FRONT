@@ -35,7 +35,7 @@ const Login = () => {
     try {
       console.log("🔹 Iniciando sesión con el backend...");
       
-      const API_URL = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const response = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
