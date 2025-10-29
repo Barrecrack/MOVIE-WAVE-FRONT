@@ -152,10 +152,10 @@ const FavoritesPage: React.FC = () => {
   return (
     <div className="favorites-page">
       <header className="favorites-header">
-        <button className="back-btn" onClick={() => navigate("/movies")}>
-          ← Volver a Películas
-        </button>
         <h2 className="favorites-title">Mis Películas Favoritas</h2>
+        <button className="back-btn" onClick={() => navigate("/movies")}>
+          Menu ← 
+        </button>
       </header>
 
       {favoritos.length === 0 ? (

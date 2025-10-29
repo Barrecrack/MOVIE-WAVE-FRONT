@@ -14,11 +14,32 @@
     background: #1a1a1a
     padding: 1.5rem
     border-radius: 12px
-    max-width: 700px
+    max-width: 500px
     width: 90%
     color: #fff
     position: relative
 
+  &__close
+    position: absolute
+    top: 20px
+    left: 20px
+    background-color: rgba(255, 255, 255, 0.15)
+    border: none
+    border-radius: 50%
+    width: 65px
+    height: 65px
+    font-size: 16px
+    color: white
+    cursor: pointer
+    display: flex
+    align-items: center
+    justify-content: center
+    transition: all 0.3s ease
+    z-index: 20
+
+    &:hover
+      background-color: rgba(255, 255, 255, 0.3)
+      transform: scale(1.1)
   &__title
     color: #ffcc00
     margin-bottom: 1rem
@@ -32,15 +53,7 @@
     border-radius: 8px
     margin-bottom: 1rem
 
-  &__close
-    position: absolute
-    top: 10px
-    right: 10px
-    background: none
-    border: none
-    color: #fff
-    font-size: 1.2rem
-    cursor: pointer
+
 
 .video-modal__actions
   margin-top: 1.5rem
