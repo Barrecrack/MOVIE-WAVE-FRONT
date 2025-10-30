@@ -10,32 +10,29 @@
   /* ----- ENCABEZADO ----- */
   &__header
     background: rgba(0, 10, 30, 0.95)
-    padding: 0.5rem 0.5rem
+    padding: 0.5rem 1rem
     display: flex
-    justify-content: center
+    justify-content: space-between
     align-items: center
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6)
     position: sticky
     top: 0
     z-index: 10
-    overflow: hidden
-
+    
   &__nav
     width: 100%
-    max-width: 1200px
     display: flex
     justify-content: space-between
     align-items: center
-    margin: 0 auto
-    padding: 0 0.5rem
+    gap: 1rem
 
   &__logo
-    height: 55px
+    height: 45px
     width: auto
     cursor: pointer
-    margin-left: 0.3rem
     filter: drop-shadow(0 0 8px rgba(0, 128, 255, 0.6))
     transition: transform 0.3s ease
+    flex-shrink: 0
     &:hover
       transform: scale(1.05)
 
@@ -44,13 +41,32 @@
     display: flex
     justify-content: center
     align-items: center
+    max-width: 500px
+    margin: 0 auto
 
   &__search
+    width: 100%
+    max-width: 450px
+
+  /* Botón del menú hamburguesa - MÁS PEQUEÑO */
+  .menu-toggle
+    background: none
+    border: none
+    color: #00bfff
+    font-size: 1.4rem
+    cursor: pointer
+    padding: 0.4rem
     display: flex
     align-items: center
     justify-content: center
-    width: 100%
-    max-width: 450px
+    transition: all 0.3s ease
+    border-radius: 4px
+    flex-shrink: 0
+    width: 40px
+    height: 40px
+    &:hover
+      background: rgba(0, 191, 255, 0.1)
+      transform: scale(1.05)
 
   /* Botón del menú (sidebar) */
   .menu-toggle
@@ -469,3 +485,37 @@
   &-message
     font-size: 1rem
     opacity: 0.8
+
+/* ===== RESPONSIVE HEADER ===== */
+@media (max-width: 768px)
+  .movies__header
+    padding: 0.4rem 0.8rem
+  
+  .movies__logo
+    height: 38px
+  
+  .movies__nav-center
+    max-width: 300px
+    margin: 0 0.5rem
+  
+  .menu-toggle
+    width: 36px
+    height: 36px
+    font-size: 1.2rem
+
+@media (max-width: 480px)
+  .movies__header
+    padding: 0.3rem 0.6rem
+  
+  .movies__logo
+    height: 35px
+  
+  .movies__nav-center
+    max-width: 250px
+    margin: 0 0.3rem
+  
+  .menu-toggle
+    width: 34px
+    height: 34px
+    font-size: 1.1rem
+
