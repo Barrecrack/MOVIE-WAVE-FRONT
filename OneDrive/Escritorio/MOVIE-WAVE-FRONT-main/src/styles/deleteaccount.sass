@@ -1,0 +1,124 @@
+$background-color: #3b82f6
+$background-gradient-1: linear-gradient(#364F68 70%, #A5AFED)
+$background-gradient-2: linear-gradient(to bottom, #13173D, #3e49c3ff)
+
+
+.delete-container
+  display: flex
+  justify-content: center
+  align-items: center
+  height: 100vh
+  background: $background-gradient-1
+  color: #ffffff
+
+  .back-menu-btn
+    position: absolute
+    top: 20px
+    left: 20px
+    background-color: rgba(255, 255, 255, 0.15)
+    border: none
+    border-radius: 50%
+    width: 65px
+    height: 65px
+    font-size: 16px
+    color: white
+    cursor: pointer
+    display: flex
+    align-items: center
+    justify-content: center
+    transition: all 0.3s ease
+    z-index: 20
+
+    &:hover
+      background-color: rgba(255, 255, 255, 0.3)
+      transform: scale(1.1)
+
+.delete-box
+  background: $background-gradient-2
+  padding: 2.5rem
+  border-radius: 20px
+  box-shadow: 0 0 25px rgba(102, 252, 241, 0.2)
+  text-align: center
+  width: 90%
+  max-width: 400px
+  transition: all 0.3s ease-in-out
+
+  h2
+    font-size: 1.8rem
+    margin-bottom: 1rem
+    color: #ffffffff
+
+  p
+    color: #ffffffff
+    font-size: 1rem
+    margin-bottom: 1.5rem
+    line-height: 1.6
+
+  .btn-delete
+    background: linear-gradient(90deg, #3b82f6, #2563eb)
+    color: white
+    border: none
+    padding: 0.9rem
+    width: 100%
+    border-radius: 10px
+    font-size: 1.05rem
+    font-weight: 600
+    cursor: pointer
+    margin-top: 0.8rem
+    letter-spacing: 0.5px
+    transition: all 0.3s ease
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4)
+
+    &:hover
+        background: linear-gradient(90deg, #2563eb, #1d4ed8)
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6)
+        transform: translateY(-2px)
+
+  .confirm-box
+    background: $background-gradient-2
+    padding: 1.5rem
+    border-radius: 10px
+    border: 1px solid #f50b0bff
+    animation: fadeIn 0.3s ease-in-out
+
+    p
+      margin-bottom: 1rem
+      color: #ffffff
+
+    .btn-group
+      display: flex
+      justify-content: center
+      gap: 1rem
+
+      button
+        background: linear-gradient(90deg, #3b82f6, #2563eb)
+        color: white
+        border: none
+        padding: 0.9rem
+        width: 100%
+        border-radius: 10px
+        font-size: 1.05rem
+        font-weight: 600
+        cursor: pointer
+        margin-top: 0.8rem
+        letter-spacing: 0.5px
+        transition: all 0.3s ease
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4)
+
+        &:hover
+            background: linear-gradient(90deg, #2563eb, #1d4ed8)
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6)
+            transform: translateY(-2px)
+
+  .error
+    color: #ff5555
+    margin-top: 1rem
+    font-size: 0.9rem
+
+@keyframes fadeIn
+  from
+    opacity: 0
+    transform: scale(0.9)
+  to
+    opacity: 1
+    transform: scale(1)

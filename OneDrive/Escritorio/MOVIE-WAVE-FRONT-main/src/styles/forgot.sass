@@ -1,0 +1,176 @@
+@use 'login' as *
+
+// =============================
+// 🌌 Fondo general
+// =============================
+.forgot-container
+  height: 100vh
+  width: 100vw
+  display: flex
+  align-items: center
+  justify-content: center
+  background: $background-gradient-1
+  font-family: 'Poppins', sans-serif
+  padding: 1rem
+
+// =============================
+// 🧊 Caja principal
+// =============================
+.forgot-form
+  background: $background-gradient-2
+  padding: 3rem 3rem
+  border-radius: 1.2rem
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.35)
+  display: flex
+  flex-direction: column
+  align-items: center
+  color: #fff
+  width: 100%
+  max-width: 420px
+  text-align: center
+  backdrop-filter: blur(16px)
+  transition: all 0.3s ease
+
+  &:hover
+    transform: translateY(-3px)
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.3)
+
+  h2
+    font-size: 2rem
+    font-weight: 700
+    margin-bottom: 0.5rem
+    letter-spacing: 0.5px
+
+  p
+    font-size: 0.9rem
+    margin-top: 1.2rem
+
+// =============================
+// 🖼️ Logo (un poco más grande)
+// =============================
+.img-log
+  width: 88%                   // antes 80%
+  max-width: 400px             // antes 360px
+  height: auto
+  margin-bottom: 1.4rem
+  display: block
+  object-fit: contain
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.45))
+  transition: transform 0.25s ease
+
+  &:hover
+    transform: scale(1.03)
+
+// =============================
+// 💬 Inputs
+// =============================
+.input
+  width: 100%
+  padding: 0.8rem 1rem
+  margin-bottom: 1.2rem
+  border: none
+  border-radius: 0.6rem
+  color: $input-text-color
+  background-color: $input-background-color
+  font-size: 1rem
+  outline: none
+  transition: all 0.3s ease
+
+  &:focus
+    background: rgba(255, 255, 255, 0.15)
+    box-shadow: 0 0 8px #42a5f5
+
+// =============================
+// 🔘 Botón principal
+// =============================
+button
+  background: linear-gradient(90deg, #3b82f6, #2563eb)
+  color: white
+  border: none
+  padding: 0.9rem
+  width: 100%
+  border-radius: 10px
+  font-size: 1.05rem
+  font-weight: 600
+  cursor: pointer
+  margin-top: 0.8rem
+  letter-spacing: 0.5px
+  transition: all 0.3s ease
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4)
+
+  &:hover
+    background: linear-gradient(90deg, #2563eb, #1d4ed8)
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6)
+    transform: translateY(-2px)
+
+// =============================
+// 🔗 Enlace de inicio de sesión
+// =============================
+.login-link
+  font-size: 0.9rem
+  color: #fff
+
+  a
+    color: #8ae3f7ff
+    font-weight: 500
+    text-decoration: none
+    transition: color 0.25s ease
+
+    &:hover
+      color: #ffd700
+
+// =============================
+// ⚠️ Mensajes de error y éxito
+// =============================
+.error, .success
+  width: 100%
+  padding: 0.8rem
+  border-radius: 8px
+  font-size: 0.9rem
+  text-align: center
+  margin-bottom: 1rem
+
+.error
+  color: #ff4d4d
+  background: rgba(255, 77, 77, 0.1)
+  border: 1px solid rgba(255, 77, 77, 0.2)
+
+.success
+  color: #4dff88
+  background: rgba(77, 255, 136, 0.1)
+  border: 1px solid rgba(77, 255, 136, 0.2)
+
+// =============================
+// 📱 Responsividad
+// =============================
+@media (max-width: 768px)
+  .forgot-form
+    padding: 2.2rem 1.8rem
+    max-width: 92%
+
+  .img-log
+    width: 70%                // antes 60%
+    max-width: 320px
+    margin-bottom: 1rem
+
+  h2
+    font-size: 1.6rem
+
+@media (max-width: 480px)
+  $mobile-height: 44px
+
+  .forgot-form
+    padding: 1.6rem 1.2rem
+    max-width: 95%
+
+    h2
+      font-size: 1.45rem
+
+  .img-log
+    width: 82%                // antes 72%
+    max-width: 260px
+    margin-bottom: 0.8rem
+
+  input, button
+    height: $mobile-height
+    font-size: 0.95rem

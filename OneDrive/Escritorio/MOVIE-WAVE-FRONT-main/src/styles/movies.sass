@@ -1,0 +1,521 @@
+.movies
+  background: linear-gradient(180deg, #001b3a, #000d1f)
+  color: #ffffff
+  min-height: 100vh
+  display: flex
+  flex-direction: column
+  font-family: 'Poppins', sans-serif
+  overflow-x: hidden
+
+  /* ----- ENCABEZADO ----- */
+  &__header
+    background: rgba(0, 10, 30, 0.95)
+    padding: 0.5rem 1rem
+    display: flex
+    justify-content: space-between
+    align-items: center
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6)
+    position: sticky
+    top: 0
+    z-index: 10
+    
+  &__nav
+    width: 100%
+    display: flex
+    justify-content: space-between
+    align-items: center
+    gap: 1rem
+
+  &__logo
+    height: 45px
+    width: auto
+    cursor: pointer
+    filter: drop-shadow(0 0 8px rgba(0, 128, 255, 0.6))
+    transition: transform 0.3s ease
+    flex-shrink: 0
+    &:hover
+      transform: scale(1.05)
+
+  &__nav-center
+    flex: 1
+    display: flex
+    justify-content: center
+    align-items: center
+    max-width: 500px
+    margin: 0 auto
+
+  &__search
+    width: 100%
+    max-width: 450px
+
+  /* Botón del menú hamburguesa - MÁS PEQUEÑO */
+  .menu-toggle
+    background: none
+    border: none
+    color: #00bfff
+    font-size: 1.4rem
+    cursor: pointer
+    padding: 0.4rem
+    display: flex
+    align-items: center
+    justify-content: center
+    transition: all 0.3s ease
+    border-radius: 4px
+    flex-shrink: 0
+    width: 40px
+    height: 40px
+    &:hover
+      background: rgba(0, 191, 255, 0.1)
+      transform: scale(1.05)
+
+  /* Botón del menú (sidebar) */
+  .menu-toggle
+    background: none
+    border: none
+    color: #00bfff
+    font-size: 1.8rem
+    cursor: pointer
+    padding: 0.3rem 0.6rem
+    display: flex
+    align-items: center
+    justify-content: center
+    transition: transform 0.2s ease
+    &:hover
+      transform: scale(1.1)
+
+  /* ----- ESTADO DE CARGA ----- */
+  &__loading
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    padding: 4rem 0
+    text-align: center
+    font-size: 1.1rem
+
+  &__spinner
+    width: 40px
+    height: 40px
+    border: 4px solid rgba(255, 255, 255, 0.2)
+    border-top-color: #00bfff
+    border-radius: 50%
+    animation: spin 1s linear infinite
+    margin-bottom: 1rem
+
+  @keyframes spin
+    from
+      transform: rotate(0deg)
+    to
+      transform: rotate(360deg)
+
+  /* ===== FILAS TIPO NETFLIX ===== */
+  &__main
+    flex: 1
+    padding: 2rem 0
+
+  &__content
+    display: flex
+    flex-direction: column
+    gap: 3rem
+
+  &__row
+    padding: 0 2rem
+
+  &__row-title
+    font-size: 1.5rem
+    font-weight: 600
+    color: #ffffff
+    margin-bottom: 1rem
+    padding-left: 0.5rem
+    border-left: 4px solid #00bfff
+    text-transform: capitalize
+
+  &__row-container
+    position: relative
+    overflow: hidden
+    &:hover
+      .movies__row-nav
+        opacity: 1
+
+  &__row-scroll
+    display: flex
+    gap: 1rem
+    overflow-x: auto
+    overflow-y: hidden
+    padding: 0.5rem 0.2rem 1.5rem
+    scroll-behavior: smooth
+    -webkit-overflow-scrolling: touch
+    
+    /* Ocultar scrollbar pero mantener funcionalidad */
+    scrollbar-width: none
+    -ms-overflow-style: none
+    &::-webkit-scrollbar
+      display: none
+
+    /* Asegurar que las tarjetas mantengan tamaño consistente */
+    .movies__card
+      flex: 0 0 auto
+      width: 180px
+      min-width: 180px
+
+  /* Navegación del carrusel */
+  &__row-nav
+    position: absolute
+    top: 50%
+    transform: translateY(-50%)
+    background: rgba(0, 0, 0, 0.7)
+    border: none
+    color: #00bfff
+    font-size: 1.5rem
+    width: 40px
+    height: 40px
+    border-radius: 50%
+    display: flex
+    align-items: center
+    justify-content: center
+    cursor: pointer
+    transition: all 0.3s ease
+    opacity: 0
+    z-index: 5
+    &:hover
+      background: rgba(0, 191, 255, 0.8)
+      color: #001b3a
+
+    &--prev
+      left: 10px
+
+    &--next
+      right: 10px
+
+  /* ----- TARJETAS DE PELÍCULAS ----- */
+  &__card
+    background: rgba(255, 255, 255, 0.08)
+    border-radius: 12px
+    overflow: hidden
+    transition: transform 0.3s ease, box-shadow 0.3s ease
+    cursor: pointer
+    position: relative
+    &:hover
+      transform: scale(1.05)
+      box-shadow: 0 0 15px rgba(0, 191, 255, 0.3)
+
+  &__image
+    width: 100%
+    height: 260px
+    object-fit: cover
+    transition: opacity 0.3s ease
+    &:hover
+      opacity: 0.9
+
+  &__info
+    padding: 0.9rem
+    text-align: center
+
+  &__name
+    font-weight: 600
+    font-size: 1.05rem
+    margin-bottom: 0.3rem
+    color: #ffffff
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+  &__genre
+    color: #7fc9ff
+    font-size: 0.9rem
+    margin-bottom: 0.2rem
+    text-transform: capitalize
+
+  &__year
+    color: #b8d9ff
+    font-size: 0.85rem
+
+  &__favorite-btn
+    background: none
+    border: 1px solid #00bfff
+    color: #00bfff
+    padding: 0.4rem 1rem
+    border-radius: 25px
+    font-size: 0.85rem
+    margin-top: 0.5rem
+    cursor: pointer
+    transition: all 0.3s ease
+    &:hover
+      background: #00bfff
+      color: #001b3a
+
+  &__empty
+    text-align: center
+    margin-top: 3rem
+    color: #7fc9ff
+    font-size: 1.1rem
+
+  &__error
+    text-align: center
+    color: #ff4c4c
+    margin: 2rem 0
+
+  /* ----- BÚSQUEDA ----- */
+  &__search-results
+    padding: 0 2rem
+
+  &__search-title
+    font-size: 1.5rem
+    font-weight: 600
+    color: #ffffff
+    margin-bottom: 1.5rem
+    padding-left: 0.5rem
+    border-left: 4px solid #00bfff
+
+/* ==================== PIE DE PÁGINA ==================== */
+.movies__footer
+  background: #000b1a
+  padding: 3rem 2rem 1rem
+  color: #cfd9e6
+  border-top: 1px solid rgba(0, 191, 255, 0.2)
+  margin-top: 4rem
+
+  .footer-container
+    max-width: 1200px
+    margin: 0 auto
+
+  h3
+    color: #ffffff
+    font-size: 1.2rem
+    font-weight: 600
+    margin-bottom: 1.5rem
+    border-bottom: 2px solid #007bff
+    display: inline-block
+    padding-bottom: 0.3rem
+
+  .footer-grid
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))
+    gap: 2.5rem
+    margin-bottom: 2rem
+
+  .footer-column
+    display: flex
+    flex-direction: column
+    gap: 0.4rem
+
+    h4
+      color: #009dff
+      font-size: 1rem
+      font-weight: 600
+      margin-bottom: 0.6rem
+      text-transform: uppercase
+
+    a
+      color: #cfd9e6
+      text-decoration: none
+      font-size: 0.9rem
+      transition: color 0.3s ease
+      &:hover
+        color: #00bfff
+
+  .footer-line
+    height: 1px
+    width: 100%
+    background: linear-gradient(to right, transparent, #007bff, transparent)
+    margin: 1.5rem 0
+
+  .footer-copy
+    text-align: center
+    font-size: 0.85rem
+    color: #8fa6c9
+    margin-top: 1rem
+
+
+/* ===== SIDEBAR ===== */
+.sidebar
+  position: fixed
+  top: 0
+  right: -260px
+  width: 260px
+  height: 100%
+  background: rgba(5, 10, 25, 0.97)
+  color: #fff
+  padding: 3.5rem 1.5rem 2rem
+  display: flex
+  flex-direction: column
+  gap: 1.5rem
+  box-shadow: -3px 0 10px rgba(0,0,0,0.6)
+  transition: right 0.3s ease
+  z-index: 1100
+
+  &.open
+    right: 0
+
+.sidebar-title
+  font-size: 1.6rem
+  font-weight: 600
+  text-align: center
+  margin-bottom: 1rem
+  span
+    color: #00bfff
+
+.sidebar-nav
+  display: flex
+  flex-direction: column
+  gap: 1rem
+  margin-top: 1rem
+
+  button, a
+    background: none
+    border: none
+    color: #ffffff
+    text-decoration: none
+    font-size: 1rem
+    text-align: left
+    cursor: pointer
+    transition: color 0.3s ease
+    &:hover
+      color: #00bfff
+
+  .logout
+    color: #ff6666
+    &:hover
+      color: #ff8080
+
+/* 🔹 Botón de cierre */
+.close-btn
+  position: center
+  top: 10px
+  right: 10px
+  background: #3b82f6
+  border: none
+  color: white
+  font-size: 1.2rem
+  cursor: pointer
+  opacity: 0
+  transform: scale(0.8)
+  transition: opacity 0.3s ease, transform 0.2s ease
+  z-index: 1200
+
+/* 🔹 Mostrar botón solo cuando el sidebar está abierto */
+.sidebar.open .close-btn
+  opacity: 1
+  transform: scale(1)
+  pointer-events: auto
+
+/* 🔹 Fondo oscuro al abrir menú */
+.sidebar-overlay
+  position: fixed
+  top: 0
+  left: 0
+  width: 100%
+  height: 100%
+  background: rgba(0,0,0,0.5)
+  z-index: 1000
+  opacity: 0
+  pointer-events: none
+  transition: opacity 0.3s ease
+
+/* 🔹 Mostrar overlay cuando el sidebar está abierto */
+.sidebar.open + .sidebar-overlay
+  opacity: 1
+  pointer-events: auto
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px)
+  .movies__logo
+    height: 45px
+  
+  .movies__nav-center
+    width: 100%
+  
+  .movies__search
+    width: 100%
+  
+  .menu-toggle
+    font-size: 1.6rem
+
+  .movies__row
+    padding: 0 1rem
+  
+  .movies__row-title
+    font-size: 1.3rem
+  
+  .movies__row-scroll .movies__card
+    width: 150px
+    min-width: 150px
+
+  .movies__row-nav
+    display: none // Ocultar navegación en móviles
+
+  .movies__search-results
+    padding: 0 1rem
+
+@media (max-width: 480px)
+  .movies__row-scroll .movies__card
+    width: 140px
+    min-width: 140px
+
+  .movies__row-title
+    font-size: 1.2rem
+
+  .movies__image
+    height: 200px
+
+  .movies__info
+    padding: 0.7rem
+
+  .movies__name
+    font-size: 0.95rem
+
+  .movies__favorite-btn
+    font-size: 0.8rem
+    padding: 0.3rem 0.8rem
+
+/* Estilos para cuando no hay resultados */
+.movies__no-results
+  text-align: center
+  padding: 3rem 2rem
+  color: #7fc9ff
+
+  &-icon
+    font-size: 3rem
+    margin-bottom: 1rem
+
+  &-title
+    font-size: 1.5rem
+    margin-bottom: 0.5rem
+
+  &-message
+    font-size: 1rem
+    opacity: 0.8
+
+/* ===== RESPONSIVE HEADER ===== */
+@media (max-width: 768px)
+  .movies__header
+    padding: 0.4rem 0.8rem
+  
+  .movies__logo
+    height: 38px
+  
+  .movies__nav-center
+    max-width: 300px
+    margin: 0 0.5rem
+  
+  .menu-toggle
+    width: 36px
+    height: 36px
+    font-size: 1.2rem
+
+@media (max-width: 480px)
+  .movies__header
+    padding: 0.3rem 0.6rem
+  
+  .movies__logo
+    height: 35px
+  
+  .movies__nav-center
+    max-width: 250px
+    margin: 0 0.3rem
+  
+  .menu-toggle
+    width: 34px
+    height: 34px
+    font-size: 1.1rem
+
