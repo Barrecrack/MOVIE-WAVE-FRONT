@@ -31,10 +31,9 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/forgot" element={<Forgot />} />
         <Route path="/resetpassword" element={<ResetPassword />} />
 
-        //nuevo apartado
-        <Route path="/deleteaccount" element={<DeleteAccount />} />
-        
+
         {/* Protected routes */}
+        <Route path="/menu" element={<AuthGuard><DeleteAccount /></AuthGuard>} /> //nuevo apartado
         <Route path="/menu" element={<AuthGuard><Menu /></AuthGuard>} />
         <Route path="/movies" element={<AuthGuard><Movies /></AuthGuard>} />
         <Route path="/profile" element={<AuthGuard><EditProfile /></AuthGuard>} />

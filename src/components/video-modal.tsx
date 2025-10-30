@@ -6,18 +6,27 @@ interface VideoModalProps {
   alCerrar: () => void;
 }
 
+// 🎯 INTERFAZ PARA SUBTÍTULOS
+interface SubtitleTrack {
+  lang: string;
+  label: string;
+  src: string;
+}
+
 const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   const [videoData, setVideoData] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // ⭐ NUEVOS ESTADOS para comentarios y calificación
+  // ⭐ ESTADOS para comentarios y calificación
   const [rating, setRating] = useState<number | null>(null);
   const [comment, setComment] = useState("");
   const [commentsList, setCommentsList] = useState<string[]>([]);
 
-  // 🎬 NUEVOS ESTADOS PARA SUBTÍTULOS
-  const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
+  // 🎬 ESTADOS PARA SUBTÍTULOS
+  const [currentSubtitle, setCurrentSubtitle] = useState<string | null>(null);
+  const [availableSubtitles, setAvailableSubtitles] = useState<SubtitleTrack[]>([]);
+  const [subtitlesLoading, setSubtitlesLoading] = useState(false);
 
   // ===============================
   // CÓDIGO ORIGINAL (sin cambios)
@@ -33,7 +42,11 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
         if (res.ok) {
           const data = await res.json();
           const videoEncontrado = data.find((video: any) => video.id === videoId);
-          if (videoEncontrado) setVideoData(videoEncontrado);
+          if (videoEncontrado) {
+            setVideoData(videoEncontrado);
+            // 🎯 CARGAR SUBTÍTULOS DESDE EL BACKEND
+            cargarSubtitulosDesdeBackend(videoEncontrado.id);
+          }
           else await buscarEnOtrosGeneros(videoId);
         } else throw new Error(`Error ${res.status}: ${res.statusText}`);
       } catch (err) {
@@ -52,6 +65,33 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
       }
     };
 
+    // 🎯 FUNCIÓN PARA CARGAR SUBTÍTULOS DESDE EL BACKEND
+    const cargarSubtitulosDesdeBackend = async (videoId: number) => {
+      const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+      try {
+        setSubtitlesLoading(true);
+        const subtitlesResponse = await fetch(`${API_BASE}/videos/${videoId}/subtitles`);
+
+        if (subtitlesResponse.ok) {
+          const subtitlesData = await subtitlesResponse.json();
+          setAvailableSubtitles(subtitlesData);
+        } else {
+          setAvailableSubtitles([
+            { lang: "es", label: "Español", src: `${API_BASE}/videos/${videoId}/subtitles/es` },
+            { lang: "en", label: "English", src: `${API_BASE}/videos/${videoId}/subtitles/en` }
+          ]);
+        }
+      } catch (error) {
+        console.error("Error cargando subtítulos:", error);
+        setAvailableSubtitles([
+          { lang: "es", label: "Español", src: `${API_BASE}/videos/${videoId}/subtitles/es` },
+          { lang: "en", label: "English", src: `${API_BASE}/videos/${videoId}/subtitles/en` }
+        ]);
+      } finally {
+        setSubtitlesLoading(false);
+      }
+    }
+
     const buscarEnOtrosGeneros = async (id: number) => {
       const generos = ["action", "comedy", "romance", "horror", "sci-fi", "adventure", "animation"];
       const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
@@ -64,6 +104,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
             const video = data.find((v: any) => v.id === id);
             if (video) {
               setVideoData(video);
+              cargarSubtitulosDesdeBackend(video.id);
               return;
             }
           }
@@ -114,8 +155,18 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   };
 
   // ===============================
-  // 💫 NUEVAS FUNCIONES
+  // 💫 FUNCIONES PARA SUBTÍTULOS
   // ===============================
+
+  /** Activa subtítulos en un idioma específico */
+  const activateSubtitles = (lang: string) => {
+    setCurrentSubtitle(lang);
+  };
+
+  /** Desactiva todos los subtítulos */
+  const disableSubtitles = () => {
+    setCurrentSubtitle(null);
+  };
 
   /** Guarda la calificación del usuario (1-5 estrellas) */
   const handleRating = (value: number) => {
@@ -132,13 +183,8 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  /** Activa o desactiva los subtítulos */
-  const toggleSubtitles = () => {
-    setSubtitlesEnabled(!subtitlesEnabled);
-  };
-
   // ===============================
-  // RENDER ORIGINAL + NUEVAS SECCIONES
+  // RENDER MEJORADO
   // ===============================
   if (loading) {
     return (
@@ -180,33 +226,104 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
               className="video-modal__video"
               poster={videoData.poster}
             >
-              {subtitlesEnabled && (
+              {/* 🎯 PISTAS DE SUBTÍTULOS DESDE EL BACKEND */}
+              {availableSubtitles.map((track) => (
                 <track
-                  label="Español"
+                  key={track.lang}
                   kind="subtitles"
-                  srcLang="es"
-                  src="/subtitles/default.vtt"
-                  default
+                  srcLang={track.lang}
+                  label={track.label}
+                  src={track.src}
+                  default={currentSubtitle === track.lang}
                 />
-              )}
+              ))}
               Tu navegador no soporta el elemento de video.
             </video>
 
-            {/* 🔤 Botón de subtítulos */}
-            <button
-              onClick={toggleSubtitles}
-              style={{
+            {/* 🎯 CONTROLES DE SUBTÍTULOS */}
+            <div className="subtitles-controls" style={{
+              marginTop: "1rem",
+              display: "flex",
+              gap: "0.5rem",
+              justifyContent: "center",
+              flexWrap: "wrap"
+            }}>
+              {/* Botón Desactivar */}
+              <button
+                onClick={disableSubtitles}
+                disabled={subtitlesLoading}
+                style={{
+                  background: currentSubtitle === null ? "#3b82f6" : "#6b7280",
+                  color: "#fff",
+                  border: "none",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "8px",
+                  cursor: subtitlesLoading ? "not-allowed" : "pointer",
+                  fontSize: "0.9rem",
+                  opacity: subtitlesLoading ? 0.6 : 1
+                }}
+              >
+                {subtitlesLoading ? "⏳" : "🔇"} Sin subtítulos
+              </button>
+
+              {/* Botón Español */}
+              <button
+                onClick={() => activateSubtitles("es")}
+                disabled={subtitlesLoading}
+                style={{
+                  background: currentSubtitle === "es" ? "#10b981" : "#6b7280",
+                  color: "#fff",
+                  border: "none",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "8px",
+                  cursor: subtitlesLoading ? "not-allowed" : "pointer",
+                  fontSize: "0.9rem",
+                  opacity: subtitlesLoading ? 0.6 : 1
+                }}
+              >
+                {subtitlesLoading ? "⏳" : "🇪🇸"} Español
+              </button>
+
+              {/* Botón Inglés */}
+              <button
+                onClick={() => activateSubtitles("en")}
+                disabled={subtitlesLoading}
+                style={{
+                  background: currentSubtitle === "en" ? "#10b981" : "#6b7280",
+                  color: "#fff",
+                  border: "none",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "8px",
+                  cursor: subtitlesLoading ? "not-allowed" : "pointer",
+                  fontSize: "0.9rem",
+                  opacity: subtitlesLoading ? 0.6 : 1
+                }}
+              >
+                {subtitlesLoading ? "⏳" : "🇺🇸"} English
+              </button>
+            </div>
+
+            {/* 🎯 INDICADOR DE SUBTÍTULOS ACTIVOS */}
+            {currentSubtitle && !subtitlesLoading && (
+              <p style={{
                 marginTop: "0.5rem",
-                background: "#3b82f6",
-                color: "#fff",
-                border: "none",
-                padding: "0.5rem 1rem",
-                borderRadius: "8px",
-                cursor: "pointer",
-              }}
-            >
-              {subtitlesEnabled ? "🔇 Desactivar subtítulos" : "💬 Activar subtítulos"}
-            </button>
+                fontSize: "0.9rem",
+                color: "#10b981",
+                fontWeight: "bold"
+              }}>
+                📝 Subtítulos en {currentSubtitle === "es" ? "Español" : "English"} activados
+              </p>
+            )}
+
+            {subtitlesLoading && (
+              <p style={{
+                marginTop: "0.5rem",
+                fontSize: "0.9rem",
+                color: "#6b7280"
+              }}>
+                Cargando subtítulos...
+              </p>
+            )}
           </div>
         ) : (
           <div style={{ textAlign: "center", padding: "2rem" }}>
@@ -243,6 +360,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
                 fontSize: "1.8rem",
                 cursor: "pointer",
                 color: star <= (rating || 0) ? "#ffd700" : "#ccc",
+                margin: "0 0.2rem"
               }}
             >
               ★

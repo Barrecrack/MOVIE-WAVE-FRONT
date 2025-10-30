@@ -63,7 +63,7 @@ const DeleteAccount: React.FC = () => {
             <p>¿Estás completamente seguro?</p>
             <div className="btn-group">
               <button onClick={handleDeleteAccount} disabled={loading}>
-                {loading ? "Eliminando..." : "Sí, eliminar"}
+                {loading ? "Eliminando..." : "ELIMINAR"}
               </button>
               <button onClick={() => setConfirming(false)}>Cancelar</button>
             </div>
