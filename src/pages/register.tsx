@@ -4,8 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 
 /**
  * Register component handles user registration process.
- * @component
- * @returns {JSX.Element} The registration page with form and validation.
  */
 const Register = () => {
   const [name, setName] = useState("");
@@ -13,26 +11,56 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [birthdate, setBirthdate] = useState(""); // 👈 Cambiar a birthdate
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const navigate = useNavigate();
 
   /**
+   * Handles date selection from the date picker
+   */
+  const handleDateSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBirthdate(e.target.value);
+    setShowDatePicker(false);
+  };
+
+  /**
+   * Formats date for display
+   */
+  const formatDateForDisplay = (dateString: string) => {
+    if (!dateString) return "Seleccionar fecha de nacimiento";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  /**
    * Handles the registration form submission.
-   * Validates inputs, sends data to the API, and redirects on success.
-   * @async
-   * @param {React.FormEvent} e - The form submission event.
-   * @returns {Promise<void>}
    */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !lastname || !email || !password || !confirmPassword) {
+    if (!name || !lastname || !email || !password || !confirmPassword || !birthdate) {
       alert("Por favor complete todos los campos.");
       return;
     }
 
     if (password !== confirmPassword) {
       alert("Las contraseñas no coinciden.");
+      return;
+    }
+
+    // Validar que la fecha de nacimiento sea válida (al menos 5 años)
+    const birthDate = new Date(birthdate);
+    const today = new Date();
+    const minDate = new Date();
+    minDate.setFullYear(today.getFullYear() - 5); // Mínimo 5 años
+    
+    if (birthDate > minDate) {
+      alert("Debes tener al menos 5 años para registrarte.");
       return;
     }
 
@@ -51,18 +79,19 @@ const Register = () => {
           lastname,
           email,
           password,
+          birthdate, // 👈 Enviar fecha de nacimiento
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Error al registrar el usuario.");
+        alert(data.error || "Error al registrar el usuario.");
         return;
       }
 
       alert("Registro exitoso. Ahora puede iniciar sesión.");
-      navigate("/"); // Redirects to login
+      navigate("/");
     } catch (error) {
       console.error(error);
       alert("Error al conectar con el servidor.");
@@ -83,6 +112,7 @@ const Register = () => {
             className="input"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
           />
 
           <input
@@ -91,40 +121,68 @@ const Register = () => {
             className="input"
             value={lastname}
             onChange={(e) => setLastname(e.target.value)}
+            required
           />
 
-          <input
-            type="number"
-            placeholder="Edad"
-            className="input"
-            //value={age}
-            //onChange={(e) => setAge(e.target.value)}
-          />
+          {/* 👈 Campo de fecha de nacimiento con modal */}
+          <div className="date-input-container">
+            <button
+              type="button"
+              className="date-input-button"
+              onClick={() => setShowDatePicker(!showDatePicker)}
+            >
+              {formatDateForDisplay(birthdate)}
+            </button>
+            
+            {showDatePicker && (
+              <div className="date-picker-modal">
+                <div className="date-picker-header">
+                  <h3>Selecciona tu fecha de nacimiento</h3>
+                  <button 
+                    type="button" 
+                    className="close-button"
+                    onClick={() => setShowDatePicker(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <input
+                  type="date"
+                  className="date-input"
+                  value={birthdate}
+                  onChange={handleDateSelect}
+                  max={new Date().toISOString().split('T')[0]}
+                  required
+                />
+              </div>
+            )}
+          </div>
 
           <input
             type="email"
-            placeholder="Correo"
+            placeholder="Correo electrónico"
             className="input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
 
           <input
             type="password"
-            placeholder="Confirme su contraseña"
+            placeholder="Contraseña"
             className="input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
-
-          
 
           <input
             type="password"
-            placeholder="Confirme su contraseña"
+            placeholder="Confirmar contraseña"
             className="input"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            required
           />
 
           <div className="terms">
@@ -133,6 +191,7 @@ const Register = () => {
               id="terms"
               checked={agreeTerms}
               onChange={(e) => setAgreeTerms(e.target.checked)}
+              required
             />
             <label htmlFor="terms" className="terms-label">
               Estoy de acuerdo con los{" "}
@@ -151,6 +210,14 @@ const Register = () => {
           ¿Ya tiene cuenta? <Link to="/">Inicie sesión</Link>
         </p>
       </div>
+
+      {/* Overlay para cerrar el modal */}
+      {showDatePicker && (
+        <div 
+          className="modal-overlay" 
+          onClick={() => setShowDatePicker(false)}
+        />
+      )}
     </div>
   );
 };

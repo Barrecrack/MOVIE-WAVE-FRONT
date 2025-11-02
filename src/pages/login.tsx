@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import "../styles/login.sass";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient";
 
 /**
  * Login component for user authentication.
@@ -17,8 +16,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   /**
-   * Handles the user login process by validating credentials,
-   * sending a request to the backend, and synchronizing with Supabase.
+   * Handles the user login process by sending credentials to the backend.
    * 
    * @param {React.FormEvent} e - The form submission event.
    */
@@ -35,7 +33,7 @@ const Login = () => {
     try {
       console.log("🔹 Iniciando sesión con el backend...");
       
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
       const response = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,25 +49,24 @@ const Login = () => {
 
       console.log("✅ Login exitoso via backend:", data.user?.email);
 
-      // 🔥 CLAVE: Sincronizar con Supabase en el frontend
+      // 🔥 IMPORTANTE: Solo guardamos el token, NO sincronizamos con Supabase
       if (data.token) {
-        console.log("🔄 Sincronizando sesión con Supabase frontend...");
+        console.log("🔐 Guardando token en localStorage...");
         
-        // Option 1: Use setSession to synchronize
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: data.token,
-          refresh_token: data.token, // Or use a real refresh token if available
-        });
-
-        if (sessionError) {
-          console.warn("⚠️ Failed to sync session:", sessionError.message);
-          // Not fatal, continue
-        } else {
-          console.log("✅ Supabase session synchronized");
+        // Guardar token para futuras peticiones al backend
+        localStorage.setItem("supabase.auth.token", data.token);
+        
+        // Opcional: guardar información básica del usuario
+        if (data.user) {
+          localStorage.setItem("userData", JSON.stringify({
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.user_metadata?.name,
+            lastname: data.user.user_metadata?.lastname
+          }));
         }
-
-        // Also store token in localStorage for compatibility
-        localStorage.setItem("token", data.token);
+        
+        console.log("✅ Token guardado correctamente");
       }
 
       alert("Inicio de sesión exitoso.");

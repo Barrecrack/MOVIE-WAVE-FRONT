@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient";
 import "../styles/menu-dropdown.sass";
 
 /**
@@ -14,17 +13,17 @@ const MenuDropdown: React.FC = () => {
   const navigate = useNavigate();
 
   /**
-   * Handles user logout by signing out from Supabase,
-   * clearing local storage, showing confirmation, and redirecting to home.
+   * Handles user logout by clearing local storage,
+   * showing confirmation, and redirecting to home.
    *
-   * @async
    * @function handleLogout
-   * @returns {Promise<void>}
    */
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem("token");
+  const handleLogout = () => {
+    // Limpiar todos los tokens y datos de usuario
+    localStorage.removeItem("supabase.auth.token");
     localStorage.removeItem("userData");
+    localStorage.removeItem("token");
+    
     alert("Sesión cerrada exitosamente.");
     navigate("/");
   };
@@ -46,6 +45,7 @@ const MenuDropdown: React.FC = () => {
           <h2>Movie<span>Wave</span></h2>
           <button onClick={() => navigate("/movies")}>🎬 Películas</button>
           <button onClick={() => navigate("/profile")}>👤 Perfil</button>
+          <button onClick={() => navigate("/favorites")}>⭐ Favoritos</button>
           <button onClick={() => navigate("/about")}>ℹ️ Sobre nosotros</button>
           <button className="logout" onClick={handleLogout}>🚪 Cerrar sesión</button>
         </div>
