@@ -4,7 +4,6 @@ import SearchBar from "../components/search-bar.tsx";
 import VideoModal from "../components/video-modal.tsx";
 import type { ResultadoBusquedaVideo } from "../types/vide.types.ts";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient";
 
 interface MovieRow {
   genre: string;
@@ -33,6 +32,40 @@ const MoviesPage: React.FC = () => {
   const navigate = useNavigate();
 
   const genres = ["popular", "action", "comedy", "romance", "horror", "sci-fi", "adventure", "animation"];
+
+  /**
+   * Gets the authentication token from localStorage
+   */
+  const getAuthToken = (): string | null => {
+    return localStorage.getItem('supabase.auth.token');
+  };
+
+  /**
+   * Gets user session from token
+   */
+  const getUserSession = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/user-profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        return { user: userData, access_token: token };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting user session:', error);
+      return null;
+    }
+  };
 
   /**
    * Loads movies by genre using the API.
@@ -130,14 +163,7 @@ const MoviesPage: React.FC = () => {
     try {
       console.log("🔹 Intentando agregar a favoritos...");
 
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-      if (sessionError) {
-        console.error("❌ Error de sesión:", sessionError);
-        alert('Error de autenticación. Por favor inicia sesión nuevamente.');
-        navigate("/");
-        return;
-      }
+      const session = await getUserSession();
 
       if (!session) {
         console.error("❌ No hay sesión activa");
@@ -148,17 +174,14 @@ const MoviesPage: React.FC = () => {
 
       console.log("✅ Usuario autenticado:", session.user.email);
 
-      const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-
-      const response = await fetch(`${API_URL}/api/favorites`, {
+      const response = await fetch(`${API_BASE}/api/favorites`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          id_usuario: session.user.id,
-          id_contenido: movie.id
+          id_contenido: movie.id // Solo enviamos el id_contenido, el id_usuario se obtiene del token
         }),
       });
 
@@ -229,9 +252,9 @@ const MoviesPage: React.FC = () => {
 
       {/* SIDEBAR */}
       <aside className={`sidebar sidebar-right ${isSidebarOpen ? "open" : ""}`}>
-          <h2 className="sidebar-title">
-            Movie<span>Wave</span>
-          </h2>
+        <h2 className="sidebar-title">
+          Movie<span>Wave</span>
+        </h2>
         <button
           className="close-btn"
           onClick={() => setIsSidebarOpen(false)}
@@ -240,10 +263,7 @@ const MoviesPage: React.FC = () => {
           ✖
         </button>
 
-          
-
         <nav className="sidebar-nav">
-          
           <button onClick={() => navigate("/profile")}>👤 Perfil</button>
           <button onClick={() => navigate("/favorites")}>⭐ Favoritos</button>
           <button onClick={() => navigate("/about")}>ℹ️ Sobre nosotros</button>

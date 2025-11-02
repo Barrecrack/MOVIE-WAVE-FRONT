@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient";
 import "../styles/menu.sass";
 
 /**
@@ -16,15 +15,13 @@ const Menu: React.FC = () => {
   /**
    * Handles user logout process.
    * Clears authentication data from local storage and redirects to login.
-   * 
-   * @async
-   * @function handleLogout
-   * @returns {Promise<void>}
    */
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem("token"); // Delete the token from storage
+    // Solo limpiamos localStorage - NO autenticamos con Supabase
+    localStorage.removeItem("supabase.auth.token");
     localStorage.removeItem("userData");
+    localStorage.removeItem("token");
+    
     alert("Sesión cerrada exitosamente.");
     navigate("/"); // Redirects to login
   };
@@ -50,6 +47,10 @@ const Menu: React.FC = () => {
 
           <button className="menu-btn" onClick={() => navigate("/profile")}>
             Perfil
+          </button>
+
+          <button className="menu-btn" onClick={() => navigate("/favorites")}>
+            Favoritos
           </button>
 
           <button className="menu-btn" onClick={() => navigate("/about")}>

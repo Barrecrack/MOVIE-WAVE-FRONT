@@ -1,29 +1,26 @@
 import React, { useEffect, useState } from "react";
 import "../styles/favorites.sass";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient";
-
-interface Contenido {
-  id_contenido: number;
-  titulo: string;
-  poster: string;
-  genero: string;
-  año: number;
-  descripcion?: string;
-  duracion?: string;
-  video_url?: string;
-}
 
 interface FavoriteItem {
   id_usuario: string;
   id_contenido: number;
   fecha_agregado: string;
-  Contenido: Contenido;
+  Contenido?: {
+    id_contenido: number;
+    titulo: string;
+    poster: string;
+    genero: string;
+    año: number;
+    descripcion?: string;
+    duracion?: string;
+    video_url?: string;
+  };
 }
 
 /**
  * FavoritesPage component that displays and manages the user's favorite movies.
- * Loads favorites from the API or falls back to localStorage if necessary.
+ * Loads favorites from the backend API only.
  *
  * @component
  * @returns {JSX.Element} The favorites management page.
@@ -31,6 +28,7 @@ interface FavoriteItem {
 const FavoritesPage: React.FC = () => {
   const [favoritos, setFavoritos] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,7 +36,42 @@ const FavoritesPage: React.FC = () => {
   }, []);
 
   /**
-   * Loads the user's favorite movies from the API or localStorage as a fallback.
+   * Gets the authentication token from localStorage
+   */
+  const getAuthToken = (): string | null => {
+    return localStorage.getItem('supabase.auth.token');
+  };
+
+  /**
+   * Gets user session from token via backend
+   */
+  const getUserSession = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
+      const response = await fetch(`${API_BASE}/api/user-profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        return { user: userData, access_token: token };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting user session:', error);
+      return null;
+    }
+  };
+
+  /**
+   * Loads the user's favorite movies from the backend API.
    *
    * @async
    * @function loadFavorites
@@ -46,21 +79,21 @@ const FavoritesPage: React.FC = () => {
    */
   const loadFavorites = async () => {
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const session = await getUserSession();
 
-      if (userError || !user) {
+      if (!session) {
         console.error("Usuario no autenticado");
+        setError("Debes iniciar sesión para ver tus favoritos");
         navigate("/");
         return;
       }
 
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
 
-      console.log("🔹 Cargando favoritos...");
-      const response = await fetch(`${API_URL}/api/favorites/${user.id}`, {
+      console.log("🔹 Cargando favoritos desde el backend...");
+      const response = await fetch(`${API_URL}/api/favorites/my-favorites`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
 
@@ -68,35 +101,15 @@ const FavoritesPage: React.FC = () => {
         const data = await response.json();
         console.log('📋 Favoritos cargados:', data);
         setFavoritos(data);
+        setError(null);
       } else {
         const errorData = await response.json();
         console.error('❌ Error del backend:', errorData);
-        throw new Error(errorData.error || 'Error cargando favoritos');
+        setError(errorData.error || 'Error cargando favoritos');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error cargando favoritos:", error);
-
-      try {
-        const stored = JSON.parse(localStorage.getItem("favoritos") || "[]");
-        console.log('📋 Usando favoritos de localStorage:', stored.length);
-
-        const convertedFavorites: FavoriteItem[] = stored.map((movie: any) => ({
-          id_usuario: 'local',
-          id_contenido: movie.id,
-          fecha_agregado: new Date().toISOString(),
-          Contenido: {
-            id_contenido: movie.id,
-            titulo: movie.title,
-            poster: movie.poster,
-            genero: movie.genre,
-            año: movie.year
-          }
-        }));
-        setFavoritos(convertedFavorites);
-      } catch (localError) {
-        console.error("Error con localStorage:", localError);
-        setFavoritos([]);
-      }
+      setError("Error al cargar los favoritos. Intenta más tarde.");
     } finally {
       setLoading(false);
     }
@@ -112,20 +125,20 @@ const FavoritesPage: React.FC = () => {
    */
   const eliminarFavorito = async (idContenido: number) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const session = await getUserSession();
 
-      if (!user) {
-        alert('Usuario no autenticado');
+      if (!session) {
+        alert('Debes iniciar sesión para eliminar favoritos');
+        navigate("/");
         return;
       }
 
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
 
-      const response = await fetch(`${API_URL}/api/favorites/${user.id}/${idContenido}`, {
+      const response = await fetch(`${API_URL}/api/favorites/${idContenido}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
 
@@ -133,11 +146,12 @@ const FavoritesPage: React.FC = () => {
         setFavoritos(prev => prev.filter(fav => fav.id_contenido !== idContenido));
         alert("Película eliminada de favoritos");
       } else {
-        throw new Error('Error eliminando favorito');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error eliminando favorito');
       }
     } catch (error: any) {
       console.error("Error eliminando favorito:", error);
-      alert("Error al eliminar de favoritos");
+      alert("Error al eliminar de favoritos: " + error.message);
     }
   };
 
@@ -158,7 +172,13 @@ const FavoritesPage: React.FC = () => {
         </button>
       </header>
 
-      {favoritos.length === 0 ? (
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+
+      {favoritos.length === 0 && !error ? (
         <div className="favorites-empty">
           <p>No tienes películas en favoritos.</p>
           <p>Agrega películas desde la página principal haciendo clic en "⭐ Favorito"</p>
@@ -174,14 +194,14 @@ const FavoritesPage: React.FC = () => {
           {favoritos.map((fav) => (
             <div key={`${fav.id_usuario}-${fav.id_contenido}`} className="favorite-card">
               <img
-                src={fav.Contenido.poster || "/images/default-movie.jpg"}
-                alt={fav.Contenido.titulo}
+                src={fav.Contenido?.poster || "/images/default-movie.jpg"}
+                alt={fav.Contenido?.titulo || "Película sin título"}
                 className="favorite-poster"
               />
               <div className="favorite-info">
-                <h3>{fav.Contenido.titulo}</h3>
-                <p className="favorite-genre">{fav.Contenido.genero}</p>
-                <p className="favorite-year">{fav.Contenido.año}</p>
+                <h3>{fav.Contenido?.titulo || "Título no disponible"}</h3>
+                <p className="favorite-genre">{fav.Contenido?.genero || "Género no disponible"}</p>
+                <p className="favorite-year">{fav.Contenido?.año || "Año no disponible"}</p>
                 <p className="favorite-date">
                   Agregado: {new Date(fav.fecha_agregado).toLocaleDateString()}
                 </p>

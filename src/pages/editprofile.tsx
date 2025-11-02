@@ -1,65 +1,64 @@
 import React, { useState, useEffect } from "react";
 import "../styles/editprofile.sass";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient";
 
 /**
  * EditProfile component allows the user to view and update their profile information.
- * It retrieves user data from Supabase or backend and provides edit functionality.
- * 
- * 💡 NOTA:
- * Si deseas visualizar el frontend sin iniciar sesión,
- * puedes comentar temporalmente las líneas marcadas con:
- * // 👉 (Desactivar para visualizar frontend)
  */
 const EditProfile = () => {
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
+  const [birthdate, setBirthdate] = useState(""); // 👈 Cambiar a birthdate
+  const [age, setAge] = useState(""); // 👈 Edad calculada
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 👉 (Desactivar para visualizar frontend sin login)
     fetchUserData();
   }, []);
 
   /**
-   * Fetches user data from Supabase or backend if Supabase session is not found.
-   * Falls back to localStorage if no session is available.
-   * 
-   * @async
-   * @function
+   * Gets the authentication token from localStorage
+   */
+  const getAuthToken = (): string | null => {
+    return localStorage.getItem('supabase.auth.token');
+  };
+
+  /**
+   * Formats date for display
+   */
+  const formatDateForDisplay = (dateString: string) => {
+    if (!dateString) return "Seleccionar fecha de nacimiento";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  /**
+   * Handles date selection from the date picker
+   */
+  const handleDateSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBirthdate(e.target.value);
+    setShowDatePicker(false);
+  };
+
+  /**
+   * Fetches user data from the backend API.
    */
   const fetchUserData = async () => {
     try {
-      console.log("🔹 Obteniendo datos del usuario...");
+      console.log("🔹 Obteniendo datos del usuario desde el backend...");
 
-      const { data: { user }, error: supabaseError } = await supabase.auth.getUser();
-
-      if (!supabaseError && user) {
-        console.log("✅ Usuario obtenido de Supabase:", user.email);
-
-        const userData = {
-          name: user.user_metadata?.name || '',
-          lastname: user.user_metadata?.lastname || '',
-          email: user.email || '',
-        };
-
-        setName(userData.name);
-        setLastname(userData.lastname);
-        setEmail(userData.email);
-        return;
-      }
-
-      console.log("🔄 Supabase no tiene sesión, intentando con backend...");
-
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       if (!token) {
         console.error("❌ No hay token disponible");
-        // 👉 (Desactivar para visualizar frontend sin login)
         alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
         navigate("/");
         return;
@@ -77,6 +76,8 @@ const EditProfile = () => {
         setName(userData.name || "");
         setLastname(userData.lastname || "");
         setEmail(userData.email || "");
+        setBirthdate(userData.birthdate || ""); // 👈 Recibir birthdate
+        setAge(userData.age ? `${userData.age} años` : "No disponible"); // 👈 Recibir edad calculada
         console.log("✅ Datos obtenidos del backend");
       } else {
         throw new Error('Error obteniendo datos del usuario');
@@ -84,7 +85,8 @@ const EditProfile = () => {
 
     } catch (error: any) {
       console.error("❌ Error cargando datos:", error);
-
+      
+      // Intentar cargar desde localStorage como fallback
       try {
         const storedData = localStorage.getItem("userData");
         if (storedData) {
@@ -92,15 +94,15 @@ const EditProfile = () => {
           setName(parsedData.name || "");
           setLastname(parsedData.lastname || "");
           setEmail(parsedData.email || "");
+          setBirthdate(parsedData.birthdate || "");
+          setAge(parsedData.age || "");
           console.log("✅ Datos cargados desde localStorage");
         } else {
-          // 👉 (Desactivar para visualizar frontend sin login)
           alert("Error cargando perfil. Por favor inicia sesión nuevamente.");
           navigate("/");
         }
       } catch (localError) {
         console.error("Error con localStorage:", localError);
-        // 👉 (Desactivar para visualizar frontend sin login)
         alert("Error cargando perfil. Por favor inicia sesión nuevamente.");
         navigate("/");
       }
@@ -111,10 +113,6 @@ const EditProfile = () => {
 
   /**
    * Handles the profile update process by sending updated data to the backend.
-   * Verifies the Supabase session before proceeding.
-   * 
-   * @async
-   * @param {React.FormEvent} e - The form submission event.
    */
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,18 +126,12 @@ const EditProfile = () => {
     try {
       console.log("🔹 Actualizando perfil...");
 
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-      if (sessionError || !session) {
-        console.error("❌ Error de sesión:", sessionError);
-        // 👉 (Desactivar para visualizar frontend sin login)
+      const token = getAuthToken();
+      if (!token) {
         alert('Tu sesión ha expirado. Por favor inicia sesión de nuevo.');
         navigate("/");
         return;
       }
-
-      const token = session.access_token;
-      console.log("✅ Token obtenido");
 
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
       console.log("🔹 Enviando solicitud a:", `${API_URL}/api/update-user`);
@@ -153,6 +145,7 @@ const EditProfile = () => {
         body: JSON.stringify({
           name: name.trim(),
           lastname: lastname.trim(),
+          birthdate: birthdate, // 👈 Incluir birthdate en la actualización
         }),
       });
 
@@ -161,6 +154,19 @@ const EditProfile = () => {
 
       if (!response.ok) {
         throw new Error(data.error || "Error al actualizar el perfil.");
+      }
+
+      // Actualizar localStorage con los nuevos datos
+      const userData = localStorage.getItem("userData");
+      if (userData) {
+        const parsedData = JSON.parse(userData);
+        const updatedData = {
+          ...parsedData,
+          name: name.trim(),
+          lastname: lastname.trim(),
+          birthdate: birthdate
+        };
+        localStorage.setItem("userData", JSON.stringify(updatedData));
       }
 
       alert("Perfil actualizado exitosamente.");
@@ -183,18 +189,17 @@ const EditProfile = () => {
   /** Cancels edit mode and reloads the original user data. */
   const handleCancel = () => {
     setIsEditing(false);
+    setShowDatePicker(false);
     fetchUserData();
   };
 
   /** Navigates back to the movies page. */
   const handleBackToMovies = () => {
-    // 👉 (Desactivar para visualizar frontend sin redirección)
     navigate("/movies");
   };
 
   /** Redirects user to password change page. */
   const handleChangePassword = () => {
-    // 👉 (Desactivar para visualizar frontend sin redirección)
     navigate("/forgot");
   };
 
@@ -232,11 +237,12 @@ const EditProfile = () => {
               <p className="profile-field">
                 <strong>Correo:</strong> {email || "No disponible"}
               </p>
-              {/* 
               <p className="profile-field">
                 <strong>Edad:</strong> {age || "No disponible"}
               </p>
-              */}
+              <p className="profile-field">
+                <strong>Fecha de nacimiento:</strong> {birthdate ? formatDateForDisplay(birthdate) : "No disponible"}
+              </p>
             </div>
 
             <div className="profile-actions">
@@ -285,16 +291,39 @@ const EditProfile = () => {
               title="El correo electrónico no se puede modificar"
             />
 
-            {/*
-            <input
-              type="number"
-              placeholder="Edad"
-              className="input disabled"
-              value={age}
-              disabled
-              title="edad aun no se puede modificar"
-            />
-            */}
+            {/* 👈 Campo de fecha de nacimiento con modal para edición */}
+            <div className="date-input-container">
+              <button
+                type="button"
+                className="date-input-button"
+                onClick={() => setShowDatePicker(!showDatePicker)}
+              >
+                {formatDateForDisplay(birthdate)}
+              </button>
+              
+              {showDatePicker && (
+                <div className="date-picker-modal">
+                  <div className="date-picker-header">
+                    <h3>Selecciona tu fecha de nacimiento</h3>
+                    <button 
+                      type="button" 
+                      className="close-button"
+                      onClick={() => setShowDatePicker(false)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <input
+                    type="date"
+                    className="date-input"
+                    value={birthdate}
+                    onChange={handleDateSelect}
+                    max={new Date().toISOString().split('T')[0]}
+                    required
+                  />
+                </div>
+              )}
+            </div>
 
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
               <button
@@ -316,6 +345,14 @@ const EditProfile = () => {
           </form>
         )}
       </div>
+
+      {/* Overlay para cerrar el modal */}
+      {showDatePicker && (
+        <div 
+          className="modal-overlay" 
+          onClick={() => setShowDatePicker(false)}
+        />
+      )}
     </div>
   );
 };

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../supabaseClient';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -8,7 +7,7 @@ interface AuthGuardProps {
 
 /**
  * AuthGuard component that protects routes from unauthorized access.
- * Checks if a valid Supabase session exists; if not, redirects to login.
+ * Checks if a valid token exists; if not, redirects to login.
  *
  * @component
  * @param {React.ReactNode} children - Components to render when the user is authenticated.
@@ -16,6 +15,7 @@ interface AuthGuardProps {
  */
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,8 +23,15 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   }, []);
 
   /**
-   * Verifies if there is an active user session in Supabase.
-   * Redirects to the login page if no session is found or if an error occurs.
+   * Gets the authentication token from localStorage
+   */
+  const getAuthToken = (): string | null => {
+    return localStorage.getItem('supabase.auth.token');
+  };
+
+  /**
+   * Verifies if the user is authenticated by checking the token with the backend.
+   * Redirects to the login page if no valid token is found.
    *
    * @async
    * @function checkAuth
@@ -32,24 +39,39 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
    */
   const checkAuth = async () => {
     try {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const token = getAuthToken();
       
-      if (error) {
-        console.error('Error verificando sesión:', error);
+      if (!token) {
+        console.log('❌ No hay token, redirigiendo al login...');
         navigate('/');
         return;
       }
 
-      if (!session) {
-        console.log('No hay sesión activa, redirigiendo al login...');
+      // Verificar el token con el backend
+      const API_URL = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
+      const response = await fetch(`${API_URL}/api/user-profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        console.log('✅ Token válido, usuario autenticado');
+        setIsAuthenticated(true);
+        setLoading(false);
+      } else {
+        console.log('❌ Token inválido o expirado, redirigiendo al login...');
+        // Limpiar token inválido
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('userData');
         navigate('/');
-        return;
       }
 
-      console.log('✅ Sesión activa encontrada:', session.user.email);
-      setLoading(false);
     } catch (error) {
-      console.error('Error en AuthGuard:', error);
+      console.error('❌ Error en AuthGuard:', error);
+      // Limpiar tokens en caso de error
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('userData');
       navigate('/');
     }
   };
@@ -69,7 +91,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   }
 
-  return <>{children}</>;
+  return isAuthenticated ? <>{children}</> : null;
 };
 
 export default AuthGuard;
