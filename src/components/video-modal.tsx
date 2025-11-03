@@ -69,6 +69,9 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
       }
 
       const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+
+      console.log('🔄 Enviando solicitud para agregar favorito...');
+
       const response = await fetch(`${API_BASE}/api/favorites`, {
         method: 'POST',
         headers: {
@@ -81,22 +84,33 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
             title: videoData?.title,
             poster: videoData?.poster,
             genre: videoData?.genre,
-            year: videoData?.year
+            year: videoData?.year,
+            description: videoData?.description
           }
         })
       });
 
+      const responseData = await response.json();
+
       if (response.ok) {
         setIsFavorite(true);
+        console.log('✅ Favorito agregado correctamente:', responseData);
         alert("✅ Agregado a favoritos");
       } else if (response.status === 400) {
-        alert("❤️ Ya está en favoritos");
+        if (responseData.error === 'Ya está en favoritos') {
+          setIsFavorite(true);
+          alert("❤️ Ya está en favoritos");
+        } else {
+          console.error('❌ Error 400:', responseData);
+          throw new Error(responseData.error || 'Error al agregar favorito');
+        }
       } else {
-        throw new Error('Error al agregar favorito');
+        console.error('❌ Error en respuesta:', responseData);
+        throw new Error(responseData.error || 'Error al agregar favorito');
       }
     } catch (error: any) {
-      console.error('Error agregando favorito:', error);
-      alert("Error al agregar a favoritos");
+      console.error('💥 Error agregando favorito:', error);
+      alert("Error al agregar a favoritos: " + error.message);
     }
   };
 
