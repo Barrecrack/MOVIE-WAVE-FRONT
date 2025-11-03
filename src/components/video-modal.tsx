@@ -59,7 +59,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  // 🔥 NUEVO: Agregar a favoritos (BACKEND)
+
   const addToFavorites = async () => {
     try {
       const token = getAuthToken();
