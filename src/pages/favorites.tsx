@@ -3,18 +3,21 @@ import "../styles/favorites.sass";
 import { useNavigate } from "react-router-dom";
 
 interface FavoriteItem {
+  id_favorito: string;
   id_usuario: string;
-  id_contenido: number;
+  id_contenido: string;
   fecha_agregado: string;
   Contenido?: {
-    id_contenido: number;
+    id_contenido: string;
+    id_externo: string;
     titulo: string;
-    poster: string;
-    genero: string;
-    año: number;
-    descripcion?: string;
-    duracion?: string;
-    video_url?: string;
+    descripcion: string;
+    duracion: string;
+    tipo: string;
+    fecha: string;
+    calificacion: number;
+    poster?: string;
+    genero?: string;
   };
 }
 
@@ -100,7 +103,28 @@ const FavoritesPage: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('📋 Favoritos cargados:', data);
-        setFavoritos(data);
+        
+        // Formatear los datos para que coincidan con la interfaz
+        const formattedFavorites = data.map((fav: any) => ({
+          id_favorito: fav.id_favorito,
+          id_usuario: fav.id_usuario,
+          id_contenido: fav.id_contenido,
+          fecha_agregado: fav.fecha_agregado,
+          Contenido: fav.Contenido ? {
+            id_contenido: fav.Contenido.id_contenido,
+            id_externo: fav.Contenido.id_externo,
+            titulo: fav.Contenido.titulo || "Sin título",
+            descripcion: fav.Contenido.descripcion || "Sin descripción",
+            duracion: fav.Contenido.duracion || "00:00",
+            tipo: fav.Contenido.tipo || "video",
+            fecha: fav.Contenido.fecha,
+            calificacion: fav.Contenido.calificacion || 0,
+            poster: fav.Contenido.poster,
+            genero: fav.Contenido.genero || fav.Contenido.tipo
+          } : undefined
+        }));
+
+        setFavoritos(formattedFavorites);
         setError(null);
       } else {
         const errorData = await response.json();
@@ -120,10 +144,10 @@ const FavoritesPage: React.FC = () => {
    *
    * @async
    * @function eliminarFavorito
-   * @param {number} idContenido - The ID of the movie to remove from favorites.
+   * @param {string} idContenido - The ID of the movie to remove from favorites.
    * @returns {Promise<void>}
    */
-  const eliminarFavorito = async (idContenido: number) => {
+  const eliminarFavorito = async (idContenido: string) => {
     try {
       const session = await getUserSession();
 
@@ -135,6 +159,7 @@ const FavoritesPage: React.FC = () => {
 
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
 
+      console.log(`🔹 Eliminando favorito con ID: ${idContenido}`);
       const response = await fetch(`${API_URL}/api/favorites/${idContenido}`, {
         method: 'DELETE',
         headers: {
@@ -153,6 +178,37 @@ const FavoritesPage: React.FC = () => {
       console.error("Error eliminando favorito:", error);
       alert("Error al eliminar de favoritos: " + error.message);
     }
+  };
+
+  /**
+   * Gets the poster URL for a movie
+   */
+  const getPosterUrl = (contenido: any): string => {
+    if (contenido?.poster) return contenido.poster;
+    
+    // Si no hay poster, intentar usar el ID externo para generar una imagen por defecto
+    if (contenido?.id_externo) {
+      return `/images/default-movie.jpg`;
+    }
+    
+    return "/images/default-movie.jpg";
+  };
+
+  /**
+   * Gets the genre for display
+   */
+  const getGenreDisplay = (contenido: any): string => {
+    return contenido?.genero || contenido?.tipo || "Género no disponible";
+  };
+
+  /**
+   * Gets the year for display
+   */
+  const getYearDisplay = (contenido: any): string => {
+    if (contenido?.fecha) {
+      return new Date(contenido.fecha).getFullYear().toString();
+    }
+    return "Año no disponible";
   };
 
   if (loading) {
@@ -192,18 +248,26 @@ const FavoritesPage: React.FC = () => {
       ) : (
         <div className="favorites-list">
           {favoritos.map((fav) => (
-            <div key={`${fav.id_usuario}-${fav.id_contenido}`} className="favorite-card">
+            <div key={fav.id_favorito} className="favorite-card">
               <img
-                src={fav.Contenido?.poster || "/images/default-movie.jpg"}
+                src={getPosterUrl(fav.Contenido)}
                 alt={fav.Contenido?.titulo || "Película sin título"}
                 className="favorite-poster"
+                onError={(e) => {
+                  // Si la imagen falla al cargar, usar una por defecto
+                  (e.target as HTMLImageElement).src = "/images/default-movie.jpg";
+                }}
               />
               <div className="favorite-info">
                 <h3>{fav.Contenido?.titulo || "Título no disponible"}</h3>
-                <p className="favorite-genre">{fav.Contenido?.genero || "Género no disponible"}</p>
-                <p className="favorite-year">{fav.Contenido?.año || "Año no disponible"}</p>
+                <p className="favorite-genre">{getGenreDisplay(fav.Contenido)}</p>
+                <p className="favorite-year">{getYearDisplay(fav.Contenido)}</p>
+                <p className="favorite-duration">{fav.Contenido?.duracion || "Duración no disponible"}</p>
+                {fav.Contenido?.descripcion && fav.Contenido.descripcion !== "Sin descripción" && (
+                  <p className="favorite-description">{fav.Contenido.descripcion}</p>
+                )}
                 <p className="favorite-date">
-                  Agregado: {new Date(fav.fecha_agregado).toLocaleDateString()}
+                  Agregado: {new Date(fav.fecha_agregado).toLocaleDateString('es-ES')}
                 </p>
                 <div className="favorite-actions">
                   <button
