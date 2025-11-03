@@ -45,9 +45,19 @@ const EditProfile = () => {
    * Handles date selection from the date picker
    */
   const handleDateSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBirthdate(e.target.value);
-    setShowDatePicker(false);
-  };
+  const newDate = e.target.value;
+  setBirthdate(newDate);
+
+  // Calcular edad en vivo
+  const birth = new Date(newDate);
+  const today = new Date();
+  let years = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) years--;
+  setAge(`${years} años`);
+
+  setShowDatePicker(false);
+};
 
   /**
    * Fetches user data from the backend API.

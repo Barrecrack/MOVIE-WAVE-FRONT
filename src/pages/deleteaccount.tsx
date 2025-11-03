@@ -32,7 +32,7 @@ const DeleteAccount: React.FC = () => {
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
       
       console.log("🔹 Enviando solicitud de eliminación de cuenta...");
-      const response = await fetch(`${API_URL}/api/delete-account`, {
+      const response = await fetch(`${API_URL}/auth/delete-account`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
