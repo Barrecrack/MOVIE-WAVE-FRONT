@@ -11,57 +11,22 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [birthdate, setBirthdate] = useState(""); // 👈 Cambiar a birthdate
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [birthdate, setBirthdate] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const navigate = useNavigate();
 
-  /**
-   * Handles date selection from the date picker
-   */
-  const handleDateSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBirthdate(e.target.value);
-    // No cerrar automáticamente, dejar que el usuario confirme
-  };
-
-  /**
-   * Confirms the selected date and closes the picker
-   */
-  const confirmDateSelection = () => {
-    setShowDatePicker(false);
-  };
-
-  /**
-   * Formats date for display
-   */
-  const formatDateForDisplay = (dateString: string) => {
-    if (!dateString) return "📅 Seleccionar fecha de nacimiento";
-    const date = new Date(dateString);
-    return `📅 ${date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    })}`;
-  };
-
-  /**
-   * Calculate age from birthdate
-   */
+  /** Calculates age from birthdate */
   const calculateAge = (birthDate: string): number => {
     if (!birthDate) return 0;
     const birth = new Date(birthDate);
     const today = new Date();
     let years = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      years--;
-    }
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) years--;
     return years;
   };
 
-  /**
-   * Handles the registration form submission.
-   */
+  /** Handles the registration form submission. */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -75,7 +40,6 @@ const Register = () => {
       return;
     }
 
-    // Validar que la fecha de nacimiento sea válida (al menos 5 años)
     const age = calculateAge(birthdate);
     if (age < 5) {
       alert("Debes tener al menos 5 años para registrarte.");
@@ -88,7 +52,7 @@ const Register = () => {
     }
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
+      const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
       const response = await fetch(`${API_URL}/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -97,7 +61,7 @@ const Register = () => {
           lastname,
           email,
           password,
-          birthdate, // 👈 Enviar fecha de nacimiento
+          birthdate,
         }),
       });
 
@@ -119,7 +83,7 @@ const Register = () => {
   return (
     <div className="register-page">
       <img src="/images/moviewave-logo.png" className="img-logo" alt="Logo del sitio" />
-     
+
       <div className="register-box">
         <h1 className="titulo">Crea tu cuenta</h1>
 
@@ -142,79 +106,24 @@ const Register = () => {
             required
           />
 
-          {/* 👈 Campo de fecha de nacimiento con modal MEJORADO */}
-          <div className="date-input-container">
-            <button
-              type="button"
-              className={`date-input-button ${birthdate ? 'has-value' : ''}`}
-              onClick={() => setShowDatePicker(true)}
-            >
-              {formatDateForDisplay(birthdate)}
-            </button>
-            
-            {showDatePicker && (
-              <>
-                <div 
-                  className="modal-overlay" 
-                  onClick={() => setShowDatePicker(false)}
-                />
-                <div className="date-picker-modal">
-                  <div className="date-picker-header">
-                    <h3>🎂 Selecciona tu fecha de nacimiento</h3>
-                    <button 
-                      type="button" 
-                      className="close-button"
-                      onClick={() => setShowDatePicker(false)}
-                      aria-label="Cerrar selector de fecha"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  
-                  <div className="date-picker-content">
-                    <input
-                      type="date"
-                      className="date-input"
-                      value={birthdate}
-                      onChange={handleDateSelect}
-                      max={new Date().toISOString().split('T')[0]}
-                      required
-                    />
-                    
-                    {birthdate && (
-                      <div className="age-preview">
-                        <p>
-                          <strong>Edad calculada:</strong> {calculateAge(birthdate)} años
-                          {calculateAge(birthdate) < 5 && (
-                            <span className="age-warning"> ❌ (Mínimo 5 años)</span>
-                          )}
-                        </p>
-                      </div>
-                    )}
-                    
-                    <div className="date-picker-actions">
-                      <button
-                        type="button"
-                        className="cancel-date-btn"
-                        onClick={() => {
-                          setBirthdate("");
-                          setShowDatePicker(false);
-                        }}
-                      >
-                        Limpiar
-                      </button>
-                      <button
-                        type="button"
-                        className="confirm-date-btn"
-                        onClick={confirmDateSelection}
-                        disabled={!birthdate || calculateAge(birthdate) < 5}
-                      >
-                        {calculateAge(birthdate) < 5 ? 'Edad insuficiente' : 'Confirmar fecha'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </>
+          <div className="form-group">
+            <label htmlFor="birthdate">Fecha de nacimiento</label>
+            <input
+              type="date"
+              id="birthdate"
+              className="input"
+              value={birthdate}
+              onChange={(e) => setBirthdate(e.target.value)}
+              max={new Date().toISOString().split("T")[0]}
+              required
+            />
+            {birthdate && (
+              <p className="age-preview">
+                <strong>Edad:</strong> {calculateAge(birthdate)} años
+                {calculateAge(birthdate) < 5 && (
+                  <span className="age-warning"> ❌ (Mínimo 5 años)</span>
+                )}
+              </p>
             )}
           </div>
 
@@ -265,7 +174,7 @@ const Register = () => {
             Registrarse
           </button>
         </form>
-        
+
         <p className="login-link">
           ¿Ya tiene cuenta? <Link to="/">Inicie sesión</Link>
         </p>
