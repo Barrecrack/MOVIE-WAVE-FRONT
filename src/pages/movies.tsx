@@ -11,7 +11,7 @@ interface MovieRow {
 }
 
 /**
- * MoviesPage component - displays movie categories, search results, and allows adding favorites.
+ * MoviesPage component - displays movie categories and search results.
  * Handles authentication, API requests, modals, and navigation.
  */
 const MoviesPage: React.FC = () => {
@@ -32,40 +32,6 @@ const MoviesPage: React.FC = () => {
   const navigate = useNavigate();
 
   const genres = ["popular", "action", "comedy", "romance", "horror", "sci-fi", "adventure", "animation"];
-
-  /**
-   * Gets the authentication token from localStorage
-   */
-  const getAuthToken = (): string | null => {
-    return localStorage.getItem('supabase.auth.token');
-  };
-
-  /**
-   * Gets user session from token
-   */
-  const getUserSession = async () => {
-    const token = getAuthToken();
-    if (!token) {
-      return null;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE}/api/user-profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        return { user: userData, access_token: token };
-      }
-      return null;
-    } catch (error) {
-      console.error('Error getting user session:', error);
-      return null;
-    }
-  };
 
   /**
    * Loads movies by genre using the API.
@@ -146,64 +112,9 @@ const MoviesPage: React.FC = () => {
     }
   };
 
-  /**
-   * Opens the movie modal.
-   * @param id - ID of the selected movie.
-   */
+  /** Opens and closes the movie modal */
   const openModal = (id: number) => setSelectedMovieId(id);
-
-  /** Closes the movie modal. */
   const closeModal = () => setSelectedMovieId(null);
-
-  /**
-   * Adds a movie to user's favorites list.
-   * @param movie - Movie object to be added to favorites.
-   */
-  const addToFavorites = async (movie: ResultadoBusquedaVideo) => {
-    try {
-      console.log("🔹 Intentando agregar a favoritos...");
-
-      const session = await getUserSession();
-
-      if (!session) {
-        console.error("❌ No hay sesión activa");
-        alert('Debes iniciar sesión para agregar favoritos');
-        navigate("/");
-        return;
-      }
-
-      console.log("✅ Usuario autenticado:", session.user.email);
-
-      const response = await fetch(`${API_BASE}/api/favorites`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          id_externo: movie.id.toString(), // ❗ CAMBIO AQUÍ
-          movie_data: {
-            title: movie.title,
-            poster: movie.poster,
-            genre: movie.genre,
-            year: movie.year
-          }
-        }),
-      });
-
-      if (response.ok) {
-        alert("✅ Película agregada a favoritos");
-      } else if (response.status === 400) {
-        alert("⭐ Esta película ya está en favoritos");
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al agregar favorito');
-      }
-    } catch (error: any) {
-      console.error('Error agregando favorito:', error);
-      alert("Error al agregar a favoritos: " + error.message);
-    }
-  };
 
   /** Loads movies on first render. */
   useEffect(() => {
@@ -321,20 +232,6 @@ const MoviesPage: React.FC = () => {
                             <h3 className="movies__name">{movie.title}</h3>
                             <p className="movies__genre">{movie.genre}</p>
                             <p className="movies__year">{movie.year}</p>
-                            <button
-                              className="movies__favorite-btn"
-                              onClick={() => addToFavorites(movie)}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                fontSize: "1.5rem",
-                                cursor: "pointer",
-                                color: "#dc2626",
-                                padding: "0.5rem"
-                              }}
-                            >
-                              ❤️ Favorito
-                            </button>
                           </div>
                         </div>
                       ))
@@ -365,12 +262,6 @@ const MoviesPage: React.FC = () => {
                             <h3 className="movies__name">{movie.title}</h3>
                             <p className="movies__genre">{movie.genre}</p>
                             <p className="movies__year">{movie.year}</p>
-                            <button
-                              className="movies__favorite-btn"
-                              onClick={() => addToFavorites(movie)}
-                            >
-                              ⭐ Favorito
-                            </button>
                           </div>
                         </div>
                       ))}
