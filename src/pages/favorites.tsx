@@ -9,7 +9,7 @@ interface FavoriteItem {
   fecha_agregado: string;
   Contenido?: {
     id_contenido: string;
-    id_externo: string;
+    id_externo: string; // 🔥 Este es el ID de Pexels
     titulo: string;
     descripcion: string;
     duracion: string;
@@ -21,13 +21,6 @@ interface FavoriteItem {
   };
 }
 
-/**
- * FavoritesPage component that displays and manages the user's favorite movies.
- * Loads favorites from the backend API only.
- *
- * @component
- * @returns {JSX.Element} The favorites management page.
- */
 const FavoritesPage: React.FC = () => {
   const [favoritos, setFavoritos] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,28 +31,18 @@ const FavoritesPage: React.FC = () => {
     loadFavorites();
   }, []);
 
-  /**
-   * Gets the authentication token from localStorage
-   */
   const getAuthToken = (): string | null => {
     return localStorage.getItem('supabase.auth.token');
   };
 
-  /**
-   * Gets user session from token via backend
-   */
   const getUserSession = async () => {
     const token = getAuthToken();
-    if (!token) {
-      return null;
-    }
+    if (!token) return null;
 
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'https://movie-wave-ocyd.onrender.com';
       const response = await fetch(`${API_BASE}/api/user-profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
 
       if (response.ok) {
@@ -74,18 +57,14 @@ const FavoritesPage: React.FC = () => {
   };
 
   /**
-   * Loads the user's favorite movies from the backend API.
-   *
-   * @async
-   * @function loadFavorites
-   * @returns {Promise<void>}
+   * Carga los favoritos directamente desde la base de datos
+   * Ya incluyen la información del contenido gracias al JOIN
    */
   const loadFavorites = async () => {
     try {
       const session = await getUserSession();
 
       if (!session) {
-        console.error("Usuario no autenticado");
         setError("Debes iniciar sesión para ver tus favoritos");
         navigate("/");
         return;
@@ -95,40 +74,16 @@ const FavoritesPage: React.FC = () => {
 
       console.log("🔹 Cargando favoritos desde el backend...");
       const response = await fetch(`${API_URL}/api/favorites/my-favorites`, {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
       if (response.ok) {
         const data = await response.json();
         console.log('📋 Favoritos cargados:', data);
-        
-        // Formatear los datos para que coincidan con la interfaz
-        const formattedFavorites = data.map((fav: any) => ({
-          id_favorito: fav.id_favorito,
-          id_usuario: fav.id_usuario,
-          id_contenido: fav.id_contenido,
-          fecha_agregado: fav.fecha_agregado,
-          Contenido: fav.Contenido ? {
-            id_contenido: fav.Contenido.id_contenido,
-            id_externo: fav.Contenido.id_externo,
-            titulo: fav.Contenido.titulo || "Sin título",
-            descripcion: fav.Contenido.descripcion || "Sin descripción",
-            duracion: fav.Contenido.duracion || "00:00",
-            tipo: fav.Contenido.tipo || "video",
-            fecha: fav.Contenido.fecha,
-            calificacion: fav.Contenido.calificacion || 0,
-            poster: fav.Contenido.poster,
-            genero: fav.Contenido.genero || fav.Contenido.tipo
-          } : undefined
-        }));
-
-        setFavoritos(formattedFavorites);
+        setFavoritos(data);
         setError(null);
       } else {
         const errorData = await response.json();
-        console.error('❌ Error del backend:', errorData);
         setError(errorData.error || 'Error cargando favoritos');
       }
     } catch (error: any) {
@@ -140,35 +95,30 @@ const FavoritesPage: React.FC = () => {
   };
 
   /**
-   * Removes a movie from the user's favorites list.
-   *
-   * @async
-   * @function eliminarFavorito
-   * @param {string} idContenido - The ID of the movie to remove from favorites.
-   * @returns {Promise<void>}
+   * Elimina un favorito usando el ID de Pexels (id_externo)
    */
-  const eliminarFavorito = async (idContenido: string) => {
+  const eliminarFavorito = async (idPexels: string) => {
     try {
       const session = await getUserSession();
 
       if (!session) {
         alert('Debes iniciar sesión para eliminar favoritos');
-        navigate("/");
         return;
       }
 
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
 
-      console.log(`🔹 Eliminando favorito con ID: ${idContenido}`);
-      const response = await fetch(`${API_URL}/api/favorites/${idContenido}`, {
+      console.log(`🔹 Eliminando favorito con ID Pexels: ${idPexels}`);
+      const response = await fetch(`${API_URL}/api/favorites/${idPexels}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
       if (response.ok) {
-        setFavoritos(prev => prev.filter(fav => fav.id_contenido !== idContenido));
+        // Actualizar el estado local
+        setFavoritos(prev => prev.filter(fav => 
+          fav.Contenido?.id_externo !== idPexels
+        ));
         alert("Película eliminada de favoritos");
       } else {
         const errorData = await response.json();
@@ -181,29 +131,24 @@ const FavoritesPage: React.FC = () => {
   };
 
   /**
-   * Gets the poster URL for a movie
+   * Abre el video en un modal (puedes implementar esta función)
    */
-  const getPosterUrl = (contenido: any): string => {
-    if (contenido?.poster) return contenido.poster;
-    
-    // Si no hay poster, intentar usar el ID externo para generar una imagen por defecto
-    if (contenido?.id_externo) {
-      return `/images/default-movie.jpg`;
-    }
-    
-    return "/images/default-movie.jpg";
+  const abrirVideo = (favorito: FavoriteItem) => {
+    // Aquí puedes abrir el modal o navegar a la página del video
+    console.log("Abrir video:", favorito);
+    // Ejemplo: navigate(`/video/${favorito.Contenido?.id_externo}`);
+    alert(`Abriendo: ${favorito.Contenido?.titulo}`);
   };
 
-  /**
-   * Gets the genre for display
-   */
+  // Helper functions
+  const getPosterUrl = (contenido: any): string => {
+    return contenido?.poster || "/images/default-movie.jpg";
+  };
+
   const getGenreDisplay = (contenido: any): string => {
     return contenido?.genero || contenido?.tipo || "Género no disponible";
   };
 
-  /**
-   * Gets the year for display
-   */
   const getYearDisplay = (contenido: any): string => {
     if (contenido?.fecha) {
       return new Date(contenido.fecha).getFullYear().toString();
@@ -228,51 +173,54 @@ const FavoritesPage: React.FC = () => {
         </button>
       </header>
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
       {favoritos.length === 0 && !error ? (
         <div className="favorites-empty">
           <p>No tienes películas en favoritos.</p>
-          <p>Agrega películas desde la página principal haciendo clic en "⭐ Favorito"</p>
-          <button
-            onClick={() => navigate("/movies")}
-            className="browse-movies-btn"
-          >
+          <p>Agrega películas desde la página principal haciendo clic en "❤️ Añadir a favoritos"</p>
+          <button onClick={() => navigate("/movies")} className="browse-movies-btn">
             Explorar Películas
           </button>
         </div>
       ) : (
         <div className="favorites-list">
-          {favoritos.map((fav) => (
-            <div key={fav.id_favorito} className="favorite-card">
+          {favoritos.map((favorito) => (
+            <div key={favorito.id_favorito} className="favorite-card">
               <img
-                src={getPosterUrl(fav.Contenido)}
-                alt={fav.Contenido?.titulo || "Película sin título"}
+                src={getPosterUrl(favorito.Contenido)}
+                alt={favorito.Contenido?.titulo || "Película sin título"}
                 className="favorite-poster"
+                onClick={() => abrirVideo(favorito)}
+                style={{ cursor: 'pointer' }}
                 onError={(e) => {
-                  // Si la imagen falla al cargar, usar una por defecto
                   (e.target as HTMLImageElement).src = "/images/default-movie.jpg";
                 }}
               />
               <div className="favorite-info">
-                <h3>{fav.Contenido?.titulo || "Título no disponible"}</h3>
-                <p className="favorite-genre">{getGenreDisplay(fav.Contenido)}</p>
-                <p className="favorite-year">{getYearDisplay(fav.Contenido)}</p>
-                <p className="favorite-duration">{fav.Contenido?.duracion || "Duración no disponible"}</p>
-                {fav.Contenido?.descripcion && fav.Contenido.descripcion !== "Sin descripción" && (
-                  <p className="favorite-description">{fav.Contenido.descripcion}</p>
+                <h3 onClick={() => abrirVideo(favorito)} style={{ cursor: 'pointer' }}>
+                  {favorito.Contenido?.titulo || "Título no disponible"}
+                </h3>
+                <p className="favorite-genre">{getGenreDisplay(favorito.Contenido)}</p>
+                <p className="favorite-year">{getYearDisplay(favorito.Contenido)}</p>
+                <p className="favorite-duration">{favorito.Contenido?.duracion || "Duración no disponible"}</p>
+                {favorito.Contenido?.descripcion && favorito.Contenido.descripcion !== "Sin descripción" && (
+                  <p className="favorite-description">{favorito.Contenido.descripcion}</p>
                 )}
                 <p className="favorite-date">
-                  Agregado: {new Date(fav.fecha_agregado).toLocaleDateString('es-ES')}
+                  Agregado: {new Date(favorito.fecha_agregado).toLocaleDateString('es-ES')}
                 </p>
                 <div className="favorite-actions">
                   <button
+                    className="play-btn"
+                    onClick={() => abrirVideo(favorito)}
+                    title="Reproducir video"
+                  >
+                    ▶️ Reproducir
+                  </button>
+                  <button
                     className="delete-btn"
-                    onClick={() => eliminarFavorito(fav.id_contenido)}
+                    onClick={() => eliminarFavorito(favorito.Contenido?.id_externo || '')}
                     title="Eliminar de favoritos"
                   >
                     ❌ Eliminar
