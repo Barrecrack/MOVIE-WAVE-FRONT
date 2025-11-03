@@ -33,7 +33,7 @@ createRoot(document.getElementById("root")!).render(
 
 
         {/* Protected routes */}
-        <Route path="/menu" element={<AuthGuard><DeleteAccount /></AuthGuard>} /> //nuevo apartado
+        <Route path="/deleteaccount" element={<AuthGuard><DeleteAccount /></AuthGuard>} /> //nuevo apartado
         <Route path="/menu" element={<AuthGuard><Menu /></AuthGuard>} />
         <Route path="/movies" element={<AuthGuard><Movies /></AuthGuard>} />
         <Route path="/profile" element={<AuthGuard><EditProfile /></AuthGuard>} />
