@@ -72,6 +72,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
 
       console.log('🔄 Enviando solicitud para agregar favorito...');
 
+      // 🔥 ENVÍO SIMPLIFICADO - solo el ID de Pexels
       const response = await fetch(`${API_BASE}/api/favorites`, {
         method: 'POST',
         headers: {
@@ -79,14 +80,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          id_contenido: videoId,
-          movie_data: {
-            title: videoData?.title,
-            poster: videoData?.poster,
-            genre: videoData?.genre,
-            year: videoData?.year,
-            description: videoData?.description
-          }
+          id_contenido: videoId // Solo enviamos el ID de Pexels
         })
       });
 
