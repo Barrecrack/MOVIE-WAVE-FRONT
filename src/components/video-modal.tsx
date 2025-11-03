@@ -18,19 +18,150 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // ⭐ ESTADOS para comentarios y calificación
-  const [rating, setRating] = useState<number | null>(null);
-  const [comment, setComment] = useState("");
-  const [commentsList, setCommentsList] = useState<string[]>([]);
+  // ⭐ ESTADOS ACTUALIZADOS para comentarios y calificación con backend
+  const [userRating, setUserRating] = useState<number | null>(null);
+  const [userComment, setUserComment] = useState("");
+  const [hasUserRated, setHasUserRated] = useState(false);
 
   // 🎬 ESTADOS PARA SUBTÍTULOS
   const [currentSubtitle, setCurrentSubtitle] = useState<string | null>(null);
   const [availableSubtitles, setAvailableSubtitles] = useState<SubtitleTrack[]>([]);
   const [subtitlesLoading, setSubtitlesLoading] = useState(false);
 
-  // 🔥 NUEVO: Obtener token de autenticación
+  // 🔥 Obtener token de autenticación
   const getAuthToken = (): string | null => {
     return localStorage.getItem('supabase.auth.token');
+  };
+
+  // 🔥 NUEVO: Verificar calificación del usuario desde backend
+  const checkUserRating = async () => {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        setHasUserRated(false);
+        setUserRating(null);
+        setUserComment("");
+        return;
+      }
+
+      const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+      const response = await fetch(`${API_BASE}/api/ratings/user/${videoId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.hasRating && data.calificacion) {
+          setUserRating(data.calificacion.puntuacion);
+          setUserComment(data.calificacion.comentario || "");
+          setHasUserRated(true);
+        } else {
+          setHasUserRated(false);
+          setUserRating(null);
+          setUserComment("");
+        }
+      }
+    } catch (error) {
+      console.error('Error verificando calificación:', error);
+      setHasUserRated(false);
+    }
+  };
+
+  // 🔥 NUEVO: Guardar calificación en backend
+  const saveRating = async (puntuacion: number, comentario: string) => {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        alert('Debes iniciar sesión para calificar');
+        return;
+      }
+
+      const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+
+      const response = await fetch(`${API_BASE}/api/ratings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          id_contenido: videoId,
+          puntuacion: puntuacion,
+          comentario: comentario
+        })
+      });
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        setHasUserRated(true);
+        setUserRating(puntuacion);
+        setUserComment(comentario);
+        alert(`✅ ${hasUserRated ? 'Calificación actualizada' : 'Calificación guardada'} correctamente`);
+      } else {
+        throw new Error(responseData.error || 'Error al guardar calificación');
+      }
+    } catch (error: any) {
+      console.error('Error guardando calificación:', error);
+      alert("Error al guardar calificación: " + error.message);
+    }
+  };
+
+  // 🔥 NUEVO: Eliminar calificación
+  const deleteRating = async () => {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        alert('Debes iniciar sesión para eliminar calificación');
+        return;
+      }
+
+      const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+      const response = await fetch(`${API_BASE}/api/ratings/${videoId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        setHasUserRated(false);
+        setUserRating(null);
+        setUserComment("");
+        alert("🗑️ Calificación eliminada");
+      } else {
+        throw new Error('Error al eliminar calificación');
+      }
+    } catch (error: any) {
+      console.error('Error eliminando calificación:', error);
+      alert("Error al eliminar calificación");
+    }
+  };
+
+  // 🔥 NUEVO: Manejo de calificación con backend
+  const handleRating = async (value: number) => {
+    await saveRating(value, userComment);
+  };
+
+  // 🔥 NUEVO: Manejo de comentarios con backend
+  const handleCommentSubmit = async () => {
+    if (userComment.trim() !== "") {
+      if (userRating) {
+        // Si ya tiene calificación, actualizar con el comentario
+        await saveRating(userRating, userComment);
+      } else {
+        alert("⚠️ Primero califica la película con estrellas");
+      }
+    } else {
+      alert("⚠️ Escribe un comentario antes de enviar");
+    }
+  };
+
+  // 🔥 NUEVO: Manejo de cambio de comentario
+  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setUserComment(e.target.value);
   };
 
   // 🔥 NUEVO: Verificar si el video está en favoritos (BACKEND)
@@ -59,7 +190,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-
   const addToFavorites = async () => {
     try {
       const token = getAuthToken();
@@ -72,7 +202,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
 
       console.log('🔄 Enviando solicitud para agregar favorito...');
 
-      // 🔥 ENVÍO SIMPLIFICADO - solo el ID de Pexels
       const response = await fetch(`${API_BASE}/api/favorites`, {
         method: 'POST',
         headers: {
@@ -80,7 +209,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          id_contenido: videoId // Solo enviamos el ID de Pexels
+          id_contenido: videoId
         })
       });
 
@@ -153,7 +282,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
           const videoEncontrado = data.find((video: any) => video.id === videoId);
           if (videoEncontrado) {
             setVideoData(videoEncontrado);
-            // 🎯 CARGAR SUBTÍTULOS DESDE EL BACKEND
             cargarSubtitulosDesdeBackend(videoEncontrado.id);
           }
           else await buscarEnOtrosGeneros(videoId);
@@ -174,7 +302,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
       }
     };
 
-    // 🎯 FUNCIÓN PARA CARGAR SUBTÍTULOS DESDE EL BACKEND
     const cargarSubtitulosDesdeBackend = async (videoId: number) => {
       const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
       try {
@@ -239,6 +366,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   useEffect(() => {
     if (videoData) {
       checkIfFavorite();
+      checkUserRating(); // 🔥 NUEVO: Verificar calificación del usuario
     }
   }, [videoData]);
 
@@ -246,33 +374,16 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   // 💫 FUNCIONES PARA SUBTÍTULOS (ORIGINALES)
   // ===============================
 
-  /** Activa subtítulos en un idioma específico */
   const activateSubtitles = (lang: string) => {
     setCurrentSubtitle(lang);
   };
 
-  /** Desactiva todos los subtítulos */
   const disableSubtitles = () => {
     setCurrentSubtitle(null);
   };
 
-  /** Guarda la calificación del usuario (1-5 estrellas) */
-  const handleRating = (value: number) => {
-    setRating(value);
-    alert(`🌟 Calificaste la película con ${value} estrella${value > 1 ? "s" : ""}`);
-  };
-
-  /** Envía un comentario y lo almacena en la lista local */
-  const handleCommentSubmit = () => {
-    if (comment.trim() !== "") {
-      setCommentsList((prev) => [...prev, comment]);
-      setComment("");
-      alert("💬 Comentario enviado correctamente");
-    }
-  };
-
   // ===============================
-  // RENDER MEJORADO (ORIGINAL)
+  // RENDER MEJORADO
   // ===============================
   if (loading) {
     return (
@@ -314,7 +425,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
               className="video-modal__video"
               poster={videoData.poster}
             >
-              {/* 🎯 PISTAS DE SUBTÍTULOS DESDE EL BACKEND */}
               {availableSubtitles.map((track) => (
                 <track
                   key={track.lang}
@@ -328,7 +438,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
               Tu navegador no soporta el elemento de video.
             </video>
 
-            {/* 🎯 CONTROLES DE SUBTÍTULOS */}
             <div className="subtitles-controls" style={{
               marginTop: "1rem",
               display: "flex",
@@ -336,7 +445,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
               justifyContent: "center",
               flexWrap: "wrap"
             }}>
-              {/* Botón Desactivar */}
               <button
                 onClick={disableSubtitles}
                 disabled={subtitlesLoading}
@@ -354,7 +462,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
                 {subtitlesLoading ? "⏳" : "🔇"} Sin subtítulos
               </button>
 
-              {/* Botón Español */}
               <button
                 onClick={() => activateSubtitles("es")}
                 disabled={subtitlesLoading}
@@ -372,7 +479,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
                 {subtitlesLoading ? "⏳" : "🇪🇸"} Español
               </button>
 
-              {/* Botón Inglés */}
               <button
                 onClick={() => activateSubtitles("en")}
                 disabled={subtitlesLoading}
@@ -391,7 +497,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
               </button>
             </div>
 
-            {/* 🎯 INDICADOR DE SUBTÍTULOS ACTIVOS */}
             {currentSubtitle && !subtitlesLoading && (
               <p style={{
                 marginTop: "0.5rem",
@@ -424,7 +529,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
           </div>
         )}
 
-        {/* 🔥 ACTUALIZADO: FAVORITOS CON BACKEND */}
+        {/* FAVORITOS CON BACKEND */}
         <div className="video-modal__actions">
           {isFavorite ? (
             <button className="fav-btn remove" onClick={removeFromFavorites}>
@@ -437,9 +542,28 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
           )}
         </div>
 
-        {/* ⭐ SECCIÓN DE CALIFICACIÓN (ORIGINAL) */}
+        {/* ⭐ SECCIÓN DE CALIFICACIÓN ACTUALIZADA CON BACKEND */}
         <div className="rating-section" style={{ marginTop: "1.5rem", textAlign: "center" }}>
-          <h3>Califica esta película:</h3>
+          <h3>
+            {hasUserRated ? "Tu calificación:" : "Califica esta película:"}
+            {hasUserRated && (
+              <button
+                onClick={deleteRating}
+                style={{
+                  marginLeft: "10px",
+                  background: "#ef4444",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "2px 8px",
+                  fontSize: "0.8rem",
+                  cursor: "pointer"
+                }}
+              >
+                Eliminar
+              </button>
+            )}
+          </h3>
           {[1, 2, 3, 4, 5].map((star) => (
             <span
               key={star}
@@ -447,21 +571,26 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
               style={{
                 fontSize: "1.8rem",
                 cursor: "pointer",
-                color: star <= (rating || 0) ? "#ffd700" : "#ccc",
+                color: star <= (userRating || 0) ? "#ffd700" : "#ccc",
                 margin: "0 0.2rem"
               }}
             >
               ★
             </span>
           ))}
+          {userRating && (
+            <p style={{ marginTop: "0.5rem", color: "#666" }}>
+              Calificaste con {userRating} estrella{userRating > 1 ? "s" : ""}
+            </p>
+          )}
         </div>
 
-        {/* 💬 SECCIÓN DE COMENTARIOS (ORIGINAL) */}
+        {/* 💬 SECCIÓN DE COMENTARIOS ACTUALIZADA CON BACKEND */}
         <div className="comments-section" style={{ marginTop: "1.5rem" }}>
           <h3>Deja tu comentario:</h3>
           <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
+            value={userComment}
+            onChange={handleCommentChange}
             placeholder="Escribe tu opinión sobre la película..."
             style={{
               width: "100%",
@@ -474,17 +603,8 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
             }}
           />
           <button onClick={handleCommentSubmit} className="fav-btn add">
-            💬 Enviar comentario
+            {hasUserRated ? "💾 Actualizar comentario" : "💬 Guardar comentario"}
           </button>
-
-          {/* Lista de comentarios */}
-          <ul style={{ marginTop: "1rem", paddingLeft: "1rem" }}>
-            {commentsList.map((c, i) => (
-              <li key={i} style={{ marginBottom: "0.5rem" }}>
-                🗣️ {c}
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </div>
