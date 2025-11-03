@@ -30,9 +30,9 @@ const DeleteAccount: React.FC = () => {
       }
 
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-      
+
       console.log("🔹 Enviando solicitud de eliminación de cuenta...");
-      const response = await fetch(`${API_URL}/auth/delete-account`, {
+      const response = await fetch(`${API_URL}/api/delete-account`, { // ❌ CAMBIAR ESTA LÍNEA
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -53,7 +53,7 @@ const DeleteAccount: React.FC = () => {
 
       alert("Tu cuenta ha sido eliminada permanentemente.");
       navigate("/register");
-      
+
     } catch (err: any) {
       console.error("❌ Error eliminando cuenta:", err);
       setError(err.message);
@@ -67,7 +67,7 @@ const DeleteAccount: React.FC = () => {
       <button className="back-menu-btn" onClick={() => navigate("/movies")}>
         menú ←
       </button>
-      
+
       <div className="delete-box">
         <img
           src="/images/moviewave-logo.png"
@@ -89,14 +89,14 @@ const DeleteAccount: React.FC = () => {
           <div className="confirm-box">
             <p>¿Estás completamente seguro?</p>
             <div className="btn-group">
-              <button 
-                onClick={handleDeleteAccount} 
+              <button
+                onClick={handleDeleteAccount}
                 disabled={loading}
                 className="confirm-delete-btn"
               >
                 {loading ? "Eliminando..." : "ELIMINAR"}
               </button>
-              <button 
+              <button
                 onClick={() => setConfirming(false)}
                 className="cancel-btn"
               >

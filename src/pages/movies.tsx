@@ -181,7 +181,13 @@ const MoviesPage: React.FC = () => {
           Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          id_contenido: movie.id // Solo enviamos el id_contenido, el id_usuario se obtiene del token
+          id_contenido: movie.id,
+          movie_data: { // ❗ Pasar datos adicionales de la película
+            title: movie.title,
+            poster: movie.poster,
+            genre: movie.genre,
+            year: movie.year
+          }
         }),
       });
 
