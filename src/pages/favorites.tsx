@@ -9,20 +9,29 @@ interface FavoriteItem {
   fecha_agregado: string;
   Contenido?: {
     id_contenido: string;
-    id_externo: string; // 🔥 Este es el ID de Pexels
+    id_externo: string; // ID de Pexels
     titulo: string;
     descripcion: string;
     duracion: string;
     tipo: string;
     fecha: string;
     calificacion: number;
-    poster?: string;
-    genero?: string;
   };
+}
+
+interface VideoData {
+  id: number;
+  title: string;
+  genre: string;
+  year: number;
+  poster: string;
+  videoUrl: string | null;
+  description: string;
 }
 
 const FavoritesPage: React.FC = () => {
   const [favoritos, setFavoritos] = useState<FavoriteItem[]>([]);
+  const [videoData, setVideoData] = useState<{[key: string]: VideoData}>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -57,8 +66,41 @@ const FavoritesPage: React.FC = () => {
   };
 
   /**
-   * Carga los favoritos directamente desde la base de datos
-   * Ya incluyen la información del contenido gracias al JOIN
+   * Busca información completa del video por ID de Pexels
+   */
+  const fetchVideoData = async (pexelsId: string): Promise<VideoData | null> => {
+    try {
+      // Buscar en los videos populares primero
+      const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+      const response = await fetch(`${API_URL}/videos/search?query=popular`);
+      
+      if (response.ok) {
+        const videos = await response.json();
+        const video = videos.find((v: any) => v.id.toString() === pexelsId);
+        
+        if (video) {
+          return video;
+        }
+      }
+      
+      // Si no se encuentra, devolver datos básicos
+      return {
+        id: parseInt(pexelsId),
+        title: `Video ${pexelsId}`,
+        genre: "Video",
+        year: new Date().getFullYear(),
+        poster: "/images/default-movie.jpg",
+        videoUrl: null,
+        description: "Video de Pexels"
+      };
+    } catch (error) {
+      console.error(`Error buscando video ${pexelsId}:`, error);
+      return null;
+    }
+  };
+
+  /**
+   * Carga los favoritos y luego busca la información de cada video
    */
   const loadFavorites = async () => {
     try {
@@ -78,9 +120,23 @@ const FavoritesPage: React.FC = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log('📋 Favoritos cargados:', data);
-        setFavoritos(data);
+        const favoritosData: FavoriteItem[] = await response.json();
+        console.log('📋 Favoritos cargados:', favoritosData);
+        
+        // 🔥 BUSCAR INFORMACIÓN COMPLETA DE CADA VIDEO
+        const videoDataMap: {[key: string]: VideoData} = {};
+        
+        for (const favorito of favoritosData) {
+          if (favorito.Contenido?.id_externo) {
+            const videoInfo = await fetchVideoData(favorito.Contenido.id_externo);
+            if (videoInfo) {
+              videoDataMap[favorito.Contenido.id_externo] = videoInfo;
+            }
+          }
+        }
+        
+        setFavoritos(favoritosData);
+        setVideoData(videoDataMap);
         setError(null);
       } else {
         const errorData = await response.json();
@@ -119,6 +175,14 @@ const FavoritesPage: React.FC = () => {
         setFavoritos(prev => prev.filter(fav => 
           fav.Contenido?.id_externo !== idPexels
         ));
+        
+        // Eliminar de videoData también
+        setVideoData(prev => {
+          const newData = {...prev};
+          delete newData[idPexels];
+          return newData;
+        });
+        
         alert("Película eliminada de favoritos");
       } else {
         const errorData = await response.json();
@@ -131,29 +195,45 @@ const FavoritesPage: React.FC = () => {
   };
 
   /**
-   * Abre el video en un modal (puedes implementar esta función)
+   * Abre el video en el modal
    */
   const abrirVideo = (favorito: FavoriteItem) => {
-    // Aquí puedes abrir el modal o navegar a la página del video
-    console.log("Abrir video:", favorito);
-    // Ejemplo: navigate(`/video/${favorito.Contenido?.id_externo}`);
-    alert(`Abriendo: ${favorito.Contenido?.titulo}`);
-  };
-
-  // Helper functions
-  const getPosterUrl = (contenido: any): string => {
-    return contenido?.poster || "/images/default-movie.jpg";
-  };
-
-  const getGenreDisplay = (contenido: any): string => {
-    return contenido?.genero || contenido?.tipo || "Género no disponible";
-  };
-
-  const getYearDisplay = (contenido: any): string => {
-    if (contenido?.fecha) {
-      return new Date(contenido.fecha).getFullYear().toString();
+    if (favorito.Contenido?.id_externo) {
+      const videoInfo = videoData[favorito.Contenido.id_externo];
+      if (videoInfo) {
+        // Aquí puedes implementar la lógica para abrir el modal
+        console.log("Abrir video:", videoInfo);
+        alert(`Abriendo: ${videoInfo.title}`);
+      }
     }
-    return "Año no disponible";
+  };
+
+  // Helper functions usando la información de Pexels
+  const getVideoInfo = (favorito: FavoriteItem): VideoData | null => {
+    if (favorito.Contenido?.id_externo) {
+      return videoData[favorito.Contenido.id_externo] || null;
+    }
+    return null;
+  };
+
+  const getPosterUrl = (favorito: FavoriteItem): string => {
+    const videoInfo = getVideoInfo(favorito);
+    return videoInfo?.poster || "/images/default-movie.jpg";
+  };
+
+  const getTitle = (favorito: FavoriteItem): string => {
+    const videoInfo = getVideoInfo(favorito);
+    return videoInfo?.title || favorito.Contenido?.titulo || "Título no disponible";
+  };
+
+  const getGenre = (favorito: FavoriteItem): string => {
+    const videoInfo = getVideoInfo(favorito);
+    return videoInfo?.genre || favorito.Contenido?.tipo || "Video";
+  };
+
+  const getYear = (favorito: FavoriteItem): string => {
+    const videoInfo = getVideoInfo(favorito);
+    return videoInfo?.year?.toString() || new Date().getFullYear().toString();
   };
 
   if (loading) {
@@ -188,8 +268,8 @@ const FavoritesPage: React.FC = () => {
           {favoritos.map((favorito) => (
             <div key={favorito.id_favorito} className="favorite-card">
               <img
-                src={getPosterUrl(favorito.Contenido)}
-                alt={favorito.Contenido?.titulo || "Película sin título"}
+                src={getPosterUrl(favorito)}
+                alt={getTitle(favorito)}
                 className="favorite-poster"
                 onClick={() => abrirVideo(favorito)}
                 style={{ cursor: 'pointer' }}
@@ -199,10 +279,10 @@ const FavoritesPage: React.FC = () => {
               />
               <div className="favorite-info">
                 <h3 onClick={() => abrirVideo(favorito)} style={{ cursor: 'pointer' }}>
-                  {favorito.Contenido?.titulo || "Título no disponible"}
+                  {getTitle(favorito)}
                 </h3>
-                <p className="favorite-genre">{getGenreDisplay(favorito.Contenido)}</p>
-                <p className="favorite-year">{getYearDisplay(favorito.Contenido)}</p>
+                <p className="favorite-genre">{getGenre(favorito)}</p>
+                <p className="favorite-year">{getYear(favorito)}</p>
                 <p className="favorite-duration">{favorito.Contenido?.duracion || "Duración no disponible"}</p>
                 {favorito.Contenido?.descripcion && favorito.Contenido.descripcion !== "Sin descripción" && (
                   <p className="favorite-description">{favorito.Contenido.descripcion}</p>
