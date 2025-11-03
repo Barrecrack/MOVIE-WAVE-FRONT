@@ -9,8 +9,8 @@ const EditProfile = () => {
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
-  const [birthdate, setBirthdate] = useState(""); // 👈 Cambiar a birthdate
-  const [age, setAge] = useState(""); // 👈 Edad calculada
+  const [birthdate, setBirthdate] = useState("");
+  const [age, setAge] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -32,32 +32,48 @@ const EditProfile = () => {
    * Formats date for display
    */
   const formatDateForDisplay = (dateString: string) => {
-    if (!dateString) return "Seleccionar fecha de nacimiento";
+    if (!dateString) return "📅 Seleccionar fecha de nacimiento";
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
+    return `📅 ${date.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
-    });
+    })}`;
+  };
+
+  /**
+   * Calculates age from birthdate
+   */
+  const calculateAge = (birthDate: string): string => {
+    if (!birthDate) return "";
+    const birth = new Date(birthDate);
+    const today = new Date();
+    let years = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      years--;
+    }
+    return `${years} años`;
   };
 
   /**
    * Handles date selection from the date picker
    */
   const handleDateSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const newDate = e.target.value;
-  setBirthdate(newDate);
+    const newDate = e.target.value;
+    setBirthdate(newDate);
+    setAge(calculateAge(newDate));
+  };
 
-  // Calcular edad en vivo
-  const birth = new Date(newDate);
-  const today = new Date();
-  let years = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) years--;
-  setAge(`${years} años`);
-
-  setShowDatePicker(false);
-};
+  /**
+   * Confirms date selection and closes picker
+   */
+  const confirmDateSelection = () => {
+    setShowDatePicker(false);
+    if (birthdate) {
+      setAge(calculateAge(birthdate));
+    }
+  };
 
   /**
    * Fetches user data from the backend API.
@@ -86,8 +102,8 @@ const EditProfile = () => {
         setName(userData.name || "");
         setLastname(userData.lastname || "");
         setEmail(userData.email || "");
-        setBirthdate(userData.birthdate || ""); // 👈 Recibir birthdate
-        setAge(userData.age ? `${userData.age} años` : "No disponible"); // 👈 Recibir edad calculada
+        setBirthdate(userData.birthdate || "");
+        setAge(userData.age ? `${userData.age} años` : calculateAge(userData.birthdate));
         console.log("✅ Datos obtenidos del backend");
       } else {
         throw new Error('Error obteniendo datos del usuario');
@@ -105,7 +121,7 @@ const EditProfile = () => {
           setLastname(parsedData.lastname || "");
           setEmail(parsedData.email || "");
           setBirthdate(parsedData.birthdate || "");
-          setAge(parsedData.age || "");
+          setAge(parsedData.age || calculateAge(parsedData.birthdate));
           console.log("✅ Datos cargados desde localStorage");
         } else {
           alert("Error cargando perfil. Por favor inicia sesión nuevamente.");
@@ -127,8 +143,8 @@ const EditProfile = () => {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim() || !lastname.trim()) {
-      alert("Por favor complete nombre y apellido.");
+    if (!name.trim() || !lastname.trim() || !birthdate) {
+      alert("Por favor complete nombre, apellido y fecha de nacimiento.");
       return;
     }
 
@@ -155,7 +171,7 @@ const EditProfile = () => {
         body: JSON.stringify({
           name: name.trim(),
           lastname: lastname.trim(),
-          birthdate: birthdate, // 👈 Incluir birthdate en la actualización
+          birthdate: birthdate,
         }),
       });
 
@@ -174,12 +190,13 @@ const EditProfile = () => {
           ...parsedData,
           name: name.trim(),
           lastname: lastname.trim(),
-          birthdate: birthdate
+          birthdate: birthdate,
+          age: calculateAge(birthdate)
         };
         localStorage.setItem("userData", JSON.stringify(updatedData));
       }
 
-      alert("Perfil actualizado exitosamente.");
+      alert("✅ Perfil actualizado exitosamente.");
       setIsEditing(false);
       await fetchUserData();
 
@@ -227,7 +244,7 @@ const EditProfile = () => {
   return (
     <div className="edit-profile-page">
       <button className="back-menu-btn" onClick={handleBackToMovies}>
-        menú ←
+        ← Volver al menú
       </button>
 
       <div className="edit-profile-box">
@@ -239,33 +256,33 @@ const EditProfile = () => {
 
             <div className="profile-info">
               <p className="profile-field">
-                <strong>Nombre:</strong> {name || "No disponible"}
+                <strong>👤 Nombre:</strong> {name || "No disponible"}
               </p>
               <p className="profile-field">
-                <strong>Apellido:</strong> {lastname || "No disponible"}
+                <strong>👥 Apellido:</strong> {lastname || "No disponible"}
               </p>
               <p className="profile-field">
-                <strong>Correo:</strong> {email || "No disponible"}
+                <strong>📧 Correo:</strong> {email || "No disponible"}
               </p>
               <p className="profile-field">
-                <strong>Edad:</strong> {age || "No disponible"}
+                <strong>🎂 Edad:</strong> {age || "No disponible"}
               </p>
               <p className="profile-field">
-                <strong>Fecha de nacimiento:</strong> {birthdate ? formatDateForDisplay(birthdate) : "No disponible"}
+                <strong>📅 Fecha de nacimiento:</strong> {birthdate ? formatDateForDisplay(birthdate).replace('📅 ', '') : "No disponible"}
               </p>
             </div>
 
             <div className="profile-actions">
               <button
                 type="button"
-                className="register-btn"
+                className="edit-profile-btn"
                 onClick={handleEdit}
               >
                 ✏️ Editar perfil
               </button>
               <button
                 type="button"
-                className="google-btn"
+                className="change-password-btn"
                 onClick={handleChangePassword}
               >
                 🔒 Cambiar contraseña
@@ -273,96 +290,132 @@ const EditProfile = () => {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleUpdateProfile}>
-            <input
-              type="text"
-              placeholder="Nombre"
-              className="input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-
-            <input
-              type="text"
-              placeholder="Apellido"
-              className="input"
-              value={lastname}
-              onChange={(e) => setLastname(e.target.value)}
-              required
-            />
-
-            <input
-              type="email"
-              placeholder="Correo electrónico"
-              className="input disabled"
-              value={email}
-              disabled
-              title="El correo electrónico no se puede modificar"
-            />
-
-            {/* 👈 Campo de fecha de nacimiento con modal para edición */}
-            <div className="date-input-container">
-              <button
-                type="button"
-                className="date-input-button"
-                onClick={() => setShowDatePicker(!showDatePicker)}
-              >
-                {formatDateForDisplay(birthdate)}
-              </button>
-              
-              {showDatePicker && (
-                <div className="date-picker-modal">
-                  <div className="date-picker-header">
-                    <h3>Selecciona tu fecha de nacimiento</h3>
-                    <button 
-                      type="button" 
-                      className="close-button"
-                      onClick={() => setShowDatePicker(false)}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <input
-                    type="date"
-                    className="date-input"
-                    value={birthdate}
-                    onChange={handleDateSelect}
-                    max={new Date().toISOString().split('T')[0]}
-                    required
-                  />
-                </div>
-              )}
+          <form onSubmit={handleUpdateProfile} className="edit-form">
+            <div className="form-group">
+              <label htmlFor="name">Nombre</label>
+              <input
+                id="name"
+                type="text"
+                placeholder="Tu nombre"
+                className="input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+            <div className="form-group">
+              <label htmlFor="lastname">Apellido</label>
+              <input
+                id="lastname"
+                type="text"
+                placeholder="Tu apellido"
+                className="input"
+                value={lastname}
+                onChange={(e) => setLastname(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="email">Correo electrónico</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="Tu correo electrónico"
+                className="input disabled"
+                value={email}
+                disabled
+                title="El correo electrónico no se puede modificar"
+              />
+            </div>
+
+            {/* Mejorado: Campo de fecha de nacimiento con modal */}
+            <div className="form-group">
+              <label htmlFor="birthdate">Fecha de nacimiento</label>
+              <div className="date-input-wrapper">
+                <button
+                  type="button"
+                  id="birthdate"
+                  className={`date-input-button ${birthdate ? 'has-value' : ''}`}
+                  onClick={() => setShowDatePicker(true)}
+                >
+                  {formatDateForDisplay(birthdate)}
+                </button>
+                
+                {showDatePicker && (
+                  <>
+                    <div className="modal-overlay" onClick={() => setShowDatePicker(false)} />
+                    <div className="date-picker-modal">
+                      <div className="date-picker-header">
+                        <h3>🎂 Selecciona tu fecha de nacimiento</h3>
+                        <button 
+                          type="button" 
+                          className="close-button"
+                          onClick={() => setShowDatePicker(false)}
+                          aria-label="Cerrar"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <div className="date-picker-content">
+                        <input
+                          type="date"
+                          className="date-input-field"
+                          value={birthdate}
+                          onChange={handleDateSelect}
+                          max={new Date().toISOString().split('T')[0]}
+                          required
+                        />
+                        {birthdate && (
+                          <div className="age-preview">
+                            <span>📊 Edad calculada: <strong>{calculateAge(birthdate)}</strong></span>
+                          </div>
+                        )}
+                        <div className="date-picker-actions">
+                          <button
+                            type="button"
+                            className="cancel-date-btn"
+                            onClick={() => setShowDatePicker(false)}
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="button"
+                            className="confirm-date-btn"
+                            onClick={confirmDateSelection}
+                            disabled={!birthdate}
+                          >
+                            Confirmar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="form-actions">
               <button
                 type="submit"
-                className="register-btn"
+                className="save-btn"
                 disabled={saving}
               >
-                {saving ? 'Guardando...' : '💾 Guardar'}
+                {saving ? '⏳ Guardando...' : '💾 Guardar cambios'}
               </button>
               <button
                 type="button"
-                className="google-btn"
+                className="cancel-btn"
                 onClick={handleCancel}
                 disabled={saving}
               >
-               ❌ Cancelar
+                ❌ Cancelar
               </button>
             </div>
           </form>
         )}
       </div>
-
-      {/* Overlay para cerrar el modal */}
-      {showDatePicker && (
-        <div 
-          className="modal-overlay" 
-          onClick={() => setShowDatePicker(false)}
-        />
-      )}
     </div>
   );
 };

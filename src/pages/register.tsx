@@ -21,6 +21,13 @@ const Register = () => {
    */
   const handleDateSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBirthdate(e.target.value);
+    // No cerrar automáticamente, dejar que el usuario confirme
+  };
+
+  /**
+   * Confirms the selected date and closes the picker
+   */
+  const confirmDateSelection = () => {
     setShowDatePicker(false);
   };
 
@@ -28,13 +35,28 @@ const Register = () => {
    * Formats date for display
    */
   const formatDateForDisplay = (dateString: string) => {
-    if (!dateString) return "Seleccionar fecha de nacimiento";
+    if (!dateString) return "📅 Seleccionar fecha de nacimiento";
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
+    return `📅 ${date.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
-    });
+    })}`;
+  };
+
+  /**
+   * Calculate age from birthdate
+   */
+  const calculateAge = (birthDate: string): number => {
+    if (!birthDate) return 0;
+    const birth = new Date(birthDate);
+    const today = new Date();
+    let years = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      years--;
+    }
+    return years;
   };
 
   /**
@@ -54,12 +76,8 @@ const Register = () => {
     }
 
     // Validar que la fecha de nacimiento sea válida (al menos 5 años)
-    const birthDate = new Date(birthdate);
-    const today = new Date();
-    const minDate = new Date();
-    minDate.setFullYear(today.getFullYear() - 5); // Mínimo 5 años
-    
-    if (birthDate > minDate) {
+    const age = calculateAge(birthdate);
+    if (age < 5) {
       alert("Debes tener al menos 5 años para registrarte.");
       return;
     }
@@ -124,37 +142,79 @@ const Register = () => {
             required
           />
 
-          {/* 👈 Campo de fecha de nacimiento con modal */}
+          {/* 👈 Campo de fecha de nacimiento con modal MEJORADO */}
           <div className="date-input-container">
             <button
               type="button"
-              className="date-input-button"
-              onClick={() => setShowDatePicker(!showDatePicker)}
+              className={`date-input-button ${birthdate ? 'has-value' : ''}`}
+              onClick={() => setShowDatePicker(true)}
             >
               {formatDateForDisplay(birthdate)}
             </button>
             
             {showDatePicker && (
-              <div className="date-picker-modal">
-                <div className="date-picker-header">
-                  <h3>Selecciona tu fecha de nacimiento</h3>
-                  <button 
-                    type="button" 
-                    className="close-button"
-                    onClick={() => setShowDatePicker(false)}
-                  >
-                    ✕
-                  </button>
-                </div>
-                <input
-                  type="date"
-                  className="date-input"
-                  value={birthdate}
-                  onChange={handleDateSelect}
-                  max={new Date().toISOString().split('T')[0]}
-                  required
+              <>
+                <div 
+                  className="modal-overlay" 
+                  onClick={() => setShowDatePicker(false)}
                 />
-              </div>
+                <div className="date-picker-modal">
+                  <div className="date-picker-header">
+                    <h3>🎂 Selecciona tu fecha de nacimiento</h3>
+                    <button 
+                      type="button" 
+                      className="close-button"
+                      onClick={() => setShowDatePicker(false)}
+                      aria-label="Cerrar selector de fecha"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  
+                  <div className="date-picker-content">
+                    <input
+                      type="date"
+                      className="date-input"
+                      value={birthdate}
+                      onChange={handleDateSelect}
+                      max={new Date().toISOString().split('T')[0]}
+                      required
+                    />
+                    
+                    {birthdate && (
+                      <div className="age-preview">
+                        <p>
+                          <strong>Edad calculada:</strong> {calculateAge(birthdate)} años
+                          {calculateAge(birthdate) < 5 && (
+                            <span className="age-warning"> ❌ (Mínimo 5 años)</span>
+                          )}
+                        </p>
+                      </div>
+                    )}
+                    
+                    <div className="date-picker-actions">
+                      <button
+                        type="button"
+                        className="cancel-date-btn"
+                        onClick={() => {
+                          setBirthdate("");
+                          setShowDatePicker(false);
+                        }}
+                      >
+                        Limpiar
+                      </button>
+                      <button
+                        type="button"
+                        className="confirm-date-btn"
+                        onClick={confirmDateSelection}
+                        disabled={!birthdate || calculateAge(birthdate) < 5}
+                      >
+                        {calculateAge(birthdate) < 5 ? 'Edad insuficiente' : 'Confirmar fecha'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
@@ -210,14 +270,6 @@ const Register = () => {
           ¿Ya tiene cuenta? <Link to="/">Inicie sesión</Link>
         </p>
       </div>
-
-      {/* Overlay para cerrar el modal */}
-      {showDatePicker && (
-        <div 
-          className="modal-overlay" 
-          onClick={() => setShowDatePicker(false)}
-        />
-      )}
     </div>
   );
 };
