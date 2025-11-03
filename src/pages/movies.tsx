@@ -324,6 +324,14 @@ const MoviesPage: React.FC = () => {
                             <button
                               className="movies__favorite-btn"
                               onClick={() => addToFavorites(movie)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                fontSize: "1.5rem",
+                                cursor: "pointer",
+                                color: "#dc2626",
+                                padding: "0.5rem"
+                               }}
                             >
                               ❤️ Favorito
                             </button>
