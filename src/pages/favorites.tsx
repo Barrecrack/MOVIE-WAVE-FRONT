@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../styles/favorites.sass";
 import { useNavigate } from "react-router-dom";
+import VideoModal from "../components/video-modal.tsx";
 
 interface FavoriteItem {
   id_favorito: string;
@@ -34,6 +35,8 @@ const FavoritesPage: React.FC = () => {
   const [videoData, setVideoData] = useState<{[key: string]: VideoData}>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<VideoData | null>(null); // 🔥 ESTADO PARA EL MODAL
+  const [showModal, setShowModal] = useState(false); // 🔥 CONTROLAR MODAL
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -195,17 +198,25 @@ const FavoritesPage: React.FC = () => {
   };
 
   /**
-   * Abre el video en el modal
+   * 🔥 ABRE EL MODAL DEL VIDEO
    */
   const abrirVideo = (favorito: FavoriteItem) => {
     if (favorito.Contenido?.id_externo) {
       const videoInfo = videoData[favorito.Contenido.id_externo];
       if (videoInfo) {
-        // Aquí puedes implementar la lógica para abrir el modal
-        console.log("Abrir video:", videoInfo);
-        alert(`Abriendo: ${videoInfo.title}`);
+        console.log("Abriendo video modal:", videoInfo);
+        setSelectedVideo(videoInfo);
+        setShowModal(true);
       }
     }
+  };
+
+  /**
+   * 🔥 CIERRA EL MODAL
+   */
+  const cerrarModal = () => {
+    setShowModal(false);
+    setSelectedVideo(null);
   };
 
   // Helper functions usando la información de Pexels
@@ -246,6 +257,14 @@ const FavoritesPage: React.FC = () => {
 
   return (
     <div className="favorites-page">
+      {/* 🔥 MODAL DEL VIDEO */}
+      {showModal && selectedVideo && (
+        <VideoModal 
+          videoId={selectedVideo.id} 
+          alCerrar={cerrarModal} 
+        />
+      )}
+
       <header className="favorites-header">
         <h2 className="favorites-title">Mis Películas Favoritas</h2>
         <button className="back-btn" onClick={() => navigate("/movies")}>
