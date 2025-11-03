@@ -28,18 +28,9 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   const [availableSubtitles, setAvailableSubtitles] = useState<SubtitleTrack[]>([]);
   const [subtitlesLoading, setSubtitlesLoading] = useState(false);
 
-  // 🔥 Obtener token de autenticación
+  // 🔥 Obtener token de autenticación (MANTENIENDO TU CÓDIGO ORIGINAL)
   const getAuthToken = (): string | null => {
-    const tokenData = localStorage.getItem('supabase.auth.token');
-    if (!tokenData) return null;
-    
-    try {
-      const parsed = JSON.parse(tokenData);
-      return parsed.currentSession?.access_token || null;
-    } catch (error) {
-      console.error('Error parsing token:', error);
-      return null;
-    }
+    return localStorage.getItem('supabase.auth.token');
   };
 
   // 🔥 NUEVO: Verificar calificación del usuario desde backend
@@ -47,7 +38,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     try {
       const token = getAuthToken();
       if (!token) {
-        console.log('🔐 No hay token, no se puede verificar calificación');
         setHasUserRated(false);
         setUserRating(null);
         setUserComment("");
@@ -55,8 +45,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
       }
 
       const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-      console.log('🔍 Verificando calificación para video:', videoId);
-      
       const response = await fetch(`${API_BASE}/api/ratings/user/${videoId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -65,25 +53,18 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('📊 Datos de calificación recibidos:', data);
-        
         if (data.hasRating && data.calificacion) {
           setUserRating(data.calificacion.puntuacion);
           setUserComment(data.calificacion.comentario || "");
           setHasUserRated(true);
-          console.log('✅ Usuario ya calificó este video:', data.calificacion.puntuacion, 'estrellas');
         } else {
           setHasUserRated(false);
           setUserRating(null);
           setUserComment("");
-          console.log('ℹ️ Usuario no ha calificado este video');
         }
-      } else {
-        console.error('❌ Error en respuesta de calificación:', response.status);
-        setHasUserRated(false);
       }
     } catch (error) {
-      console.error('💥 Error verificando calificación:', error);
+      console.error('Error verificando calificación:', error);
       setHasUserRated(false);
     }
   };
@@ -94,12 +75,10 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
       const token = getAuthToken();
       if (!token) {
         alert('Debes iniciar sesión para calificar');
-        return false;
+        return;
       }
 
       const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-
-      console.log('💾 Guardando calificación:', { puntuacion, comentario, videoId });
 
       const response = await fetch(`${API_BASE}/api/ratings`, {
         method: 'POST',
@@ -115,21 +94,18 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
       });
 
       const responseData = await response.json();
-      console.log('📨 Respuesta del servidor:', responseData);
 
       if (response.ok) {
         setHasUserRated(true);
         setUserRating(puntuacion);
         setUserComment(comentario);
-        console.log('✅ Calificación guardada correctamente');
-        return true;
+        alert(`✅ ${hasUserRated ? 'Calificación actualizada' : 'Calificación guardada'} correctamente`);
       } else {
         throw new Error(responseData.error || 'Error al guardar calificación');
       }
     } catch (error: any) {
-      console.error('💥 Error guardando calificación:', error);
+      console.error('Error guardando calificación:', error);
       alert("Error al guardar calificación: " + error.message);
-      return false;
     }
   };
 
@@ -143,8 +119,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
       }
 
       const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
-      console.log('🗑️ Eliminando calificación para video:', videoId);
-
       const response = await fetch(`${API_BASE}/api/ratings/${videoId}`, {
         method: 'DELETE',
         headers: {
@@ -156,27 +130,19 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
         setHasUserRated(false);
         setUserRating(null);
         setUserComment("");
-        console.log('✅ Calificación eliminada correctamente');
         alert("🗑️ Calificación eliminada");
       } else {
         throw new Error('Error al eliminar calificación');
       }
     } catch (error: any) {
-      console.error('💥 Error eliminando calificación:', error);
+      console.error('Error eliminando calificación:', error);
       alert("Error al eliminar calificación");
     }
   };
 
   // 🔥 NUEVO: Manejo de calificación con backend
   const handleRating = async (value: number) => {
-    console.log('⭐ Calificación seleccionada:', value);
-    setUserRating(value);
-    
-    // Guardar inmediatamente la calificación
-    const success = await saveRating(value, userComment);
-    if (success) {
-      alert(`🌟 Calificaste la película con ${value} estrella${value > 1 ? "s" : ""}`);
-    }
+    await saveRating(value, userComment);
   };
 
   // 🔥 NUEVO: Manejo de comentarios con backend
@@ -184,10 +150,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     if (userComment.trim() !== "") {
       if (userRating) {
         // Si ya tiene calificación, actualizar con el comentario
-        const success = await saveRating(userRating, userComment);
-        if (success) {
-          alert("💬 Comentario guardado correctamente");
-        }
+        await saveRating(userRating, userComment);
       } else {
         alert("⚠️ Primero califica la película con estrellas");
       }
@@ -201,7 +164,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     setUserComment(e.target.value);
   };
 
-  // 🔥 NUEVO: Verificar si el video está en favoritos (BACKEND)
+  // 🔥 NUEVO: Verificar si el video está en favoritos (BACKEND) - TU CÓDIGO ORIGINAL
   const checkIfFavorite = async () => {
     try {
       const token = getAuthToken();
@@ -227,6 +190,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
+  // 🔥 TU CÓDIGO ORIGINAL PARA FAVORITOS
   const addToFavorites = async () => {
     try {
       const token = getAuthToken();
@@ -274,7 +238,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  // 🔥 NUEVO: Eliminar de favoritos (BACKEND)
+  // 🔥 TU CÓDIGO ORIGINAL: Eliminar de favoritos (BACKEND)
   const removeFromFavorites = async () => {
     try {
       const token = getAuthToken();
@@ -566,7 +530,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
           </div>
         )}
 
-        {/* FAVORITOS CON BACKEND */}
+        {/* FAVORITOS CON BACKEND - TU CÓDIGO ORIGINAL */}
         <div className="video-modal__actions">
           {isFavorite ? (
             <button className="fav-btn remove" onClick={removeFromFavorites}>
