@@ -20,7 +20,19 @@ const EditProfile = () => {
     fetchUserData();
   }, []);
 
-  const getAuthToken = (): string | null => localStorage.getItem("supabase.auth.token");
+  const getAuthToken = (): string | null => {
+    return localStorage.getItem("supabase.auth.token");
+  };
+
+  const formatDateForDisplay = (dateString: string) => {
+    if (!dateString) return "📅 Seleccionar fecha de nacimiento";
+    const date = new Date(dateString);
+    return `📅 ${date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })}`;
+  };
 
   const calculateAge = (birthDate: string): string => {
     if (!birthDate) return "";
@@ -28,36 +40,65 @@ const EditProfile = () => {
     const today = new Date();
     let years = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) years--;
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      years--;
+    }
     return `${years} años`;
   };
 
   const fetchUserData = async () => {
     try {
+      console.log("🔹 Obteniendo datos del usuario desde el backend...");
+
       const token = getAuthToken();
       if (!token) {
+        console.error("❌ No hay token disponible");
         alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
         navigate("/");
         return;
       }
 
-      const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+      const API_URL =
+        import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
       const response = await fetch(`${API_URL}/api/user-profile`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      if (!response.ok) throw new Error("Error obteniendo datos del usuario");
+      if (response.ok) {
+        const userData = await response.json();
+        setName(userData.name || "");
+        setLastname(userData.lastname || "");
+        setEmail(userData.email || "");
+        setBirthdate(userData.birthdate || "");
+        setAge(userData.age ? `${userData.age} años` : calculateAge(userData.birthdate));
+        console.log("✅ Datos obtenidos del backend");
+      } else {
+        throw new Error("Error obteniendo datos del usuario");
+      }
+    } catch (error: any) {
+      console.error("❌ Error cargando datos:", error);
 
-      const userData = await response.json();
-      setName(userData.name || "");
-      setLastname(userData.lastname || "");
-      setEmail(userData.email || "");
-      setBirthdate(userData.birthdate || "");
-      setAge(userData.birthdate ? calculateAge(userData.birthdate) : "");
-    } catch (error) {
-      console.error(error);
-      alert("Error cargando perfil. Por favor inicia sesión nuevamente.");
-      navigate("/");
+      try {
+        const storedData = localStorage.getItem("userData");
+        if (storedData) {
+          const parsedData = JSON.parse(storedData);
+          setName(parsedData.name || "");
+          setLastname(parsedData.lastname || "");
+          setEmail(parsedData.email || "");
+          setBirthdate(parsedData.birthdate || "");
+          setAge(parsedData.age || calculateAge(parsedData.birthdate));
+          console.log("✅ Datos cargados desde localStorage");
+        } else {
+          alert("Error cargando perfil. Por favor inicia sesión nuevamente.");
+          navigate("/");
+        }
+      } catch (localError) {
+        console.error("Error con localStorage:", localError);
+        alert("Error cargando perfil. Por favor inicia sesión nuevamente.");
+        navigate("/");
+      }
     } finally {
       setLoading(false);
     }
@@ -65,6 +106,7 @@ const EditProfile = () => {
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!name.trim() || !lastname.trim() || !birthdate) {
       alert("Por favor complete nombre, apellido y fecha de nacimiento.");
       return;
@@ -72,41 +114,70 @@ const EditProfile = () => {
 
     setSaving(true);
     try {
+      console.log("🔹 Actualizando perfil...");
+
       const token = getAuthToken();
       if (!token) {
-        alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
+        alert("Tu sesión ha expirado. Por favor inicia sesión de nuevo.");
         navigate("/");
         return;
       }
 
-      const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+      const API_URL =
+        import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
+      console.log("🔹 Enviando solicitud a:", `${API_URL}/api/update-user`);
+
       const response = await fetch(`${API_URL}/api/update-user`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name, lastname, birthdate }),
+        body: JSON.stringify({
+          name: name.trim(),
+          lastname: lastname.trim(),
+          birthdate: birthdate,
+        }),
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error al actualizar el perfil.");
+      console.log("📨 Respuesta del servidor:", data);
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al actualizar el perfil.");
+      }
+
+      const userData = localStorage.getItem("userData");
+      if (userData) {
+        const parsedData = JSON.parse(userData);
+        const updatedData = {
+          ...parsedData,
+          name: name.trim(),
+          lastname: lastname.trim(),
+          birthdate: birthdate,
+          age: calculateAge(birthdate),
+        };
+        localStorage.setItem("userData", JSON.stringify(updatedData));
+      }
 
       alert("✅ Perfil actualizado exitosamente.");
       setIsEditing(false);
       await fetchUserData();
     } catch (error: any) {
-      console.error(error);
+      console.error("❌ Error actualizando perfil:", error);
       alert(error.message || "Error al conectar con el servidor.");
     } finally {
       setSaving(false);
     }
   };
 
+  const handleEdit = () => setIsEditing(true);
   const handleCancel = () => {
     setIsEditing(false);
     fetchUserData();
   };
+  const handleBackToMovies = () => navigate("/movies");
+  const handleChangePassword = () => navigate("/forgot");
 
   if (loading) {
     return (
@@ -121,7 +192,7 @@ const EditProfile = () => {
 
   return (
     <div className="edit-profile-page">
-      <button className="back-menu-btn" onClick={() => navigate("/movies")}>
+      <button className="back-menu-btn" onClick={handleBackToMovies}>
         ← Volver al menú
       </button>
 
@@ -133,24 +204,43 @@ const EditProfile = () => {
             <img src="/images/user.png" className="img-user" alt="foto de perfil" />
 
             <div className="profile-info">
-              <p><strong>👤 Nombre:</strong> {name}</p>
-              <p><strong>👥 Apellido:</strong> {lastname}</p>
-              <p><strong>📧 Correo:</strong> {email}</p>
-              <p><strong>🎂 Edad:</strong> {age}</p>
-              <p><strong>📅 Fecha de nacimiento:</strong> {birthdate}</p>
+              <p>
+                <strong>👤 Nombre:</strong> {name || "No disponible"}
+              </p>
+              <p>
+                <strong>👥 Apellido:</strong> {lastname || "No disponible"}
+              </p>
+              <p>
+                <strong>📧 Correo:</strong> {email || "No disponible"}
+              </p>
+              <p>
+                <strong>🎂 Edad:</strong> {age || "No disponible"}
+              </p>
+              <p>
+                <strong>📅 Fecha de nacimiento:</strong>{" "}
+                {birthdate
+                  ? formatDateForDisplay(birthdate).replace("📅 ", "")
+                  : "No disponible"}
+              </p>
             </div>
 
             <div className="profile-actions">
-              <button onClick={() => setIsEditing(true)}>✏️ Editar perfil</button>
-              <button onClick={() => navigate("/forgot")}>🔒 Cambiar contraseña</button>
+              <button type="button" onClick={handleEdit}>
+                ✏️ Editar perfil
+              </button>
+              <button type="button" onClick={handleChangePassword}>
+                🔒 Cambiar contraseña
+              </button>
             </div>
           </div>
         ) : (
           <form onSubmit={handleUpdateProfile} className="edit-form">
             <div className="form-group">
-              <label>Nombre</label>
+              <label htmlFor="name">Nombre</label>
               <input
+                id="name"
                 type="text"
+                className="input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -158,9 +248,11 @@ const EditProfile = () => {
             </div>
 
             <div className="form-group">
-              <label>Apellido</label>
+              <label htmlFor="lastname">Apellido</label>
               <input
+                id="lastname"
                 type="text"
+                className="input"
                 value={lastname}
                 onChange={(e) => setLastname(e.target.value)}
                 required
@@ -168,9 +260,24 @@ const EditProfile = () => {
             </div>
 
             <div className="form-group">
-              <label>Fecha de nacimiento</label>
+              <label htmlFor="email">Correo electrónico</label>
+              <input
+                id="email"
+                type="email"
+                className="input disabled"
+                value={email}
+                disabled
+                title="El correo electrónico no se puede modificar"
+              />
+            </div>
+
+            {/* 🔹 Nuevo selector de fecha simplificado (sin modal) */}
+            <div className="form-group">
+              <label htmlFor="birthdate">Fecha de nacimiento</label>
               <input
                 type="date"
+                id="birthdate"
+                className="input"
                 value={birthdate}
                 onChange={(e) => {
                   setBirthdate(e.target.value);
@@ -187,10 +294,15 @@ const EditProfile = () => {
             </div>
 
             <div className="form-actions">
-              <button type="submit" disabled={saving}>
+              <button type="submit" className="save-btn" disabled={saving}>
                 {saving ? "⏳ Guardando..." : "💾 Guardar cambios"}
               </button>
-              <button type="button" onClick={handleCancel} disabled={saving}>
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={handleCancel}
+                disabled={saving}
+              >
                 ❌ Cancelar
               </button>
             </div>
