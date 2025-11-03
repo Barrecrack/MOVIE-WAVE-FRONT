@@ -181,8 +181,8 @@ const MoviesPage: React.FC = () => {
           Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          id_contenido: movie.id,
-          movie_data: { // ❗ Pasar datos adicionales de la película
+          id_externo: movie.id.toString(), // ❗ CAMBIO AQUÍ
+          movie_data: {
             title: movie.title,
             poster: movie.poster,
             genre: movie.genre,
@@ -271,7 +271,7 @@ const MoviesPage: React.FC = () => {
 
         <nav className="sidebar-nav">
           <button onClick={() => navigate("/profile")}>👤 Perfil</button>
-          <button onClick={() => navigate("/favorites")}>⭐ Favoritos</button>
+          <button onClick={() => navigate("/favorites")}>❤️ Favoritos</button>
           <button onClick={() => navigate("/about")}>ℹ️ Sobre nosotros</button>
           <button onClick={() => navigate("/deleteaccount")}>🗑️ Eliminar cuenta</button>
           <button onClick={() => navigate("/")} className="logout">🚪 Cerrar sesión</button>
@@ -331,7 +331,7 @@ const MoviesPage: React.FC = () => {
                                 cursor: "pointer",
                                 color: "#dc2626",
                                 padding: "0.5rem"
-                               }}
+                              }}
                             >
                               ❤️ Favorito
                             </button>
