@@ -325,7 +325,7 @@ const MoviesPage: React.FC = () => {
                               className="movies__favorite-btn"
                               onClick={() => addToFavorites(movie)}
                             >
-                              ⭐ Favorito
+                              ❤️ Favorito
                             </button>
                           </div>
                         </div>
