@@ -69,8 +69,8 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  // 🔥 NUEVO: Guardar calificación en backend
-  const saveRating = async (puntuacion: number, comentario: string) => {
+  // 🔥 ACTUALIZADO: Guardar calificación en backend - AHORA PERMITE GUARDAR PARCIALMENTE
+  const saveRating = async (puntuacion: number | null, comentario: string | null) => {
     try {
       const token = getAuthToken();
       if (!token) {
@@ -80,25 +80,49 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
 
       const API_BASE = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
 
+      // 🔥 PREPARAR DATOS PARA ENVIAR (permitir valores null)
+      const ratingData: any = {
+        id_contenido: videoId
+      };
+
+      // Solo incluir puntuación si no es null
+      if (puntuacion !== null) {
+        ratingData.puntuacion = puntuacion;
+      }
+
+      // Solo incluir comentario si no es null
+      if (comentario !== null) {
+        ratingData.comentario = comentario;
+      }
+
+      // 🔥 VALIDACIÓN: Al menos uno de los dos debe tener valor
+      if (puntuacion === null && comentario === null) {
+        alert("⚠️ Debes proporcionar al menos una calificación o un comentario");
+        return;
+      }
+
       const response = await fetch(`${API_BASE}/api/ratings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          id_contenido: videoId,
-          puntuacion: puntuacion,
-          comentario: comentario
-        })
+        body: JSON.stringify(ratingData)
       });
 
       const responseData = await response.json();
 
       if (response.ok) {
         setHasUserRated(true);
-        setUserRating(puntuacion);
-        setUserComment(comentario);
+        
+        // 🔥 ACTUALIZAR SOLO LOS CAMPOS QUE SE ENVIARON
+        if (puntuacion !== null) {
+          setUserRating(puntuacion);
+        }
+        if (comentario !== null) {
+          setUserComment(comentario);
+        }
+        
         alert(`✅ ${hasUserRated ? 'Calificación actualizada' : 'Calificación guardada'} correctamente`);
       } else {
         throw new Error(responseData.error || 'Error al guardar calificación');
@@ -140,26 +164,21 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  // 🔥 NUEVO: Manejo de calificación con backend
+  // 🔥 ACTUALIZADO: Manejo de calificación - AHORA GUARDA SOLO LA CALIFICACIÓN
   const handleRating = async (value: number) => {
-    await saveRating(value, userComment);
+    await saveRating(value, null); // 🔥 Solo calificación, comentario = null
   };
 
-  // 🔥 NUEVO: Manejo de comentarios con backend
+  // 🔥 ACTUALIZADO: Manejo de comentarios - AHORA GUARDA SOLO EL COMENTARIO
   const handleCommentSubmit = async () => {
     if (userComment.trim() !== "") {
-      if (userRating) {
-        // Si ya tiene calificación, actualizar con el comentario
-        await saveRating(userRating, userComment);
-      } else {
-        alert("⚠️ Primero califica la película con estrellas");
-      }
+      await saveRating(null, userComment.trim()); // 🔥 Solo comentario, puntuación = null
     } else {
       alert("⚠️ Escribe un comentario antes de enviar");
     }
   };
 
-  // 🔥 NUEVO: Manejo de cambio de comentario
+  // 🔥 NUEVO: Manejo de cambio de comentario (sin cambios)
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setUserComment(e.target.value);
   };
@@ -604,8 +623,13 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
             }}
           />
           <button onClick={handleCommentSubmit} className="fav-btn add">
-            {hasUserRated ? "💾 Actualizar comentario" : "💬 Guardar comentario"}
+            {userComment ? "💾 Guardar comentario" : "🗑️ Eliminar comentario"}
           </button>
+          {userComment && (
+            <p style={{ fontSize: "0.8rem", color: "#666", marginTop: "0.5rem" }}>
+              💡 Puedes guardar solo el comentario sin necesidad de calificar primero
+            </p>
+          )}
         </div>
       </div>
     </div>
