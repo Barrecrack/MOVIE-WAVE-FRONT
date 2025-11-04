@@ -28,12 +28,12 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   const [availableSubtitles, setAvailableSubtitles] = useState<SubtitleTrack[]>([]);
   const [subtitlesLoading, setSubtitlesLoading] = useState(false);
 
-  // 🔥 Obtener token de autenticación (MANTENIENDO TU CÓDIGO ORIGINAL)
+  // 🔥 Obtener token de autenticación
   const getAuthToken = (): string | null => {
     return localStorage.getItem('supabase.auth.token');
   };
 
-  // 🔥 NUEVO: Verificar calificación del usuario desde backend
+  // 🔥 Verificar calificación del usuario desde backend
   const checkUserRating = async () => {
     try {
       const token = getAuthToken();
@@ -69,7 +69,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  // 🔥 ACTUALIZADO: Guardar calificación en backend - AHORA PERMITE GUARDAR PARCIALMENTE
+  // 🔥 ACTUALIZADO: Guardar calificación en backend - PERMITE GUARDAR PARCIALMENTE
   const saveRating = async (puntuacion: number | null, comentario: string | null) => {
     try {
       const token = getAuthToken();
@@ -133,7 +133,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  // 🔥 NUEVO: Eliminar calificación
+  // 🔥 Eliminar calificación
   const deleteRating = async () => {
     try {
       const token = getAuthToken();
@@ -164,12 +164,12 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  // 🔥 ACTUALIZADO: Manejo de calificación - AHORA GUARDA SOLO LA CALIFICACIÓN
+  // 🔥 ACTUALIZADO: Manejo de calificación - GUARDA SOLO LA CALIFICACIÓN
   const handleRating = async (value: number) => {
     await saveRating(value, null); // 🔥 Solo calificación, comentario = null
   };
 
-  // 🔥 ACTUALIZADO: Manejo de comentarios - AHORA GUARDA SOLO EL COMENTARIO
+  // 🔥 ACTUALIZADO: Manejo de comentarios - GUARDA SOLO EL COMENTARIO
   const handleCommentSubmit = async () => {
     if (userComment.trim() !== "") {
       await saveRating(null, userComment.trim()); // 🔥 Solo comentario, puntuación = null
@@ -178,12 +178,12 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  // 🔥 NUEVO: Manejo de cambio de comentario (sin cambios)
+  // 🔥 Manejo de cambio de comentario
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setUserComment(e.target.value);
   };
 
-  // 🔥 NUEVO: Verificar si el video está en favoritos (BACKEND) - TU CÓDIGO ORIGINAL
+  // 🔥 Verificar si el video está en favoritos (BACKEND)
   const checkIfFavorite = async () => {
     try {
       const token = getAuthToken();
@@ -209,7 +209,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  // 🔥 TU CÓDIGO ORIGINAL PARA FAVORITOS
+  // 🔥 CÓDIGO ORIGINAL PARA FAVORITOS
   const addToFavorites = async () => {
     try {
       const token = getAuthToken();
@@ -257,7 +257,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
     }
   };
 
-  // 🔥 TU CÓDIGO ORIGINAL: Eliminar de favoritos (BACKEND)
+  // 🔥 Eliminar de favoritos (BACKEND)
   const removeFromFavorites = async () => {
     try {
       const token = getAuthToken();
@@ -287,7 +287,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   };
 
   // ===============================
-  // CÓDIGO ORIGINAL (sin cambios)
+  // CÓDIGO ORIGINAL PARA CARGAR VIDEO (MANTENIENDO ESTRUCTURA ORIGINAL)
   // ===============================
   useEffect(() => {
     const fetchVideo = async () => {
@@ -403,7 +403,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
   };
 
   // ===============================
-  // RENDER MEJORADO
+  // RENDER MEJORADO (MANTENIENDO ESTRUCTURA ORIGINAL PARA CARÁTULA)
   // ===============================
   if (loading) {
     return (
@@ -443,7 +443,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
               controls
               src={videoData.videoUrl}
               className="video-modal__video"
-              poster={videoData.poster}
+              poster={videoData.poster} 
             >
               {availableSubtitles.map((track) => (
                 <track
@@ -541,7 +541,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
         ) : (
           <div style={{ textAlign: "center", padding: "2rem" }}>
             <img
-              src={videoData.poster || "/images/default-movie.jpg"}
+              src={videoData.poster || "/images/default-movie.jpg"} 
               alt={videoData.title}
               style={{ maxWidth: "300px", width: "100%", borderRadius: "8px", marginBottom: "1rem" }}
             />
@@ -549,7 +549,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoId, alCerrar }) => {
           </div>
         )}
 
-        {/* FAVORITOS CON BACKEND - TU CÓDIGO ORIGINAL */}
+        {/* FAVORITOS CON BACKEND */}
         <div className="video-modal__actions">
           {isFavorite ? (
             <button className="fav-btn remove" onClick={removeFromFavorites}>
