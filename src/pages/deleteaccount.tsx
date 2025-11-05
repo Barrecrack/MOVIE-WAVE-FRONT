@@ -1,10 +1,18 @@
+/**
+ * @file deleteaccount.tsx
+ * @description React component that manages the user account deletion process.
+ * Displays a confirmation prompt and handles API communication to permanently remove the user account.
+ */
 import React, { useState } from "react";
 import "../styles/deleteaccount.sass";
 import { useNavigate } from "react-router-dom";
 
 /**
- * Apartado de eliminación de cuenta de usuario.
- * Muestra una caja con confirmación antes de proceder.
+ * DeleteAccount component handles the UI and logic for deleting a user's account.
+ * It provides confirmation prompts and communicates with the backend API to execute the deletion.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered Delete Account interface.
  */
 const DeleteAccount: React.FC = () => {
   const [confirming, setConfirming] = useState(false);
@@ -13,12 +21,24 @@ const DeleteAccount: React.FC = () => {
   const navigate = useNavigate();
 
   /**
-   * Gets the authentication token from localStorage
+   * Retrieves the current authentication token from localStorage.
+   *
+   * @private
+   * @returns {string | null} The stored Supabase authentication token, or null if not found.
    */
   const getAuthToken = (): string | null => {
     return localStorage.getItem('supabase.auth.token');
   };
 
+  /**
+   * Handles the complete process of account deletion.
+   * Sends a DELETE request to the backend API, clears localStorage, and redirects the user.
+   * Displays alerts and logs status messages throughout the process.
+   *
+   * @async
+   * @private
+   * @returns {Promise<void>} Resolves once the account deletion process finishes.
+   */
   const handleDeleteAccount = async () => {
     try {
       setLoading(true);
@@ -32,7 +52,7 @@ const DeleteAccount: React.FC = () => {
       const API_URL = import.meta.env.VITE_API_URL || "https://movie-wave-ocyd.onrender.com";
 
       console.log("🔹 Enviando solicitud de eliminación de cuenta...");
-      const response = await fetch(`${API_URL}/api/delete-account`, { // ❌ CAMBIAR ESTA LÍNEA
+      const response = await fetch(`${API_URL}/api/delete-account`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -46,7 +66,6 @@ const DeleteAccount: React.FC = () => {
         throw new Error(data.error || "Error al eliminar la cuenta.");
       }
 
-      // Limpiar localStorage después de eliminar la cuenta
       localStorage.removeItem("supabase.auth.token");
       localStorage.removeItem("userData");
       localStorage.removeItem("token");

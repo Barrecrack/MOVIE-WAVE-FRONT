@@ -1,8 +1,29 @@
+/**
+ * @file favorites.tsx
+ * @description Displays the user's favorite movies, allowing playback and removal. Integrates Supabase authentication and Pexels video data retrieval.
+ * @module pages/favorites
+ */
 import React, { useEffect, useState } from "react";
 import "../styles/favorites.sass";
 import { useNavigate } from "react-router-dom";
 import VideoModal from "../components/video-modal.tsx";
 
+/**
+ * @typedef {Object} FavoriteItem
+ * @property {string} id_favorito - Unique favorite ID.
+ * @property {string} id_usuario - User ID.
+ * @property {string} id_contenido - Linked content ID.
+ * @property {string} fecha_agregado - Date when the favorite was added.
+ * @property {Object} [Contenido] - Associated content metadata.
+ * @property {string} Contenido.id_contenido
+ * @property {string} Contenido.id_externo
+ * @property {string} Contenido.titulo
+ * @property {string} Contenido.descripcion
+ * @property {string} Contenido.duracion
+ * @property {string} Contenido.tipo
+ * @property {string} Contenido.fecha
+ * @property {number} Contenido.calificacion
+ */
 interface FavoriteItem {
   id_favorito: string;
   id_usuario: string;
@@ -10,7 +31,7 @@ interface FavoriteItem {
   fecha_agregado: string;
   Contenido?: {
     id_contenido: string;
-    id_externo: string; // ID de Pexels
+    id_externo: string;
     titulo: string;
     descripcion: string;
     duracion: string;
@@ -20,6 +41,16 @@ interface FavoriteItem {
   };
 }
 
+/**
+ * @typedef {Object} VideoData
+ * @property {number} id - Video ID.
+ * @property {string} title - Title of the video.
+ * @property {string} genre - Video genre.
+ * @property {number} year - Release year.
+ * @property {string} poster - Poster or thumbnail URL.
+ * @property {string|null} videoUrl - Video URL if available.
+ * @property {string} description - Video description.
+ */
 interface VideoData {
   id: number;
   title: string;
@@ -30,6 +61,12 @@ interface VideoData {
   description: string;
 }
 
+/**
+ * @component
+ * @description React component that lists and manages user favorites.
+ * Fetches metadata from backend and allows playback or deletion.
+ * @returns {JSX.Element} Rendered favorites page.
+ */
 const FavoritesPage: React.FC = () => {
   const [favoritos, setFavoritos] = useState<FavoriteItem[]>([]);
   const [videoData, setVideoData] = useState<{[key: string]: VideoData}>({});
@@ -43,10 +80,19 @@ const FavoritesPage: React.FC = () => {
     loadFavorites();
   }, []);
 
+  /**
+   * Retrieves the stored Supabase authentication token.
+   * @returns {string|null} Auth token or null if not found.
+   */
   const getAuthToken = (): string | null => {
     return localStorage.getItem('supabase.auth.token');
   };
 
+  /**
+   * Fetches the authenticated user session from backend.
+   * @async
+   * @returns {Promise<{ user: object, access_token: string } | null>} Session data or null.
+   */
   const getUserSession = async () => {
     const token = getAuthToken();
     if (!token) return null;
@@ -69,7 +115,10 @@ const FavoritesPage: React.FC = () => {
   };
 
   /**
-   * Busca información completa del video por ID de Pexels
+   * Fetches complete video metadata by its Pexels ID.
+   * @async
+   * @param {string} pexelsId - Pexels video ID.
+   * @returns {Promise<VideoData|null>} Video data or null if not found.
    */
   const fetchVideoData = async (pexelsId: string): Promise<VideoData | null> => {
     try {
@@ -103,7 +152,9 @@ const FavoritesPage: React.FC = () => {
   };
 
   /**
-   * Carga los favoritos y luego busca la información de cada video
+   * Loads user's favorites and maps related video metadata.
+   * @async
+   * @returns {Promise<void>}
    */
   const loadFavorites = async () => {
     try {
@@ -154,7 +205,10 @@ const FavoritesPage: React.FC = () => {
   };
 
   /**
-   * Elimina un favorito usando el ID de Pexels (id_externo)
+   * Deletes a favorite by its Pexels ID.
+   * @async
+   * @param {string} idPexels - External video ID.
+   * @returns {Promise<void>}
    */
   const eliminarFavorito = async (idPexels: string) => {
     try {
@@ -198,7 +252,8 @@ const FavoritesPage: React.FC = () => {
   };
 
   /**
-   * 🔥 ABRE EL MODAL DEL VIDEO
+   * Opens the selected video modal.
+   * @param {FavoriteItem} favorito - Favorite item to open.
    */
   const abrirVideo = (favorito: FavoriteItem) => {
     if (favorito.Contenido?.id_externo) {
@@ -211,15 +266,17 @@ const FavoritesPage: React.FC = () => {
     }
   };
 
-  /**
-   * 🔥 CIERRA EL MODAL
-   */
+  /** Closes the video modal. */
   const cerrarModal = () => {
     setShowModal(false);
     setSelectedVideo(null);
   };
 
-  // Helper functions usando la información de Pexels
+  /**
+   * Retrieves detailed video info from cache.
+   * @param {FavoriteItem} favorito - Favorite item.
+   * @returns {VideoData|null} Video information or null.
+   */
   const getVideoInfo = (favorito: FavoriteItem): VideoData | null => {
     if (favorito.Contenido?.id_externo) {
       return videoData[favorito.Contenido.id_externo] || null;
@@ -227,21 +284,41 @@ const FavoritesPage: React.FC = () => {
     return null;
   };
 
+  /**
+   * Returns the poster URL for a favorite.
+   * @param {FavoriteItem} favorito - Favorite item.
+   * @returns {string} Poster URL.
+   */
   const getPosterUrl = (favorito: FavoriteItem): string => {
     const videoInfo = getVideoInfo(favorito);
     return videoInfo?.poster || "/images/default-movie.jpg";
   };
 
+  /**
+   * Returns the title of a favorite video.
+   * @param {FavoriteItem} favorito - Favorite item.
+   * @returns {string} Video title.
+   */
   const getTitle = (favorito: FavoriteItem): string => {
     const videoInfo = getVideoInfo(favorito);
     return videoInfo?.title || favorito.Contenido?.titulo || "Título no disponible";
   };
 
+  /**
+   * Returns the genre of a favorite video.
+   * @param {FavoriteItem} favorito - Favorite item.
+   * @returns {string} Video genre.
+   */
   const getGenre = (favorito: FavoriteItem): string => {
     const videoInfo = getVideoInfo(favorito);
     return videoInfo?.genre || favorito.Contenido?.tipo || "Video";
   };
 
+  /**
+   * Returns the year of a favorite video.
+   * @param {FavoriteItem} favorito - Favorite item.
+   * @returns {string} Video year.
+   */
   const getYear = (favorito: FavoriteItem): string => {
     const videoInfo = getVideoInfo(favorito);
     return videoInfo?.year?.toString() || new Date().getFullYear().toString();

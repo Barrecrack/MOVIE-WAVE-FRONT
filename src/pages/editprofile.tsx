@@ -1,9 +1,18 @@
+/**
+ * @file editprofile.tsx
+ * @description React component for displaying and editing the user's profile information.
+ * Fetches data from the backend, allows inline editing, and synchronizes updates with localStorage.
+ */
 import React, { useState, useEffect } from "react";
 import "../styles/editprofile.sass";
 import { useNavigate } from "react-router-dom";
 
 /**
- * EditProfile component allows the user to view and update their profile information.
+ * EditProfile component manages user profile visualization and update operations.
+ * It provides a view mode and an editable form, allowing users to modify their personal information.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered Edit Profile interface.
  */
 const EditProfile = () => {
   const [name, setName] = useState("");
@@ -20,10 +29,21 @@ const EditProfile = () => {
     fetchUserData();
   }, []);
 
+  /**
+   * Retrieves the stored authentication token from localStorage.
+   * @private
+   * @returns {string | null} Supabase authentication token, if available.
+   */
   const getAuthToken = (): string | null => {
     return localStorage.getItem("supabase.auth.token");
   };
 
+  /**
+   * Formats a date for display in the profile view.
+   * @private
+   * @param {string} dateString - Raw date string.
+   * @returns {string} Formatted date or placeholder text.
+   */
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "📅 Seleccionar fecha de nacimiento";
     const date = new Date(dateString);
@@ -34,6 +54,12 @@ const EditProfile = () => {
     })}`;
   };
 
+  /**
+   * Calculates the user's age from their birthdate.
+   * @private
+   * @param {string} birthDate - Birthdate in ISO format.
+   * @returns {string} Calculated age (e.g., "25 años").
+   */
   const calculateAge = (birthDate: string): string => {
     if (!birthDate) return "";
     const birth = new Date(birthDate);
@@ -46,6 +72,13 @@ const EditProfile = () => {
     return `${years} años`;
   };
 
+  /**
+   * Fetches user data from the backend or localStorage.
+   * Displays fallback alerts and logs if the token is missing or the request fails.
+   * @async
+   * @private
+   * @returns {Promise<void>}
+   */
   const fetchUserData = async () => {
     try {
       console.log("🔹 Obteniendo datos del usuario desde el backend...");
@@ -104,6 +137,13 @@ const EditProfile = () => {
     }
   };
 
+  /**
+   * Handles the submission of profile updates to the backend.
+   * Updates localStorage and refreshes user data upon success.
+   * @async
+   * @param {React.FormEvent} e - Form submission event.
+   * @returns {Promise<void>}
+   */
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -171,12 +211,19 @@ const EditProfile = () => {
     }
   };
 
+  /** Enables edit mode. */
   const handleEdit = () => setIsEditing(true);
+
+  /** Cancels editing and reloads profile data. */
   const handleCancel = () => {
     setIsEditing(false);
     fetchUserData();
   };
+
+  /** Navigates back to the movies page. */
   const handleBackToMovies = () => navigate("/movies");
+
+  /** Redirects to the password reset flow. */
   const handleChangePassword = () => navigate("/forgot");
 
   if (loading) {
