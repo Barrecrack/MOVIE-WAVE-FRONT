@@ -1,6 +1,13 @@
+/**
+ * @file main.tsx
+ * @description Entry point of the React application. Initializes the root element,
+ * sets up routing structure, and applies authentication guards for protected routes.
+ */
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Login from "./pages/login.tsx";
 import Register from "./pages/register.tsx";
 import Forgot from "./pages/forgot.tsx"; 
@@ -15,25 +22,27 @@ import AuthGuard from "./components/AuthGuard.tsx";
 import DeleteAccount from "./pages/deleteaccount.tsx";
 
 /**
- * Application entry point.
+ * Initializes and renders the React root component.
  * 
- * - Uses React 18's createRoot API.
- * - Configures routes with React Router.
- * - Protects private routes with AuthGuard.
+ * - Uses React 18's `createRoot` API.
+ * - Defines public and private routes using React Router v6.
+ * - Protects sensitive pages via `AuthGuard` component.
+ * 
+ * @module AppEntry
  */
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot" element={<Forgot />} />
         <Route path="/resetpassword" element={<ResetPassword />} />
 
-
         {/* Protected routes */}
-        <Route path="/deleteaccount" element={<AuthGuard><DeleteAccount /></AuthGuard>} /> //nuevo apartado
+        <Route path="/deleteaccount" element={<AuthGuard><DeleteAccount /></AuthGuard>} />
         <Route path="/menu" element={<AuthGuard><Menu /></AuthGuard>} />
         <Route path="/movies" element={<AuthGuard><Movies /></AuthGuard>} />
         <Route path="/profile" element={<AuthGuard><EditProfile /></AuthGuard>} />

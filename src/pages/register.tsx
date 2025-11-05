@@ -1,9 +1,18 @@
+/**
+ * @file register.tsx
+ * @description React component that manages the user registration process, including form validation,
+ * password confirmation, age verification, and API communication to register a new user.
+ */
 import React, { useState } from "react";
 import "../styles/register.sass";
 import { Link, useNavigate } from "react-router-dom";
 
 /**
- * Register component handles user registration process.
+ * Register component handles user registration logic, input validation,
+ * and communication with the backend API.
+ *
+ * @component
+ * @returns {JSX.Element} The registration form interface.
  */
 const Register = () => {
   const [name, setName] = useState("");
@@ -15,7 +24,13 @@ const Register = () => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const navigate = useNavigate();
 
-  /** Calculates age from birthdate */
+  /**
+   * Calculates a user's age based on a given birthdate.
+   *
+   * @private
+   * @param {string} birthDate - The user's date of birth in YYYY-MM-DD format.
+   * @returns {number} The calculated age in years.
+   */
   const calculateAge = (birthDate: string): number => {
     if (!birthDate) return 0;
     const birth = new Date(birthDate);
@@ -26,7 +41,15 @@ const Register = () => {
     return years;
   };
 
-  /** Handles the registration form submission. */
+  /**
+   * Handles the registration form submission.
+   * Validates user input, checks password match, enforces minimum age,
+   * and sends registration data to the backend API.
+   *
+   * @async
+   * @param {React.FormEvent} e - The form submission event.
+   * @returns {Promise<void>} Resolves when the registration process is complete.
+   */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
